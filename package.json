@@ -8,7 +8,10 @@
   "files": [
     "dist"
   ],
-  "repository": "git@github.com:zeroin-earth/appwrite-graphql.git",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/zeroin-earth/appwrite-graphql.git"
+  },
   "author": "Matt Suhay <matthew.suhay@gmail.com>",
   "license": "MIT",
   "scripts": {

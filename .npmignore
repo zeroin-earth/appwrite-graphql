@@ -1,0 +1,8 @@
+# Ignore all files and directories
+*
+
+# Include specific files
+!src/
+!dist/
+!package.json
+!README.md
