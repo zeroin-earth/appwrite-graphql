@@ -1,0 +1,36 @@
+{
+  "name": "@zeroin.earth/appwrite-graphql",
+  "version": "0.13.0",
+  "description": "Appwrite Graphql library, utilizing @tanstack/react-query and inspired by react-appwrite",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "repository": "git@github.com:zeroin-earth/appwrite-graphql.git",
+  "author": "Matt Suhay <matthew.suhay@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsup",
+    "codegen": "graphql-codegen --config codegen.ts",
+    "prepublishOnly": "yarn codegen",
+    "tsc": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@graphql-typed-document-node/core": "^3.2.0",
+    "@tanstack/react-query": "^5.17.10",
+    "appwrite": "^13.0.1",
+    "graphql": "^16.8.1",
+    "immer": "^10.0.3",
+    "jotai": "^2.6.1",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.0",
+    "@graphql-codegen/client-preset": "^4.1.0",
+    "@types/react": "^18.2.47",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,0 +1,155 @@
+scalar JSON
+scalar Date
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Query {
+  accountGet: User
+  accountGetPrefs: Preferences
+  accountGetSession(sessionId: String!): Session
+  databasesListDocuments(
+    databaseId: String!
+    collectionId: String!
+    queries: [String!]
+  ): DocumentList
+  databasesGetDocument(
+    databaseId: String!
+    collectionId: String!
+    documentId: String!
+  ): Document
+  functionsGetExecution(functionId: String!, executionId: String!): Execution
+}
+
+type Mutation {
+  accountCreate(
+    userId: String!
+    email: String!
+    password: String!
+    name: String
+  ): User
+  accountUpdateEmail(email: String!, password: String!): User
+  accountUpdateName(name: String!): User
+  accountUpdatePassword(password: String!, oldPassword: String!): User
+  accountUpdatePhone(phone: String!, password: String!): User
+  accountUpdatePrefs(prefs: JSON!): User
+  accountCreateRecovery(email: String!, url: String!): Token
+  accountUpdateRecovery(
+    userId: String!
+    secret: String!
+    password: String!
+    passwordAgain: String!
+  ): Token
+  accountDeleteSessions: Status
+  accountCreateEmailSession(email: String!, password: String!): Session
+  accountCreateMagicURLSession(
+    userId: String!
+    email: String!
+    url: String
+  ): Token
+  accountUpdateMagicURLSession(userId: String!, secret: String!): Session
+  accountCreatePhoneSession(userId: String!, phone: String!): Token
+  accountUpdatePhoneSession(userId: String!, secret: String!): Session
+  accountUpdateSession(sessionId: String!): Session
+  accountDeleteSession(sessionId: String!): Status
+  accountCreateVerification(url: String!): Token
+  accountUpdateVerification(userId: String!, secret: String!): Token
+  accountCreatePhoneVerification: Token
+  accountUpdatePhoneVerification(userId: String!, secret: String!): Token
+  databasesCreateDocument(
+    databaseId: String!
+    collectionId: String!
+    documentId: String!
+    data: JSON!
+    permissions: [String!]
+  ): Document
+  databasesUpdateDocument(
+    databaseId: String!
+    collectionId: String!
+    documentId: String!
+    data: JSON
+    permissions: [String!]
+  ): Document
+  databasesDeleteDocument(
+    databaseId: String!
+    collectionId: String!
+    documentId: String!
+  ): Status
+  functionsCreateExecution(
+    functionId: String!
+    body: String
+    async: Boolean
+    path: String
+    method: String
+    headers: JSON
+  ): Execution
+}
+
+type User {
+  _id: String
+  _createdAt: Date
+  _updatedAt: Date
+  name: String
+  registration: String
+  status: String
+  labels: [String]
+  email: String
+  phone: String
+  emailVerification: Boolean
+  phoneVerification: Boolean
+  accessedAt: String
+  prefs: Preferences
+}
+
+type Preferences {
+  data: JSON
+}
+
+type Session {
+  userId: String
+  expire: String
+  current: Boolean
+}
+
+type DocumentList {
+  total: Int
+  documents: [Document]
+}
+
+type Document {
+  _id: String
+  _collectionId: String
+  _databaseId: String
+  _createdAt: String
+  _updatedAt: String
+  _permissions: [String]
+  data: JSON
+}
+
+type Token {
+  _id: String
+  _createdAt: String
+  userId: String
+  expire: String
+}
+
+type Execution {
+  _id: String
+  _createdAt: String
+  _updatedAt: String
+  functionId: String
+  trigger: String
+  status: String
+  requestMethod: String
+  requestPath: String
+  responseStatusCode: Int
+  responseBody: String
+  errors: String
+  duration: Float
+}
+
+type Status {
+  status: Boolean
+}
