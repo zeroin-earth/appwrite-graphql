@@ -76,5 +76,29 @@ export function useAccount<Preferences extends Models.Preferences>({
     return unsubscribe
   }, [graphql.client, queryClient])
 
-  return queryResult
+  return {
+    data: queryResult.data,
+    dataUpdatedAt: queryResult.dataUpdatedAt,
+    error: queryResult.error,
+    errorUpdateCount: queryResult.errorUpdateCount,
+    errorUpdatedAt: queryResult.errorUpdatedAt,
+    failureCount: queryResult.failureCount,
+    failureReason: queryResult.failureReason,
+    fetchStatus: queryResult.fetchStatus,
+    isError: queryResult.isError,
+    isFetched: queryResult.isFetched,
+    isFetchedAfterMount: queryResult.isFetchedAfterMount,
+    isFetching: queryResult.isFetching,
+    isLoading: queryResult.isLoading,
+    isLoadingError: queryResult.isLoadingError,
+    isPaused: queryResult.isPaused,
+    isPending: queryResult.isPending,
+    isPlaceholderData: queryResult.isPlaceholderData,
+    isRefetchError: queryResult.isRefetchError,
+    isRefetching: queryResult.isRefetching,
+    isStale: queryResult.isStale,
+    isSuccess: queryResult.isSuccess,
+    refetch: queryResult.refetch,
+    status: queryResult.status,
+  }
 }

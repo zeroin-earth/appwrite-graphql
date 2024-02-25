@@ -54,7 +54,41 @@ export function useLogin() {
   })
 
   return {
-    login,
-    oAuthLogin,
+    login: {
+      context: login.context,
+      data: login.data,
+      error: login.error,
+      failureCount: login.failureCount,
+      failureReason: login.failureReason,
+      isError: login.isError,
+      isIdle: login.isIdle,
+      isPaused: login.isPaused,
+      isPending: login.isPending,
+      isSuccess: login.isSuccess,
+      mutate: login.mutate,
+      mutateAsync: login.mutateAsync,
+      reset: login.reset,
+      status: login.status,
+      submittedAt: login.submittedAt,
+      variables: login.variables,
+    },
+    oAuthLogin: {
+      context: oAuthLogin.context,
+      data: oAuthLogin.data,
+      error: oAuthLogin.error,
+      failureCount: oAuthLogin.failureCount,
+      failureReason: oAuthLogin.failureReason,
+      isError: oAuthLogin.isError,
+      isIdle: oAuthLogin.isIdle,
+      isPaused: oAuthLogin.isPaused,
+      isPending: oAuthLogin.isPending,
+      isSuccess: oAuthLogin.isSuccess,
+      mutate: oAuthLogin.mutate,
+      mutateAsync: oAuthLogin.mutateAsync,
+      reset: oAuthLogin.reset,
+      status: oAuthLogin.status,
+      submittedAt: oAuthLogin.submittedAt,
+      variables: oAuthLogin.variables,
+    },
   }
 }
