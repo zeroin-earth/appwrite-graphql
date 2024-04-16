@@ -80,6 +80,7 @@ export type Mutation = {
   accountCreatePhoneVerification?: Maybe<Token>;
   accountCreateRecovery?: Maybe<Token>;
   accountCreateVerification?: Maybe<Token>;
+  accountDeleteIdentity?: Maybe<Status>;
   accountDeleteSession?: Maybe<Status>;
   accountDeleteSessions?: Maybe<Status>;
   accountUpdateEmail?: Maybe<User>;
@@ -135,6 +136,11 @@ export type MutationAccountCreateRecoveryArgs = {
 
 export type MutationAccountCreateVerificationArgs = {
   url: Scalars['String']['input'];
+};
+
+
+export type MutationAccountDeleteIdentityArgs = {
+  identityId: Scalars['String']['input'];
 };
 
 
