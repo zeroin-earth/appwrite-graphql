@@ -10,31 +10,24 @@ type Query {
   accountGet: User
   accountGetPrefs: Preferences
   accountGetSession(sessionId: String!): Session
+  accountListIdentities(queries: [String!]): IdentityList
   databasesListDocuments(
     databaseId: String!
     collectionId: String!
     queries: [String!]
   ): DocumentList
-  databasesGetDocument(
-    databaseId: String!
-    collectionId: String!
-    documentId: String!
-  ): Document
+  databasesGetDocument(databaseId: String!, collectionId: String!, documentId: String!): Document
   functionsGetExecution(functionId: String!, executionId: String!): Execution
 }
 
 type Mutation {
-  accountCreate(
-    userId: String!
-    email: String!
-    password: String!
-    name: String
-  ): User
+  accountCreate(userId: String!, email: String!, password: String!, name: String): User
   accountUpdateEmail(email: String!, password: String!): User
   accountUpdateName(name: String!): User
   accountUpdatePassword(password: String!, oldPassword: String!): User
   accountUpdatePhone(phone: String!, password: String!): User
   accountUpdatePrefs(prefs: JSON!): User
+  accountDeleteIdentity(identityId: String!): Status
   accountCreateRecovery(email: String!, url: String!): Token
   accountUpdateRecovery(
     userId: String!
@@ -43,12 +36,8 @@ type Mutation {
     passwordAgain: String!
   ): Token
   accountDeleteSessions: Status
-  accountCreateEmailSession(email: String!, password: String!): Session
-  accountCreateMagicURLSession(
-    userId: String!
-    email: String!
-    url: String
-  ): Token
+  accountCreateEmailPasswordSession(email: String!, password: String!): Session
+  accountCreateMagicURLSession(userId: String!, email: String!, url: String): Token
   accountUpdateMagicURLSession(userId: String!, secret: String!): Session
   accountCreatePhoneSession(userId: String!, phone: String!): Token
   accountUpdatePhoneSession(userId: String!, secret: String!): Session
@@ -72,11 +61,7 @@ type Mutation {
     data: JSON
     permissions: [String!]
   ): Document
-  databasesDeleteDocument(
-    databaseId: String!
-    collectionId: String!
-    documentId: String!
-  ): Status
+  databasesDeleteDocument(databaseId: String!, collectionId: String!, documentId: String!): Status
   functionsCreateExecution(
     functionId: String!
     body: String
@@ -152,4 +137,22 @@ type Execution {
 
 type Status {
   status: Boolean
+}
+
+type IdentityList {
+  total: Int!
+  identities: [Identity!]
+}
+
+type Identity {
+  _id: String
+  _createdAt: String
+  _updatedAt: String
+  userId: String
+  provider: String
+  providerUid: String
+  providerEmail: String
+  providerAccessToken: String
+  providerAccessTokenExpiry: String
+  providerRefreshToken: String
 }

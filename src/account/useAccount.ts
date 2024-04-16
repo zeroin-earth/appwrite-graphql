@@ -10,7 +10,7 @@ import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 import { useQueryClient } from '../useQueryClient'
 
-const getAccount = gql(/* GraphQL */ `
+export const getAccount = gql(/* GraphQL */ `
   query AccountGet {
     accountGet {
       ...Account_UserFragment

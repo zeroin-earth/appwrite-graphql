@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 
 import { ResultOf, TypedDocumentNode } from '@graphql-typed-document-node/core'
-import { Account, Client, Graphql } from 'appwrite'
+import { Account, Client, Databases, Functions, Graphql } from 'appwrite'
 import { print } from 'graphql'
 import { atom, useAtom } from 'jotai'
 
@@ -15,15 +15,21 @@ const projectId =
 client.setEndpoint(endpoint).setProject(projectId)
 
 const account = new Account(client)
+const databases = new Databases(client)
+const functions = new Functions(client)
 const graphql = new Graphql(client)
 
 const AccountAtom = atom<Account>(account)
+const DatabasesAtom = atom<Databases>(databases)
+const FunctionsAtom = atom<Functions>(functions)
 const GraphqlAtom = atom<Graphql>(graphql)
 
 type Variables = Record<string, unknown>
 
 export function useAppwrite() {
   const [account] = useAtom(AccountAtom)
+  const [databases] = useAtom(DatabasesAtom)
+  const [functions] = useAtom(FunctionsAtom)
   const [graphqlAppwrite] = useAtom(GraphqlAtom)
 
   const graphql = useMemo(
@@ -61,6 +67,8 @@ export function useAppwrite() {
 
   return {
     account,
+    databases,
+    functions,
     graphql,
   }
 }
