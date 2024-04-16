@@ -1,7 +1,7 @@
-import { AppwriteException } from 'appwrite'
+import { AppwriteException, OAuthProvider, Models } from 'appwrite'
 
 import { gql } from '../__generated__/gql'
-import { Session } from '../__generated__/graphql'
+// import { Session } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 
@@ -11,14 +11,14 @@ type LoginProps = {
 }
 
 type OAuthLoginProps = {
-  provider: string
+  provider: OAuthProvider
   success: string
   failure: string
 }
 
-const createEmailSession = gql(/* GraphQL */ `
-  mutation CreateEmailSession($email: String!, $password: String!) {
-    accountCreateEmailSession(email: $email, password: $password) {
+const accountCreateEmailPasswordSession = gql(/* GraphQL */ `
+  mutation CreateEmailPasswordSession($email: String!, $password: String!) {
+    accountCreateEmailPasswordSession(email: $email, password: $password) {
       userId
       expire
       current
@@ -29,21 +29,23 @@ const createEmailSession = gql(/* GraphQL */ `
 export function useLogin() {
   const { account, graphql } = useAppwrite()
 
-  const login = useMutation<Session, AppwriteException, LoginProps, unknown>({
+  const login = useMutation<Models.Session, AppwriteException, LoginProps, unknown>({
     mutationFn: async ({ email, password }) => {
-      const { data, errors } = await graphql.mutation({
-        query: createEmailSession,
-        variables: {
-          email,
-          password,
-        },
-      })
+      // const { data, errors } = await graphql.mutation({
+      //   query: accountCreateEmailPasswordSession,
+      //   variables: {
+      //     email,
+      //     password,
+      //   },
+      // })
 
-      if (errors) {
-        throw errors
-      }
+      return await account.createEmailPasswordSession(email, password)
 
-      return data.accountCreateEmailSession ?? ({} as Session)
+      // if (errors) {
+      //   throw errors
+      // }
+
+      // return data.accountCreateEmailSession ?? ({} as Session)
     },
   })
 
