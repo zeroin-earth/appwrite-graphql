@@ -2632,6 +2632,7 @@ __metadata:
     "@types/react": "npm:^18.2.78"
     appwrite: "npm:^14.0.0"
     graphql: "npm:^16.8.1"
+    graphql-scalars: "npm:^1.23.0"
     identity-obj-proxy: "npm:^3.0.0"
     immer: "npm:^10.0.4"
     jest: "npm:^29.7.0"
@@ -4251,6 +4252,17 @@ __metadata:
   peerDependencies:
     graphql: 14 - 16
   checksum: 10c0/f8167925a110e8e1de93d56c14245e7e64391dc8dce5002dd01bf24a3059f345d4ca1bb6ce2040e2ec78264211b0704e75da3e63984f0f74d2042f697a4e8cc6
+  languageName: node
+  linkType: hard
+
+"graphql-scalars@npm:^1.23.0":
+  version: 1.23.0
+  resolution: "graphql-scalars@npm:1.23.0"
+  dependencies:
+    tslib: "npm:^2.5.0"
+  peerDependencies:
+    graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+  checksum: 10c0/7666c305b8367528c4fbb583a2731d93d52f36043d71f4957ecc1d2db71d710d268e25535243beb1b2497db921daa94d3cfa83daaf4a3101a667f358ddbf3436
   languageName: node
   linkType: hard
 

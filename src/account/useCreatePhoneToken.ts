@@ -2,38 +2,40 @@ import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
-import { UpdateEmailMutation, UpdateEmailMutationVariables } from '../__generated__/graphql'
+import {
+  CreatePhoneTokenMutation,
+  CreatePhoneTokenMutationVariables,
+} from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 
-const accountUpdateEmail = gql(/* GraphQL */ `
-  mutation UpdateEmail($email: String!, $password: String!) {
-    accountUpdateEmail(email: $email, password: $password) {
-      name
-      email
+const createPhoneToken = gql(/* GraphQL */ `
+  mutation CreatePhoneToken($userId: String!, $phone: String!) {
+    accountCreatePhoneToken(userId: $userId, phone: $phone) {
+      expire
     }
   }
 `)
 
-export function useUpdateEmail({
+export function useCreatePhoneToken({
   options,
 }: {
   options?: UseMutationOptions<
-    UpdateEmailMutation['accountUpdateEmail'],
+    CreatePhoneTokenMutation['accountCreatePhoneToken'],
     AppwriteException,
-    UpdateEmailMutationVariables,
+    CreatePhoneTokenMutationVariables,
     string[]
   >
 }) {
   const { graphql } = useAppwrite()
 
   const queryResult = useMutation({
-    mutationFn: async ({ email, password }) => {
+    mutationFn: async ({ userId, phone }) => {
       const { data, errors } = await graphql.mutation({
-        query: accountUpdateEmail,
+        query: createPhoneToken,
         variables: {
-          email,
-          password,
+          userId,
+          phone,
         },
       })
 
@@ -41,7 +43,7 @@ export function useUpdateEmail({
         throw errors
       }
 
-      return data.accountUpdateEmail
+      return data.accountCreatePhoneToken
     },
     ...options,
   })

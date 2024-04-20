@@ -1,14 +1,10 @@
+import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
-import { Token } from '../__generated__/graphql'
+import { CreateRecoveryMutation, CreateRecoveryMutationVariables } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
-
-type Props = {
-  email: string
-  resetUrl: string
-}
 
 const createRecovery = gql(/* GraphQL */ `
   mutation CreateRecovery($email: String!, $url: String!) {
@@ -21,11 +17,20 @@ const createRecovery = gql(/* GraphQL */ `
 /**
  * Send the recovery email to the address supplied
  */
-export function usePasswordRecovery() {
+export function usePasswordRecovery({
+  options,
+}: {
+  options?: UseMutationOptions<
+    CreateRecoveryMutation['accountCreateRecovery'],
+    AppwriteException,
+    CreateRecoveryMutationVariables,
+    string[]
+  >
+}) {
   const { graphql } = useAppwrite()
 
-  const passwordRecovery = useMutation<Token, AppwriteException, Props, unknown>({
-    mutationFn: async ({ email, resetUrl }) => {
+  const queryResult = useMutation({
+    mutationFn: async ({ email, url: resetUrl }) => {
       const { data, errors } = await graphql.mutation({
         query: createRecovery,
         variables: {
@@ -38,13 +43,14 @@ export function usePasswordRecovery() {
         throw errors
       }
 
-      return data.accountCreateRecovery ?? ({} as Token)
+      return data.accountCreateRecovery
     },
-
-    onSuccess: async (_, variables) => {
+    ...options,
+    onSuccess: async (token, variables, context) => {
       localStorage.setItem('email', variables.email)
+      options?.onSuccess?.(token, variables, context)
     },
   })
 
-  return passwordRecovery
+  return { ...queryResult }
 }

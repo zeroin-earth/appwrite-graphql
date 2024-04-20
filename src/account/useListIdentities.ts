@@ -1,11 +1,13 @@
-import { Models } from 'appwrite'
+import { UseQueryOptions } from '@tanstack/react-query'
+import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
 import { useAppwrite } from '../useAppwrite'
-import { useMutation } from '../useMutation'
+import { useQuery } from '../useQuery'
+import { ListIdentitiesQuery, ListIdentitiesQueryVariables } from '../__generated__/graphql'
 
 type ListIdentitiesProps = {
-  queries: Array<string>
+  queries: string | string[]
 }
 
 const accountListIdentities = gql(/* GraphQL */ `
@@ -13,23 +15,28 @@ const accountListIdentities = gql(/* GraphQL */ `
     accountListIdentities(queries: $queries) {
       total
       identities {
-        userId
-        provider
-        providerUid
-        providerEmail
-        providerAccessToken
-        providerAccessTokenExpiry
-        providerRefreshToken
+        ...Identity_ProviderFragment
       }
     }
   }
 `)
 
-export function useListIdentities() {
+export function useListIdentities({
+  queries,
+  options,
+}: ListIdentitiesProps & {
+  options?: UseQueryOptions<
+    ListIdentitiesQuery['accountListIdentities'],
+    AppwriteException,
+    ListIdentitiesQueryVariables,
+    string[]
+  >
+}) {
   const { graphql } = useAppwrite()
 
-  const listIdentities = useMutation<Models.IdentityList, Error, ListIdentitiesProps, unknown>({
-    mutationFn: async ({ queries }) => {
+  const queryResult = useQuery({
+    queryKey: ['appwrite', 'account', 'identities', queries],
+    queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: accountListIdentities,
         variables: {
@@ -41,14 +48,10 @@ export function useListIdentities() {
         throw errors
       }
 
-      return {
-        ...data.accountListIdentities,
-        identities:
-          (data.accountListIdentities.identities as Array<Models.Identity>) ??
-          ([] as Array<Models.Identity>),
-      }
+      return data.accountListIdentities
     },
+    ...options,
   })
 
-  return { listIdentities }
+  return { ...queryResult }
 }

@@ -1,7 +1,7 @@
-import { AppwriteException, OAuthProvider, Models } from 'appwrite'
+import { AppwriteException, OAuthProvider } from 'appwrite'
 
 import { gql } from '../__generated__/gql'
-// import { Session } from '../__generated__/graphql'
+import { CreateEmailPasswordSessionMutation } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 
@@ -29,23 +29,25 @@ const accountCreateEmailPasswordSession = gql(/* GraphQL */ `
 export function useLogin() {
   const { account, graphql } = useAppwrite()
 
-  const login = useMutation<Models.Session, AppwriteException, LoginProps, unknown>({
+  const login = useMutation<
+    CreateEmailPasswordSessionMutation['accountCreateEmailPasswordSession'],
+    AppwriteException,
+    LoginProps
+  >({
     mutationFn: async ({ email, password }) => {
-      // const { data, errors } = await graphql.mutation({
-      //   query: accountCreateEmailPasswordSession,
-      //   variables: {
-      //     email,
-      //     password,
-      //   },
-      // })
+      const { data, errors } = await graphql.mutation({
+        query: accountCreateEmailPasswordSession,
+        variables: {
+          email,
+          password,
+        },
+      })
 
-      return await account.createEmailPasswordSession(email, password)
+      if (errors) {
+        throw errors
+      }
 
-      // if (errors) {
-      //   throw errors
-      // }
-
-      // return data.accountCreateEmailSession ?? ({} as Session)
+      return data.accountCreateEmailPasswordSession
     },
   })
 
@@ -56,41 +58,7 @@ export function useLogin() {
   })
 
   return {
-    login: {
-      context: login.context,
-      data: login.data,
-      error: login.error,
-      failureCount: login.failureCount,
-      failureReason: login.failureReason,
-      isError: login.isError,
-      isIdle: login.isIdle,
-      isPaused: login.isPaused,
-      isPending: login.isPending,
-      isSuccess: login.isSuccess,
-      mutate: login.mutate,
-      mutateAsync: login.mutateAsync,
-      reset: login.reset,
-      status: login.status,
-      submittedAt: login.submittedAt,
-      variables: login.variables,
-    },
-    oAuthLogin: {
-      context: oAuthLogin.context,
-      data: oAuthLogin.data,
-      error: oAuthLogin.error,
-      failureCount: oAuthLogin.failureCount,
-      failureReason: oAuthLogin.failureReason,
-      isError: oAuthLogin.isError,
-      isIdle: oAuthLogin.isIdle,
-      isPaused: oAuthLogin.isPaused,
-      isPending: oAuthLogin.isPending,
-      isSuccess: oAuthLogin.isSuccess,
-      mutate: oAuthLogin.mutate,
-      mutateAsync: oAuthLogin.mutateAsync,
-      reset: oAuthLogin.reset,
-      status: oAuthLogin.status,
-      submittedAt: oAuthLogin.submittedAt,
-      variables: oAuthLogin.variables,
-    },
+    login,
+    oAuthLogin,
   }
 }

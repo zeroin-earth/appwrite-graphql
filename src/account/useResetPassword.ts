@@ -1,16 +1,14 @@
+import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
-import { Token } from '../__generated__/graphql'
+import {
+  Token,
+  UpdateRecoveryMutation,
+  UpdateRecoveryMutationVariables,
+} from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
-
-type Props = {
-  userId: string
-  secret: string
-  password: string
-  confirmPassword: string
-}
 
 const updateRecovery = gql(/* GraphQL */ `
   mutation UpdateRecovery(
@@ -30,11 +28,20 @@ const updateRecovery = gql(/* GraphQL */ `
   }
 `)
 
-export function useResetPassword() {
+export function useResetPassword({
+  options,
+}: {
+  options?: UseMutationOptions<
+    UpdateRecoveryMutation['accountUpdateRecovery'],
+    AppwriteException,
+    UpdateRecoveryMutationVariables,
+    string[]
+  >
+}) {
   const { graphql } = useAppwrite()
 
-  const passwordReset = useMutation<Token, AppwriteException, Props, unknown>({
-    mutationFn: async ({ userId, secret, password, confirmPassword }) => {
+  const queryResult = useMutation({
+    mutationFn: async ({ userId, secret, password, passwordAgain: confirmPassword }) => {
       const { data, errors } = await graphql.mutation({
         query: updateRecovery,
         variables: {
@@ -51,7 +58,8 @@ export function useResetPassword() {
 
       return data.accountUpdateRecovery ?? ({} as Token)
     },
+    ...options,
   })
 
-  return passwordReset
+  return { ...queryResult }
 }

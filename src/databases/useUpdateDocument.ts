@@ -6,15 +6,15 @@ import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import type { Document } from './types'
 
-const createDocument = gql(/* GraphQL */ `
-  mutation CreateDocument(
+const updateDocument = gql(/* GraphQL */ `
+  mutation UpdateDocument(
     $databaseId: String!
     $collectionId: String!
     $documentId: String!
     $data: JSON!
     $permissions: [String!]
   ) {
-    databasesCreateDocument(
+    databasesUpdateDocument(
       databaseId: $databaseId
       collectionId: $collectionId
       documentId: $documentId
@@ -22,18 +22,24 @@ const createDocument = gql(/* GraphQL */ `
       permissions: $permissions
     ) {
       _id
+      _collectionId
+      _databaseId
+      _createdAt
+      _updatedAt
+      _permissions
+      data
     }
   }
 `)
 
-export function useCreateDocument<TDocument>(
+export function useUpdateDocument<TDocument>(
   databaseId: string,
   collectionId: string,
   documentId: string,
   data: TDocument,
   permissions?: string[],
   options?: UseMutationOptions<
-    string | undefined | null,
+    Document<TDocument>,
     AppwriteException,
     Document<TDocument>,
     string[]
@@ -45,7 +51,7 @@ export function useCreateDocument<TDocument>(
     mutationKey: ['appwrite', 'databases', databaseId, collectionId, 'documents', documentId],
     mutationFn: async () => {
       const { data: mutationData, errors } = await graphql.mutation({
-        query: createDocument,
+        query: updateDocument,
         variables: {
           databaseId,
           collectionId,
@@ -59,7 +65,14 @@ export function useCreateDocument<TDocument>(
         throw errors
       }
 
-      return mutationData.databasesCreateDocument?._id
+      const document = {
+        ...mutationData.databasesUpdateDocument,
+        ...(mutationData.databasesUpdateDocument
+          ? (JSON.parse(mutationData.databasesUpdateDocument.data) as TDocument)
+          : {}),
+      } as Document<TDocument>
+
+      return document
     },
     ...options,
   })
