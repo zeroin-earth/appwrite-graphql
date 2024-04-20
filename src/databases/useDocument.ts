@@ -74,5 +74,5 @@ export function useDocument<TDocument>(
     return unsubscribe
   }, [databaseId, collectionId, documentId, graphql.client, queryClient])
 
-  return queryResult
+  return { ...queryResult }
 }

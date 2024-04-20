@@ -4,54 +4,38 @@ import { AppwriteException } from 'appwrite'
 import { gql } from '../__generated__'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
-import type { Document } from './types'
+import { useQueryClient } from '../useQueryClient'
 
-const createDocument = gql(/* GraphQL */ `
-  mutation CreateDocument(
-    $databaseId: String!
-    $collectionId: String!
-    $documentId: String!
-    $data: JSON!
-    $permissions: [String!]
-  ) {
-    databasesCreateDocument(
+const deleteDocument = gql(/* GraphQL */ `
+  mutation DeleteDocument($databaseId: String!, $collectionId: String!, $documentId: String!) {
+    databasesDeleteDocument(
       databaseId: $databaseId
       collectionId: $collectionId
       documentId: $documentId
-      data: $data
-      permissions: $permissions
     ) {
-      _id
+      status
     }
   }
 `)
 
-export function useCreateDocument<TDocument>(
+export function useDeleteDocument(
   databaseId: string,
   collectionId: string,
   documentId: string,
-  data: TDocument,
-  permissions?: string[],
-  options?: UseMutationOptions<
-    string | undefined | null,
-    AppwriteException,
-    Document<TDocument>,
-    string[]
-  >,
+  options?: UseMutationOptions<boolean, AppwriteException, void, string[]>,
 ) {
   const { graphql } = useAppwrite()
+  const queryClient = useQueryClient()
 
   const mutationResult = useMutation({
     mutationKey: ['appwrite', 'databases', databaseId, collectionId, 'documents', documentId],
     mutationFn: async () => {
       const { data: mutationData, errors } = await graphql.mutation({
-        query: createDocument,
+        query: deleteDocument,
         variables: {
           databaseId,
           collectionId,
           documentId,
-          data,
-          permissions,
         },
       })
 
@@ -59,9 +43,19 @@ export function useCreateDocument<TDocument>(
         throw errors
       }
 
-      return mutationData.databasesCreateDocument?._id
+      return mutationData.databasesDeleteDocument.status ?? false
     },
     ...options,
+    onSuccess: async (data, variables, context) => {
+      queryClient.setQueryData(
+        ['appwrite', 'databases', databaseId, collectionId, 'documents', documentId],
+        null,
+      )
+      queryClient.removeQueries({
+        queryKey: ['appwrite', 'databases', databaseId, collectionId, 'documents', documentId],
+      })
+      options?.onSuccess?.(data, variables, context)
+    },
   })
 
   return { ...mutationResult }

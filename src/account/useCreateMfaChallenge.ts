@@ -2,38 +2,37 @@ import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
-import { UpdateEmailMutation, UpdateEmailMutationVariables } from '../__generated__/graphql'
+import { CreateMfaChallengeMutation } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 
-const accountUpdateEmail = gql(/* GraphQL */ `
-  mutation UpdateEmail($email: String!, $password: String!) {
-    accountUpdateEmail(email: $email, password: $password) {
-      name
-      email
+const accountCreateMfaChallenge = gql(/* GraphQL */ `
+  mutation CreateMfaChallenge($factor: String!) {
+    accountCreateMfaChallenge(factor: $factor) {
+      userId
+      expire
     }
   }
 `)
 
-export function useUpdateEmail({
+export function useCreateMfaChallenge({
   options,
 }: {
   options?: UseMutationOptions<
-    UpdateEmailMutation['accountUpdateEmail'],
+    CreateMfaChallengeMutation['accountCreateMfaChallenge'],
     AppwriteException,
-    UpdateEmailMutationVariables,
+    { factor: 'email' | 'phone' | 'totp' | 'recoveryCode' },
     string[]
   >
 }) {
   const { graphql } = useAppwrite()
 
   const queryResult = useMutation({
-    mutationFn: async ({ email, password }) => {
+    mutationFn: async ({ factor }) => {
       const { data, errors } = await graphql.mutation({
-        query: accountUpdateEmail,
+        query: accountCreateMfaChallenge,
         variables: {
-          email,
-          password,
+          factor,
         },
       })
 
@@ -41,7 +40,7 @@ export function useUpdateEmail({
         throw errors
       }
 
-      return data.accountUpdateEmail
+      return data.accountCreateMfaChallenge
     },
     ...options,
   })

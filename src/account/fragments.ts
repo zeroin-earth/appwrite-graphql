@@ -9,3 +9,10 @@ export const Account_UserFragment = gql(/* GraphQL */ `
     }
   }
 `)
+
+export const Identity_ProviderFragment = gql(/* GraphQL */ `
+  fragment Identity_ProviderFragment on Identity {
+    userId
+    provider
+  }
+`)

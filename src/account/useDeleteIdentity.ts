@@ -2,38 +2,36 @@ import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
-import { UpdateEmailMutation, UpdateEmailMutationVariables } from '../__generated__/graphql'
+import { DeleteIdentityMutation, DeleteIdentityMutationVariables } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 
-const accountUpdateEmail = gql(/* GraphQL */ `
-  mutation UpdateEmail($email: String!, $password: String!) {
-    accountUpdateEmail(email: $email, password: $password) {
-      name
-      email
+const accountDeleteIdentity = gql(/* GraphQL */ `
+  mutation DeleteIdentity($identityId: String!) {
+    accountDeleteIdentity(identityId: $identityId) {
+      status
     }
   }
 `)
 
-export function useUpdateEmail({
+export function useDeleteIdentity({
   options,
 }: {
   options?: UseMutationOptions<
-    UpdateEmailMutation['accountUpdateEmail'],
+    DeleteIdentityMutation['accountDeleteIdentity'],
     AppwriteException,
-    UpdateEmailMutationVariables,
+    DeleteIdentityMutationVariables,
     string[]
   >
 }) {
   const { graphql } = useAppwrite()
 
   const queryResult = useMutation({
-    mutationFn: async ({ email, password }) => {
+    mutationFn: async ({ identityId }) => {
       const { data, errors } = await graphql.mutation({
-        query: accountUpdateEmail,
+        query: accountDeleteIdentity,
         variables: {
-          email,
-          password,
+          identityId,
         },
       })
 
@@ -41,7 +39,7 @@ export function useUpdateEmail({
         throw errors
       }
 
-      return data.accountUpdateEmail
+      return data.accountDeleteIdentity ?? { status: false }
     },
     ...options,
   })

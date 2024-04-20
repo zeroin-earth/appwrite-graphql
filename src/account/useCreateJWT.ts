@@ -2,46 +2,41 @@ import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
-import { UpdateEmailMutation, UpdateEmailMutationVariables } from '../__generated__/graphql'
+import { CreateJwtMutation, CreateJwtMutationVariables } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 
-const accountUpdateEmail = gql(/* GraphQL */ `
-  mutation UpdateEmail($email: String!, $password: String!) {
-    accountUpdateEmail(email: $email, password: $password) {
-      name
-      email
+const accountCreateJWT = gql(/* GraphQL */ `
+  mutation CreateJWT {
+    accountCreateJWT {
+      jwt
     }
   }
 `)
 
-export function useUpdateEmail({
+export function useCreateJWT({
   options,
 }: {
   options?: UseMutationOptions<
-    UpdateEmailMutation['accountUpdateEmail'],
+    CreateJwtMutation['accountCreateJWT'],
     AppwriteException,
-    UpdateEmailMutationVariables,
+    CreateJwtMutationVariables,
     string[]
   >
 }) {
   const { graphql } = useAppwrite()
 
   const queryResult = useMutation({
-    mutationFn: async ({ email, password }) => {
+    mutationFn: async () => {
       const { data, errors } = await graphql.mutation({
-        query: accountUpdateEmail,
-        variables: {
-          email,
-          password,
-        },
+        query: accountCreateJWT,
       })
 
       if (errors) {
         throw errors
       }
 
-      return data.accountUpdateEmail
+      return data.accountCreateJWT
     },
     ...options,
   })

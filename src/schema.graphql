@@ -9,44 +9,62 @@ schema {
 type Query {
   accountGet: User
   accountGetPrefs: Preferences
+  accountGetMfaRecoveryCodes: MFARecoveryCodes
   accountGetSession(sessionId: String!): Session
   accountListIdentities(queries: [String!]): IdentityList
+  accountListLogs(queries: [String!]): LogsList
+  accountListMfaFactors: MFAFactors
+  accountListSessions: SessionList
+  databasesGetDocument(databaseId: String!, collectionId: String!, documentId: String!): Document
   databasesListDocuments(
     databaseId: String!
     collectionId: String!
     queries: [String!]
   ): DocumentList
-  databasesGetDocument(databaseId: String!, collectionId: String!, documentId: String!): Document
   functionsGetExecution(functionId: String!, executionId: String!): Execution
 }
 
 type Mutation {
   accountCreate(userId: String!, email: String!, password: String!, name: String): User
+  accountCreateAnonymousSession: Session
+  accountCreateEmailPasswordSession(email: String!, password: String!): Session
+  accountCreateJWT: JWT
+  accountCreateEmailToken(userId: String!, email: String!, phrase: Boolean): Token
+  accountCreateMagicURLSession(userId: String!, email: String!, url: String): Token
+  accountCreateMagicURLToken(userId: String!, email: String!, url: String, phrase: Boolean): Token
+  accountCreateMfaAuthenticator(type: String!): MFAType
+  accountCreateMfaChallenge(factor: String!): MFAChallenge
+  accountCreateMfaRecoveryCodes: MFARecoveryCodes
+  accountCreatePhoneSession(userId: String!, phone: String!): Token
+  accountCreatePhoneToken(userId: String!, phone: String!): Token
+  accountCreatePhoneVerification: Token
+  accountCreateRecovery(email: String!, url: String!): Token
+  accountCreateSession(userId: String!, secret: String!): Session
+  accountCreateVerification(url: String!): Token
+  accountDeleteIdentity(identityId: String!): Status
+  accountDeleteMfaAuthenticator(type: String!, otp: String!): User
+  accountDeleteSession(sessionId: String!): Status
+  accountDeleteSessions: Status
   accountUpdateEmail(email: String!, password: String!): User
+  accountUpdateMagicURLSession(userId: String!, secret: String!): Session
+  accountUpdateMFA(mfa: Boolean!): User
+  accountUpdateMfaAuthenticator(type: String!, otp: String!): User
+  accountUpdateMfaChallenge(challengeId: String!, otp: String!): Status
+  accountUpdateMfaRecoveryCodes: MFARecoveryCodes
   accountUpdateName(name: String!): User
   accountUpdatePassword(password: String!, oldPassword: String!): User
   accountUpdatePhone(phone: String!, password: String!): User
+  accountUpdatePhoneSession(userId: String!, secret: String!): Session
+  accountUpdatePhoneVerification(userId: String!, secret: String!): Token
   accountUpdatePrefs(prefs: JSON!): User
-  accountDeleteIdentity(identityId: String!): Status
-  accountCreateRecovery(email: String!, url: String!): Token
   accountUpdateRecovery(
     userId: String!
     secret: String!
     password: String!
     passwordAgain: String!
   ): Token
-  accountDeleteSessions: Status
-  accountCreateEmailPasswordSession(email: String!, password: String!): Session
-  accountCreateMagicURLSession(userId: String!, email: String!, url: String): Token
-  accountUpdateMagicURLSession(userId: String!, secret: String!): Session
-  accountCreatePhoneSession(userId: String!, phone: String!): Token
-  accountUpdatePhoneSession(userId: String!, secret: String!): Session
   accountUpdateSession(sessionId: String!): Session
-  accountDeleteSession(sessionId: String!): Status
-  accountCreateVerification(url: String!): Token
   accountUpdateVerification(userId: String!, secret: String!): Token
-  accountCreatePhoneVerification: Token
-  accountUpdatePhoneVerification(userId: String!, secret: String!): Token
   databasesCreateDocument(
     databaseId: String!
     collectionId: String!
@@ -54,6 +72,7 @@ type Mutation {
     data: JSON!
     permissions: [String!]
   ): Document
+  databasesDeleteDocument(databaseId: String!, collectionId: String!, documentId: String!): Status
   databasesUpdateDocument(
     databaseId: String!
     collectionId: String!
@@ -61,7 +80,6 @@ type Mutation {
     data: JSON
     permissions: [String!]
   ): Document
-  databasesDeleteDocument(databaseId: String!, collectionId: String!, documentId: String!): Status
   functionsCreateExecution(
     functionId: String!
     body: String
@@ -84,8 +102,22 @@ type User {
   phone: String
   emailVerification: Boolean
   phoneVerification: Boolean
+  mfa: Boolean
   accessedAt: String
   prefs: Preferences
+  targets: [Target]
+  accessedAt: String
+}
+
+type Target {
+  _id: String
+  _createdAt: Date
+  _updatedAt: Date
+  name: String
+  userId: String
+  providerId: String
+  providerType: String
+  identifier: String
 }
 
 type Preferences {
@@ -93,9 +125,39 @@ type Preferences {
 }
 
 type Session {
+  _id: String
+  _createdAt: Date
   userId: String
-  expire: String
+  expire: Date
+  provider: String
+  providerUid: String
+  providerAccessToken: String
+  providerAccessTokenExpiry: Date
+  providerRefreshToken: String
+  ip: String
+  osCode: String
+  osName: String
+  osVersion: String
+  clientType: String
+  clientCode: String
+  clientName: String
+  clientVersion: String
+  clientEngine: String
+  clientEngineVersion: String
+  deviceName: String
+  deviceBrand: String
+  deviceModel: String
+  countryCode: String
+  countryName: String
   current: Boolean
+  factors: [String]
+  secret: String
+  mfaUpdatedAt: Date
+}
+
+type SessionList {
+  total: Int
+  sessions: [Session]
 }
 
 type DocumentList {
@@ -139,6 +201,10 @@ type Status {
   status: Boolean
 }
 
+type JWT {
+  jwt: String
+}
+
 type IdentityList {
   total: Int!
   identities: [Identity!]
@@ -155,4 +221,58 @@ type Identity {
   providerAccessToken: String
   providerAccessTokenExpiry: String
   providerRefreshToken: String
+}
+
+type LogsList {
+  total: Int!
+  logs: [Log!]
+}
+
+type Log {
+  _id: String
+  _createdAt: String
+  _updatedAt: String
+  event: String
+  userId: String
+  userEmail: String
+  userName: String
+  mode: String
+  ip: String
+  time: String
+  osCode: String
+  osName: String
+  osVersion: String
+  clientType: String
+  clientCode: String
+  clientName: String
+  clientVersion: String
+  clientEngine: String
+  clientEngineVersion: String
+  deviceName: String
+  deviceBrand: String
+  deviceModel: String
+  countryCode: String
+  countryName: String
+}
+
+type MFAType {
+  secret: String
+  uri: String
+}
+
+type MFAChallenge {
+  _id: String
+  _createdAt: Date
+  userId: String
+  expire: Date
+}
+
+type MFAFactors {
+  totp: Boolean
+  phone: Boolean
+  email: Boolean
+}
+
+type MFARecoveryCodes {
+  recoveryCodes: [String!]!
 }
