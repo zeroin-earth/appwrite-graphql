@@ -107,38 +107,40 @@ We are working on matching parity with the current Appwrite SDK. After we do so,
 
 Still left to do:
 
-### Account
-
+### Account ✔️
+<details>
+  <summary>Done</summary>
+  
 - [x] Get account
-- [x] Create account
-- [ ] Update email
-- [ ] List Identities
-- [ ] Delete Identity
-- [ ] Create JWT
-- [ ] List logs
-- [ ] Update name
-- [ ] Update password
-- [ ] Update phone
-- [ ] Get account preferences
-- [ ] Update preferences
+- [x] Create account  
+- [x] Update email
+- [x] List Identities
+- [x] Delete Identity
+- [x] Create JWT
+- [x] List logs
+- [x] Update name
+- [x] Update password
+- [x] Update phone
+- [x] Get account preferences
+- [x] Update preferences
 - [x] Create password recovery
 - [x] Create password recovery (confirmation)
-- [ ] List sessions
-- [ ] Delete sessions
-- [ ] Create anonymous session
+- [x] List sessions
+- [x] Delete sessions
+- [x] Create anonymous session
 - [x] Create email session
-- [ ] Create magic URL session
-- [ ] Create magic URL session (confirmation)
-- [ ] Create phone session
-- [ ] Create phone session (confirmation)
-- [ ] Get session
-- [ ] Update OAuth session (refresh tokens)
+- [x] Create magic URL session
+- [x] Create magic URL session (confirmation)
+- [x] Create phone session
+- [x] Create phone session (confirmation)
+- [x] Get session
+- [x] Update OAuth session (refresh tokens)
 - [x] Delete session
-- [ ] Update status
 - [x] Create email verification
 - [x] Create email verification (confirmation)
-- [ ] Create phone verification
-- [ ] Create phone verification (confirmation)
+- [x] Create phone verification
+- [x] Create phone verification (confirmation)
+</details>
 
 ### Teams
 
@@ -156,13 +158,17 @@ Still left to do:
 - [ ] Get team preferences
 - [ ] Update preferences
 
-### Databases
+### Databases ✔️
 
+<details>
+  <summary>Done</summary>
+  
 - [X] List documents
 - [X] Create document
 - [X] Get document
-- [ ] Update document
-- [ ] Delete document
+- [x] Update document
+- [x] Delete document
+</details>
 
 ### Storage
 
@@ -175,11 +181,14 @@ Still left to do:
 - [ ] Get file preview
 - [ ] Get file for view
 
-### Functions
+### Functions ✔️
 
-- [ ] List executions
+<details>
+  <summary>Done</summary>
+  
 - [X] Create execution
 - [X] Get execution
+</details>
 
 ### Locale
 
