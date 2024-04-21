@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 
-import { type UseQueryOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
@@ -31,27 +30,15 @@ export function useCollection<TDocument>({
   databaseId,
   collectionId,
   queries,
-  options,
 }: {
   databaseId: string
   collectionId: string
   queries: string[]
-  options?: UseQueryOptions<
-    Collection<TDocument>,
-    AppwriteException,
-    Collection<TDocument>,
-    (
-      | string
-      | {
-          queries: string[]
-        }
-    )[]
-  >
 }) {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const collection = useQuery({
+  const collection = useQuery<Collection<TDocument>, AppwriteException, Collection<TDocument>>({
     queryKey: ['appwrite', 'databases', databaseId, collectionId, { queries }],
     queryFn: async () => {
       const { data, errors } = await graphql.query({
@@ -78,7 +65,6 @@ export function useCollection<TDocument>({
         documents,
       } as Collection<TDocument>
     },
-    ...options,
   })
 
   useEffect(() => {

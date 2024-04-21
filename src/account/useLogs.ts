@@ -37,21 +37,14 @@ const accountListLogs = gql(/* GraphQL */ `
   }
 `)
 
-export function useLogs({
-  queries,
-  options,
-}: {
-  queries: string | string[]
-  options?: UseQueryOptions<
-    ListLogsQuery['accountListLogs'],
-    AppwriteException,
-    ListLogsQueryVariables,
-    string[]
-  >
-}) {
+export function useLogs({ queries }: ListLogsQueryVariables) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery({
+  const queryResult = useQuery<
+    ListLogsQuery['accountListLogs'],
+    AppwriteException,
+    ListLogsQuery['accountListLogs']
+  >({
     queryKey: ['appwrite', 'account', 'logs', queries],
     queryFn: async () => {
       const { data, errors } = await graphql.query({
@@ -67,7 +60,6 @@ export function useLogs({
 
       return data.accountListLogs
     },
-    ...options,
   })
 
   return { ...queryResult }

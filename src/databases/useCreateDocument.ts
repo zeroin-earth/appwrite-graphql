@@ -1,10 +1,9 @@
-import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
-import type { Document } from './types'
+import { CreateDocumentMutation, CreateDocumentMutationVariables } from '../__generated__/graphql'
 
 const createDocument = gql(/* GraphQL */ `
   mutation CreateDocument(
@@ -26,24 +25,15 @@ const createDocument = gql(/* GraphQL */ `
   }
 `)
 
-export function useCreateDocument<TDocument>(
-  databaseId: string,
-  collectionId: string,
-  documentId: string,
-  data: TDocument,
-  permissions?: string[],
-  options?: UseMutationOptions<
-    string | undefined | null,
-    AppwriteException,
-    Document<TDocument>,
-    string[]
-  >,
-) {
+export function useCreateDocument() {
   const { graphql } = useAppwrite()
 
-  const mutationResult = useMutation({
-    mutationKey: ['appwrite', 'databases', databaseId, collectionId, 'documents', documentId],
-    mutationFn: async () => {
+  const mutationResult = useMutation<
+    CreateDocumentMutation['databasesCreateDocument'],
+    AppwriteException,
+    CreateDocumentMutationVariables
+  >({
+    mutationFn: async ({ databaseId, collectionId, documentId, data, permissions }) => {
       const { data: mutationData, errors } = await graphql.mutation({
         query: createDocument,
         variables: {
@@ -59,10 +49,9 @@ export function useCreateDocument<TDocument>(
         throw errors
       }
 
-      return mutationData.databasesCreateDocument?._id
+      return mutationData.databasesCreateDocument
     },
-    ...options,
   })
 
-  return { ...mutationResult }
+  return mutationResult
 }

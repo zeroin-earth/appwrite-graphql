@@ -501,7 +501,7 @@ export type Token = {
   __typename?: 'Token';
   _createdAt?: Maybe<Scalars['String']['output']>;
   _id?: Maybe<Scalars['String']['output']>;
-  expire?: Maybe<Scalars['String']['output']>;
+  expire?: Maybe<Scalars['Date']['output']>;
   userId?: Maybe<Scalars['String']['output']>;
 };
 
@@ -548,7 +548,7 @@ export type CreateEmailTokenMutationVariables = Exact<{
 }>;
 
 
-export type CreateEmailTokenMutation = { __typename?: 'Mutation', accountCreateEmailToken?: { __typename?: 'Token', expire?: string | null } | null };
+export type CreateEmailTokenMutation = { __typename?: 'Mutation', accountCreateEmailToken?: { __typename?: 'Token', expire?: any | null } | null };
 
 export type CreateJwtMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -563,7 +563,7 @@ export type CreateMagicUrlTokenMutationVariables = Exact<{
 }>;
 
 
-export type CreateMagicUrlTokenMutation = { __typename?: 'Mutation', accountCreateMagicURLToken?: { __typename?: 'Token', expire?: string | null } | null };
+export type CreateMagicUrlTokenMutation = { __typename?: 'Mutation', accountCreateMagicURLToken?: { __typename?: 'Token', expire?: any | null } | null };
 
 export type CreateMfaAuthenticatorMutationVariables = Exact<{
   type: Scalars['String']['input'];
@@ -590,12 +590,12 @@ export type CreatePhoneTokenMutationVariables = Exact<{
 }>;
 
 
-export type CreatePhoneTokenMutation = { __typename?: 'Mutation', accountCreatePhoneToken?: { __typename?: 'Token', expire?: string | null } | null };
+export type CreatePhoneTokenMutation = { __typename?: 'Mutation', accountCreatePhoneToken?: { __typename?: 'Token', expire?: any | null } | null };
 
 export type CreatePhoneVerificationMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CreatePhoneVerificationMutation = { __typename?: 'Mutation', accountCreatePhoneVerification?: { __typename?: 'Token', expire?: string | null } | null };
+export type CreatePhoneVerificationMutation = { __typename?: 'Mutation', accountCreatePhoneVerification?: { __typename?: 'Token', expire?: any | null } | null };
 
 export type CreateSessionMutationVariables = Exact<{
   userId: Scalars['String']['input'];
@@ -685,7 +685,7 @@ export type CreateRecoveryMutationVariables = Exact<{
 }>;
 
 
-export type CreateRecoveryMutation = { __typename?: 'Mutation', accountCreateRecovery?: { __typename?: 'Token', expire?: string | null } | null };
+export type CreateRecoveryMutation = { __typename?: 'Mutation', accountCreateRecovery?: { __typename?: 'Token', expire?: any | null } | null };
 
 export type UpdateRecoveryMutationVariables = Exact<{
   userId: Scalars['String']['input'];
@@ -695,7 +695,7 @@ export type UpdateRecoveryMutationVariables = Exact<{
 }>;
 
 
-export type UpdateRecoveryMutation = { __typename?: 'Mutation', accountUpdateRecovery?: { __typename?: 'Token', expire?: string | null } | null };
+export type UpdateRecoveryMutation = { __typename?: 'Mutation', accountUpdateRecovery?: { __typename?: 'Token', expire?: any | null } | null };
 
 export type CreateAccountMutationVariables = Exact<{
   userId: Scalars['String']['input'];
@@ -712,7 +712,7 @@ export type VerifyEmailMutationVariables = Exact<{
 }>;
 
 
-export type VerifyEmailMutation = { __typename?: 'Mutation', accountCreateVerification?: { __typename?: 'Token', expire?: string | null } | null };
+export type VerifyEmailMutation = { __typename?: 'Mutation', accountCreateVerification?: { __typename?: 'Token', expire?: any | null } | null };
 
 export type UpdateEmailMutationVariables = Exact<{
   email: Scalars['String']['input'];
@@ -795,7 +795,7 @@ export type UpdatePhoneVerificationMutationVariables = Exact<{
 }>;
 
 
-export type UpdatePhoneVerificationMutation = { __typename?: 'Mutation', accountUpdatePhoneVerification?: { __typename?: 'Token', expire?: string | null } | null };
+export type UpdatePhoneVerificationMutation = { __typename?: 'Mutation', accountUpdatePhoneVerification?: { __typename?: 'Token', expire?: any | null } | null };
 
 export type UpdatePrefsMutationVariables = Exact<{
   prefs: Scalars['JSON']['input'];
@@ -817,7 +817,7 @@ export type UpdateVerificationMutationVariables = Exact<{
 }>;
 
 
-export type UpdateVerificationMutation = { __typename?: 'Mutation', accountUpdateVerification?: { __typename?: 'Token', expire?: string | null } | null };
+export type UpdateVerificationMutation = { __typename?: 'Mutation', accountUpdateVerification?: { __typename?: 'Token', expire?: any | null } | null };
 
 export type ListDocumentsQueryVariables = Exact<{
   databaseId: Scalars['String']['input'];

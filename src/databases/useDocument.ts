@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 
-import { UseQueryOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
@@ -8,6 +7,7 @@ import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 import { useQueryClient } from '../useQueryClient'
 import type { Document } from './types'
+import { GetDocumentQueryVariables } from '../__generated__/graphql'
 
 const getDocument = gql(/* GraphQL */ `
   query GetDocument($databaseId: String!, $collectionId: String!, $documentId: String!) {
@@ -22,16 +22,15 @@ const getDocument = gql(/* GraphQL */ `
   }
 `)
 
-export function useDocument<TDocument>(
-  databaseId: string,
-  collectionId: string,
-  documentId: string,
-  options?: UseQueryOptions<Document<TDocument>, AppwriteException, Document<TDocument>, string[]>,
-) {
+export function useDocument<TDocument>({
+  databaseId,
+  collectionId,
+  documentId,
+}: GetDocumentQueryVariables) {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useQuery({
+  const queryResult = useQuery<Document<TDocument>, AppwriteException, Document<TDocument>>({
     queryKey: ['appwrite', 'databases', databaseId, collectionId, 'documents', documentId],
     queryFn: async () => {
       const { data, errors } = await graphql.query({
@@ -56,8 +55,6 @@ export function useDocument<TDocument>(
 
       return document
     },
-
-    ...options,
   })
 
   useEffect(() => {

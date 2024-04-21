@@ -1,4 +1,3 @@
-import { UseQueryOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
@@ -16,21 +15,15 @@ const getSession = gql(/* GraphQL */ `
   }
 `)
 
-export function useGetSession({
-  sessionId,
-  options,
-}: {
-  sessionId: string
-  options?: UseQueryOptions<
-    GetSessionQuery['accountGetSession'],
-    AppwriteException,
-    GetSessionQueryVariables,
-    string[]
-  >
-}) {
+export function useGetSession({ sessionId }: GetSessionQueryVariables) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery({
+  const queryResult = useQuery<
+    GetSessionQuery['accountGetSession'],
+    AppwriteException,
+    GetSessionQuery['accountGetSession']
+  >({
+    queryKey: ['appwrite', 'account', 'session', sessionId],
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: getSession,
@@ -43,8 +36,7 @@ export function useGetSession({
 
       return data.accountGetSession
     },
-    ...options,
   })
 
-  return { ...queryResult }
+  return queryResult
 }

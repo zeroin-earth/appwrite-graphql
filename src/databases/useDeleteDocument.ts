@@ -1,7 +1,7 @@
-import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
+import { DeleteDocumentMutation, DeleteDocumentMutationVariables } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -18,18 +18,16 @@ const deleteDocument = gql(/* GraphQL */ `
   }
 `)
 
-export function useDeleteDocument(
-  databaseId: string,
-  collectionId: string,
-  documentId: string,
-  options?: UseMutationOptions<boolean, AppwriteException, void, string[]>,
-) {
+export function useDeleteDocument() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const mutationResult = useMutation({
-    mutationKey: ['appwrite', 'databases', databaseId, collectionId, 'documents', documentId],
-    mutationFn: async () => {
+  const mutationResult = useMutation<
+    DeleteDocumentMutation['databasesDeleteDocument'],
+    AppwriteException,
+    DeleteDocumentMutationVariables
+  >({
+    mutationFn: async ({ databaseId, collectionId, documentId }) => {
       const { data: mutationData, errors } = await graphql.mutation({
         query: deleteDocument,
         variables: {
@@ -43,18 +41,30 @@ export function useDeleteDocument(
         throw errors
       }
 
-      return mutationData.databasesDeleteDocument.status ?? false
+      return mutationData.databasesDeleteDocument
     },
-    ...options,
-    onSuccess: async (data, variables, context) => {
+    onSuccess: async (_, variables) => {
       queryClient.setQueryData(
-        ['appwrite', 'databases', databaseId, collectionId, 'documents', documentId],
+        [
+          'appwrite',
+          'databases',
+          variables.databaseId,
+          variables.collectionId,
+          'documents',
+          variables.documentId,
+        ],
         null,
       )
       queryClient.removeQueries({
-        queryKey: ['appwrite', 'databases', databaseId, collectionId, 'documents', documentId],
+        queryKey: [
+          'appwrite',
+          'databases',
+          variables.databaseId,
+          variables.collectionId,
+          'documents',
+          variables.documentId,
+        ],
       })
-      options?.onSuccess?.(data, variables, context)
     },
   })
 

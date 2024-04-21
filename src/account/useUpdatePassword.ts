@@ -1,4 +1,3 @@
-import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
@@ -14,19 +13,14 @@ const updatePassword = gql(/* GraphQL */ `
   }
 `)
 
-export function useUpdatePassword({
-  options,
-}: {
-  options?: UseMutationOptions<
-    UpdatePasswordMutation['accountUpdatePassword'],
-    AppwriteException,
-    UpdatePasswordMutationVariables,
-    string[]
-  >
-}) {
+export function useUpdatePassword() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation({
+  const queryResult = useMutation<
+    UpdatePasswordMutation['accountUpdatePassword'],
+    AppwriteException,
+    UpdatePasswordMutationVariables
+  >({
     mutationFn: async ({ password, oldPassword }) => {
       const { data, errors } = await graphql.mutation({
         query: updatePassword,
@@ -42,7 +36,6 @@ export function useUpdatePassword({
 
       return data.accountUpdatePassword
     },
-    ...options,
   })
 
   return { ...queryResult }

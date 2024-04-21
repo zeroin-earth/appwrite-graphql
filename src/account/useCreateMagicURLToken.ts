@@ -1,4 +1,3 @@
-import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
@@ -17,19 +16,14 @@ const createMagicURLToken = gql(/* GraphQL */ `
   }
 `)
 
-export function useCreateMagicURLToken({
-  options,
-}: {
-  options?: UseMutationOptions<
-    CreateMagicUrlTokenMutation['accountCreateMagicURLToken'],
-    AppwriteException,
-    CreateMagicUrlTokenMutationVariables,
-    string[]
-  >
-}) {
+export function useCreateMagicURLToken() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation({
+  const queryResult = useMutation<
+    CreateMagicUrlTokenMutation['accountCreateMagicURLToken'],
+    AppwriteException,
+    CreateMagicUrlTokenMutationVariables
+  >({
     mutationFn: async ({ userId, email, url, phrase }) => {
       const { data, errors } = await graphql.mutation({
         query: createMagicURLToken,
@@ -47,7 +41,6 @@ export function useCreateMagicURLToken({
 
       return data.accountCreateMagicURLToken
     },
-    ...options,
   })
 
   return { ...queryResult }

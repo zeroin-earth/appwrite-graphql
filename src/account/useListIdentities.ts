@@ -1,14 +1,9 @@
-import { UseQueryOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 import { ListIdentitiesQuery, ListIdentitiesQueryVariables } from '../__generated__/graphql'
-
-type ListIdentitiesProps = {
-  queries: string | string[]
-}
 
 const accountListIdentities = gql(/* GraphQL */ `
   query ListIdentities($queries: [String!]) {
@@ -21,20 +16,14 @@ const accountListIdentities = gql(/* GraphQL */ `
   }
 `)
 
-export function useListIdentities({
-  queries,
-  options,
-}: ListIdentitiesProps & {
-  options?: UseQueryOptions<
-    ListIdentitiesQuery['accountListIdentities'],
-    AppwriteException,
-    ListIdentitiesQueryVariables,
-    string[]
-  >
-}) {
+export function useListIdentities({ queries }: ListIdentitiesQueryVariables) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery({
+  const queryResult = useQuery<
+    ListIdentitiesQuery['accountListIdentities'],
+    AppwriteException,
+    ListIdentitiesQuery['accountListIdentities']
+  >({
     queryKey: ['appwrite', 'account', 'identities', queries],
     queryFn: async () => {
       const { data, errors } = await graphql.query({
@@ -50,7 +39,6 @@ export function useListIdentities({
 
       return data.accountListIdentities
     },
-    ...options,
   })
 
   return { ...queryResult }

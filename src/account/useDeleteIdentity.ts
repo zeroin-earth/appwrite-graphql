@@ -1,4 +1,3 @@
-import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
@@ -14,19 +13,14 @@ const accountDeleteIdentity = gql(/* GraphQL */ `
   }
 `)
 
-export function useDeleteIdentity({
-  options,
-}: {
-  options?: UseMutationOptions<
-    DeleteIdentityMutation['accountDeleteIdentity'],
-    AppwriteException,
-    DeleteIdentityMutationVariables,
-    string[]
-  >
-}) {
+export function useDeleteIdentity() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation({
+  const queryResult = useMutation<
+    DeleteIdentityMutation['accountDeleteIdentity'],
+    AppwriteException,
+    DeleteIdentityMutationVariables
+  >({
     mutationFn: async ({ identityId }) => {
       const { data, errors } = await graphql.mutation({
         query: accountDeleteIdentity,
@@ -41,7 +35,6 @@ export function useDeleteIdentity({
 
       return data.accountDeleteIdentity ?? { status: false }
     },
-    ...options,
   })
 
   return { ...queryResult }

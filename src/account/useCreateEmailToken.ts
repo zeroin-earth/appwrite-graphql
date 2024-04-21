@@ -1,4 +1,3 @@
-import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
@@ -17,19 +16,14 @@ const createEmailToken = gql(/* GraphQL */ `
   }
 `)
 
-export function useCreateEmailToken({
-  options,
-}: {
-  options?: UseMutationOptions<
-    CreateEmailTokenMutation['accountCreateEmailToken'],
-    AppwriteException,
-    CreateEmailTokenMutationVariables,
-    string[]
-  >
-}) {
+export function useCreateEmailToken() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation({
+  const queryResult = useMutation<
+    CreateEmailTokenMutation['accountCreateEmailToken'],
+    AppwriteException,
+    CreateEmailTokenMutationVariables
+  >({
     mutationFn: async ({ userId, email, phrase }) => {
       const { data, errors } = await graphql.mutation({
         query: createEmailToken,
@@ -46,7 +40,6 @@ export function useCreateEmailToken({
 
       return data.accountCreateEmailToken
     },
-    ...options,
   })
 
   return { ...queryResult }

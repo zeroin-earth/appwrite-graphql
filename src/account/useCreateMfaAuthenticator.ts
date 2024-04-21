@@ -1,4 +1,3 @@
-import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
@@ -18,19 +17,14 @@ const accountCreateMfaAuthenticator = gql(/* GraphQL */ `
   }
 `)
 
-export function useCreateMfaAuthenticator({
-  options,
-}: {
-  options?: UseMutationOptions<
-    CreateMfaAuthenticatorMutation['accountCreateMfaAuthenticator'],
-    AppwriteException,
-    CreateMfaAuthenticatorMutationVariables,
-    string[]
-  >
-}) {
+export function useCreateMfaAuthenticator() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation({
+  const queryResult = useMutation<
+    CreateMfaAuthenticatorMutation['accountCreateMfaAuthenticator'],
+    AppwriteException,
+    CreateMfaAuthenticatorMutationVariables
+  >({
     mutationFn: async ({ type = 'totp' }) => {
       const { data, errors } = await graphql.mutation({
         query: accountCreateMfaAuthenticator,
@@ -45,7 +39,6 @@ export function useCreateMfaAuthenticator({
 
       return data.accountCreateMfaAuthenticator
     },
-    ...options,
   })
 
   return { ...queryResult }

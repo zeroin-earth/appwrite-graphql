@@ -1,4 +1,3 @@
-import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
@@ -14,19 +13,14 @@ const accountUpdatePhone = gql(/* GraphQL */ `
   }
 `)
 
-export function useUpdatePhone({
-  options,
-}: {
-  options?: UseMutationOptions<
-    UpdatePhoneMutation['accountUpdatePhone'],
-    AppwriteException,
-    UpdatePhoneMutationVariables,
-    string[]
-  >
-}) {
+export function useUpdatePhone() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation({
+  const queryResult = useMutation<
+    UpdatePhoneMutation['accountUpdatePhone'],
+    AppwriteException,
+    UpdatePhoneMutationVariables
+  >({
     mutationFn: async ({ phone, password }) => {
       const { data, errors } = await graphql.mutation({
         query: accountUpdatePhone,
@@ -42,7 +36,6 @@ export function useUpdatePhone({
 
       return data.accountUpdatePhone
     },
-    ...options,
   })
 
   return { ...queryResult }

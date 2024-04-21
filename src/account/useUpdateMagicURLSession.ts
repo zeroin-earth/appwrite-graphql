@@ -1,4 +1,3 @@
-import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
@@ -19,19 +18,14 @@ const updateMagicURLSession = gql(/* GraphQL */ `
   }
 `)
 
-export function useUpdateMagicURLSession({
-  options,
-}: {
-  options?: UseMutationOptions<
-    UpdateMagicUrlSessionMutation['accountUpdateMagicURLSession'],
-    AppwriteException,
-    UpdateMagicUrlSessionMutationVariables,
-    string[]
-  >
-}) {
+export function useUpdateMagicURLSession() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation({
+  const queryResult = useMutation<
+    UpdateMagicUrlSessionMutation['accountUpdateMagicURLSession'],
+    AppwriteException,
+    UpdateMagicUrlSessionMutationVariables
+  >({
     mutationFn: async ({ userId, secret }) => {
       const { data, errors } = await graphql.mutation({
         query: updateMagicURLSession,
@@ -47,7 +41,6 @@ export function useUpdateMagicURLSession({
 
       return data.accountUpdateMagicURLSession
     },
-    ...options,
   })
 
   return { ...queryResult }

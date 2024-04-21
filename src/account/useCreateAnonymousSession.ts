@@ -1,4 +1,3 @@
-import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
@@ -16,19 +15,14 @@ const createAnonymousSession = gql(/* GraphQL */ `
   }
 `)
 
-export function useCreateAnonymousSession({
-  options,
-}: {
-  options?: UseMutationOptions<
-    CreateAnonymousSessionMutation['accountCreateAnonymousSession'],
-    AppwriteException,
-    void,
-    string[]
-  >
-}) {
+export function useCreateAnonymousSession() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation({
+  const queryResult = useMutation<
+    CreateAnonymousSessionMutation['accountCreateAnonymousSession'],
+    AppwriteException,
+    void
+  >({
     mutationFn: async () => {
       const { data, errors } = await graphql.mutation({
         query: createAnonymousSession,
@@ -40,7 +34,6 @@ export function useCreateAnonymousSession({
 
       return data.accountCreateAnonymousSession
     },
-    ...options,
   })
 
   return { ...queryResult }

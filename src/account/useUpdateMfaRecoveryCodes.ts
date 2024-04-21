@@ -1,4 +1,3 @@
-import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
@@ -14,19 +13,14 @@ const accountUpdateMfaRecoveryCodes = gql(/* GraphQL */ `
   }
 `)
 
-export function useUpdateMfaRecoveryCodes({
-  options,
-}: {
-  options?: UseMutationOptions<
-    UpdateMfaRecoveryCodesMutation['accountUpdateMfaRecoveryCodes'],
-    AppwriteException,
-    void,
-    string[]
-  >
-}) {
+export function useUpdateMfaRecoveryCodes() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation({
+  const queryResult = useMutation<
+    UpdateMfaRecoveryCodesMutation['accountUpdateMfaRecoveryCodes'],
+    AppwriteException,
+    void
+  >({
     mutationFn: async () => {
       const { data, errors } = await graphql.mutation({
         query: accountUpdateMfaRecoveryCodes,
@@ -38,7 +32,6 @@ export function useUpdateMfaRecoveryCodes({
 
       return data.accountUpdateMfaRecoveryCodes
     },
-    ...options,
   })
 
   return { ...queryResult }
