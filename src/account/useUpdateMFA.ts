@@ -14,7 +14,7 @@ const accountUpdateMFA = gql(/* GraphQL */ `
   }
 `)
 
-export function useUpdateMFA({
+export function useUpdateMfa({
   options,
 }: {
   options?: UseMutationOptions<
