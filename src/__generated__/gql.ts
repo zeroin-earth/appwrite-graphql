@@ -42,8 +42,8 @@ const documents = {
     "\n  mutation CreateAccount($userId: String!, $name: String, $email: String!, $password: String!) {\n    accountCreate(userId: $userId, name: $name, email: $email, password: $password) {\n      name\n      email\n    }\n  }\n": types.CreateAccountDocument,
     "\n  mutation VerifyEmail($url: String!) {\n    accountCreateVerification(url: $url) {\n      expire\n    }\n  }\n": types.VerifyEmailDocument,
     "\n  mutation UpdateEmail($email: String!, $password: String!) {\n    accountUpdateEmail(email: $email, password: $password) {\n      name\n      email\n    }\n  }\n": types.UpdateEmailDocument,
-    "\n  mutation UpdateMFA($mfa: Boolean!) {\n    accountUpdateMFA(mfa: $mfa) {\n      mfa\n    }\n  }\n": types.UpdateMfaDocument,
     "\n  mutation UpdateMagicURLSession($userId: String!, $secret: String!) {\n    accountUpdateMagicURLSession(userId: $userId, secret: $secret) {\n      userId\n      expire\n      current\n    }\n  }\n": types.UpdateMagicUrlSessionDocument,
+    "\n  mutation UpdateMFA($mfa: Boolean!) {\n    accountUpdateMFA(mfa: $mfa) {\n      mfa\n    }\n  }\n": types.UpdateMfaDocument,
     "\n  mutation UpdateMfaAuthenticator($type: String!, $otp: String!) {\n    accountUpdateMfaAuthenticator(type: $type, otp: $otp) {\n      mfa\n    }\n  }\n": types.UpdateMfaAuthenticatorDocument,
     "\n  mutation UpdateMfaChallenge($challengeId: String!, $otp: String!) {\n    accountUpdateMfaChallenge(challengeId: $challengeId, otp: $otp) {\n      status\n    }\n  }\n": types.UpdateMfaChallengeDocument,
     "\n  mutation UpdateMfaRecoveryCodes {\n    accountUpdateMfaRecoveryCodes {\n      recoveryCodes\n    }\n  }\n": types.UpdateMfaRecoveryCodesDocument,
@@ -197,11 +197,11 @@ export function gql(source: "\n  mutation UpdateEmail($email: String!, $password
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  mutation UpdateMFA($mfa: Boolean!) {\n    accountUpdateMFA(mfa: $mfa) {\n      mfa\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateMFA($mfa: Boolean!) {\n    accountUpdateMFA(mfa: $mfa) {\n      mfa\n    }\n  }\n"];
+export function gql(source: "\n  mutation UpdateMagicURLSession($userId: String!, $secret: String!) {\n    accountUpdateMagicURLSession(userId: $userId, secret: $secret) {\n      userId\n      expire\n      current\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateMagicURLSession($userId: String!, $secret: String!) {\n    accountUpdateMagicURLSession(userId: $userId, secret: $secret) {\n      userId\n      expire\n      current\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  mutation UpdateMagicURLSession($userId: String!, $secret: String!) {\n    accountUpdateMagicURLSession(userId: $userId, secret: $secret) {\n      userId\n      expire\n      current\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateMagicURLSession($userId: String!, $secret: String!) {\n    accountUpdateMagicURLSession(userId: $userId, secret: $secret) {\n      userId\n      expire\n      current\n    }\n  }\n"];
+export function gql(source: "\n  mutation UpdateMFA($mfa: Boolean!) {\n    accountUpdateMFA(mfa: $mfa) {\n      mfa\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateMFA($mfa: Boolean!) {\n    accountUpdateMFA(mfa: $mfa) {\n      mfa\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
