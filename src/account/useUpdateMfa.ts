@@ -13,7 +13,7 @@ const accountUpdateMFA = gql(/* GraphQL */ `
   }
 `)
 
-export function useUpdateMFA() {
+export function useUpdateMfa() {
   const { graphql } = useAppwrite()
 
   const queryResult = useMutation<
