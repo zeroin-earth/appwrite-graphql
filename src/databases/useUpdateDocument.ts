@@ -5,6 +5,7 @@ import { gql } from '../__generated__'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import type { Document } from './types'
+import { UpdateDocumentMutation, UpdateDocumentMutationVariables } from '../__generated__/graphql'
 
 const updateDocument = gql(/* GraphQL */ `
   mutation UpdateDocument(
@@ -32,24 +33,15 @@ const updateDocument = gql(/* GraphQL */ `
   }
 `)
 
-export function useUpdateDocument<TDocument>(
-  databaseId: string,
-  collectionId: string,
-  documentId: string,
-  data: TDocument,
-  permissions?: string[],
-  options?: UseMutationOptions<
-    Document<TDocument>,
-    AppwriteException,
-    Document<TDocument>,
-    string[]
-  >,
-) {
+export function useUpdateDocument<TDocument>() {
   const { graphql } = useAppwrite()
 
-  const mutationResult = useMutation({
-    mutationKey: ['appwrite', 'databases', databaseId, collectionId, 'documents', documentId],
-    mutationFn: async () => {
+  const mutationResult = useMutation<
+    Document<TDocument>,
+    AppwriteException,
+    UpdateDocumentMutationVariables
+  >({
+    mutationFn: async ({ databaseId, collectionId, documentId, data, permissions }) => {
       const { data: mutationData, errors } = await graphql.mutation({
         query: updateDocument,
         variables: {
@@ -74,7 +66,6 @@ export function useUpdateDocument<TDocument>(
 
       return document
     },
-    ...options,
   })
 
   return { ...mutationResult }

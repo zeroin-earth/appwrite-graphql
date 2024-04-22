@@ -1,4 +1,3 @@
-import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
@@ -19,20 +18,15 @@ const updateVerification = gql(/* GraphQL */ `
   }
 `)
 
-export function useVerification({
-  options,
-}: {
-  options?: UseMutationOptions<
-    UpdateVerificationMutation['accountUpdateVerification'],
-    AppwriteException,
-    UpdateVerificationMutationVariables,
-    string[]
-  >
-}) {
+export function useVerification() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useMutation({
+  const queryResult = useMutation<
+    UpdateVerificationMutation['accountUpdateVerification'],
+    AppwriteException,
+    UpdateVerificationMutationVariables
+  >({
     mutationFn: async ({ userId, secret }) => {
       if (!userId || !secret) {
         throw new Error('Missing userId or secret')
@@ -52,10 +46,8 @@ export function useVerification({
 
       return data.accountUpdateVerification ?? ({} as Token)
     },
-    ...options,
-    onSuccess: async (token, variables, context) => {
+    onSuccess: async () => {
       queryClient.setQueryData(['appwrite', 'account'], null)
-      options?.onSuccess?.(token, variables, context)
     },
   })
 

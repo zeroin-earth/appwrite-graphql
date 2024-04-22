@@ -1,4 +1,3 @@
-import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
@@ -16,19 +15,14 @@ const createSession = gql(/* GraphQL */ `
   }
 `)
 
-export function useCreateSession({
-  options,
-}: {
-  options?: UseMutationOptions<
-    CreateSessionMutation['accountCreateSession'],
-    AppwriteException,
-    CreateSessionMutationVariables,
-    string[]
-  >
-}) {
+export function useCreateSession() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation({
+  const queryResult = useMutation<
+    CreateSessionMutation['accountCreateSession'],
+    AppwriteException,
+    CreateSessionMutationVariables
+  >({
     mutationFn: async ({ userId, secret }) => {
       const { data, errors } = await graphql.mutation({
         query: createSession,
@@ -44,7 +38,6 @@ export function useCreateSession({
 
       return data.accountCreateSession
     },
-    ...options,
   })
 
   return { ...queryResult }

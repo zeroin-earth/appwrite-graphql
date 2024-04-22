@@ -1,4 +1,3 @@
-import { UseQueryOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
@@ -14,19 +13,14 @@ const getMFARecoveryCodes = gql(/* GraphQL */ `
   }
 `)
 
-export function useGetMfaRecoveryCodes({
-  options,
-}: {
-  options?: UseQueryOptions<
-    GetMfaRecoveryCodesQuery['accountGetMfaRecoveryCodes'],
-    AppwriteException,
-    void,
-    string[]
-  >
-}) {
+export function useGetMfaRecoveryCodes() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery({
+  const queryResult = useQuery<
+    GetMfaRecoveryCodesQuery['accountGetMfaRecoveryCodes'],
+    AppwriteException,
+    void
+  >({
     queryKey: ['appwrite', 'account', 'mfa', 'recovery-codes'],
     queryFn: async () => {
       const { data, errors } = await graphql.query({
@@ -39,7 +33,6 @@ export function useGetMfaRecoveryCodes({
 
       return data.accountGetMfaRecoveryCodes
     },
-    ...options,
   })
 
   return { ...queryResult }

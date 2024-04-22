@@ -1,4 +1,3 @@
-import { UseQueryOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
@@ -16,19 +15,14 @@ const listMFAFactors = gql(/* GraphQL */ `
   }
 `)
 
-export function useListMfaFactors({
-  options,
-}: {
-  options?: UseQueryOptions<
-    ListMfaFactorsQuery['accountListMfaFactors'],
-    AppwriteException,
-    void,
-    string[]
-  >
-}) {
+export function useListMfaFactors() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery({
+  const queryResult = useQuery<
+    ListMfaFactorsQuery['accountListMfaFactors'],
+    AppwriteException,
+    ListMfaFactorsQuery['accountListMfaFactors']
+  >({
     queryKey: ['appwrite', 'account', 'mfa', 'factors'],
     queryFn: async () => {
       const { data, errors } = await graphql.query({
@@ -41,7 +35,6 @@ export function useListMfaFactors({
 
       return data.accountListMfaFactors
     },
-    ...options,
   })
 
   return { ...queryResult }

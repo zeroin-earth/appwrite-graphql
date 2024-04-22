@@ -1,4 +1,3 @@
-import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
@@ -16,19 +15,14 @@ const accountUpdatePrefs = gql(/* GraphQL */ `
   }
 `)
 
-export function useUpdatePrefs({
-  options,
-}: {
-  options?: UseMutationOptions<
-    UpdatePrefsMutation['accountUpdatePrefs'],
-    AppwriteException,
-    { prefs: Record<string, string | number | boolean> },
-    string[]
-  >
-}) {
+export function useUpdatePrefs() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation({
+  const queryResult = useMutation<
+    UpdatePrefsMutation['accountUpdatePrefs'],
+    AppwriteException,
+    { prefs: Record<string, string | number | boolean> }
+  >({
     mutationFn: async ({ prefs }) => {
       const { data, errors } = await graphql.mutation({
         query: accountUpdatePrefs,
@@ -43,7 +37,6 @@ export function useUpdatePrefs({
 
       return data.accountUpdatePrefs
     },
-    ...options,
   })
 
   return { ...queryResult }

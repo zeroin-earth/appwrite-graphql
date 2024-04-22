@@ -179,7 +179,7 @@ type Token {
   _id: String
   _createdAt: String
   userId: String
-  expire: String
+  expire: Date
 }
 
 type Execution {

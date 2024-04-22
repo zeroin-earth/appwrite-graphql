@@ -1,4 +1,3 @@
-import { UseQueryOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
@@ -14,14 +13,10 @@ const accountGetPrefs = gql(/* GraphQL */ `
   }
 `)
 
-export function useGetPrefs({
-  options,
-}: {
-  options?: UseQueryOptions<GetPrefsQuery['accountGetPrefs'], AppwriteException, void, string[]>
-}) {
+export function useGetPrefs() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery({
+  const queryResult = useQuery<GetPrefsQuery['accountGetPrefs'], AppwriteException, void>({
     queryKey: ['appwrite', 'account', 'prefs'],
     queryFn: async () => {
       const { data, errors } = await graphql.query({
@@ -34,7 +29,6 @@ export function useGetPrefs({
 
       return data.accountGetPrefs
     },
-    ...options,
   })
 
   return { ...queryResult }

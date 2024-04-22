@@ -1,16 +1,13 @@
 import { ID } from 'appwrite'
 
 import { gql } from '../__generated__'
-import { Token, User } from '../__generated__/graphql'
+import {
+  CreateAccountMutation,
+  CreateAccountMutationVariables,
+  VerifyEmailMutation,
+} from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
-
-type SignUpProps = {
-  userId?: string
-  name?: string
-  email: string
-  password: string
-}
 
 type VerifyProps = {
   verifyUrl: string
@@ -36,7 +33,11 @@ const verify = gql(/* GraphQL */ `
 export function useSignUp() {
   const { graphql } = useAppwrite()
 
-  const signUp = useMutation<User, Error, SignUpProps, unknown>({
+  const signUp = useMutation<
+    CreateAccountMutation['accountCreate'],
+    Error,
+    CreateAccountMutationVariables
+  >({
     mutationFn: async ({ userId, email, password, name }) => {
       const { data, errors } = await graphql.mutation({
         query: createAccount,
@@ -52,11 +53,15 @@ export function useSignUp() {
         throw errors
       }
 
-      return data.accountCreate ?? ({} as User)
+      return data.accountCreate
     },
   })
 
-  const verifyEmail = useMutation<Token, Error, VerifyProps, unknown>({
+  const verifyEmail = useMutation<
+    VerifyEmailMutation['accountCreateVerification'],
+    Error,
+    VerifyProps
+  >({
     mutationFn: async ({ verifyUrl }) => {
       const { data, errors } = await graphql.mutation({
         query: verify,
@@ -69,7 +74,7 @@ export function useSignUp() {
         throw errors
       }
 
-      return data.accountCreateVerification ?? ({} as Token)
+      return data.accountCreateVerification
     },
   })
 

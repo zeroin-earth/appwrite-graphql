@@ -1,4 +1,3 @@
-import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
@@ -14,19 +13,14 @@ const accountCreateJWT = gql(/* GraphQL */ `
   }
 `)
 
-export function useCreateJWT({
-  options,
-}: {
-  options?: UseMutationOptions<
-    CreateJwtMutation['accountCreateJWT'],
-    AppwriteException,
-    CreateJwtMutationVariables,
-    string[]
-  >
-}) {
+export function useCreateJWT() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation({
+  const queryResult = useMutation<
+    CreateJwtMutation['accountCreateJWT'],
+    AppwriteException,
+    CreateJwtMutationVariables
+  >({
     mutationFn: async () => {
       const { data, errors } = await graphql.mutation({
         query: accountCreateJWT,
@@ -38,7 +32,6 @@ export function useCreateJWT({
 
       return data.accountCreateJWT
     },
-    ...options,
   })
 
   return { ...queryResult }

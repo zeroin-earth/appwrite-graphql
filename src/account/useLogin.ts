@@ -1,14 +1,12 @@
 import { AppwriteException, OAuthProvider } from 'appwrite'
 
 import { gql } from '../__generated__/gql'
-import { CreateEmailPasswordSessionMutation } from '../__generated__/graphql'
+import {
+  CreateEmailPasswordSessionMutation,
+  CreateEmailPasswordSessionMutationVariables,
+} from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
-
-type LoginProps = {
-  email: string
-  password: string
-}
 
 type OAuthLoginProps = {
   provider: OAuthProvider
@@ -32,7 +30,7 @@ export function useLogin() {
   const login = useMutation<
     CreateEmailPasswordSessionMutation['accountCreateEmailPasswordSession'],
     AppwriteException,
-    LoginProps
+    CreateEmailPasswordSessionMutationVariables
   >({
     mutationFn: async ({ email, password }) => {
       const { data, errors } = await graphql.mutation({
@@ -51,7 +49,7 @@ export function useLogin() {
     },
   })
 
-  const oAuthLogin = useMutation<void | URL, AppwriteException, OAuthLoginProps, unknown>({
+  const oAuthLogin = useMutation<void | URL, AppwriteException, OAuthLoginProps>({
     mutationFn: async ({ provider, success, failure }) => {
       return account.createOAuth2Session(provider, success, failure)
     },
