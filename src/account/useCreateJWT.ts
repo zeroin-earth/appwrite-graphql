@@ -34,6 +34,7 @@ export function useCreateJWT({ gcTime = 600000 }: { gcTime?: number } = {}) {
       return data.accountCreateJWT
     },
     onSuccess: (data) => {
+      graphql.client.setJWT(data.jwt)
       queryClient.setQueryData(['appwrite', 'jwt'], data.jwt, { updatedAt: Date.now() })
     },
   })
@@ -60,6 +61,7 @@ export function useSuspenseCreateJWT({ gcTime = 600000 }: { gcTime?: number } = 
         throw errors
       }
 
+      graphql.client.setJWT(data.accountCreateJWT.jwt)
       return data.accountCreateJWT
     },
   })
