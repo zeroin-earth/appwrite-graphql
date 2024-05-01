@@ -14,7 +14,7 @@ type Props = {
   async?: boolean
   path?: string
   method?: string
-  headers?: Record<string, any>
+  // headers?: Record<string, any>
 }
 
 const createExecution = gql(/* GraphQL */ `
@@ -23,16 +23,14 @@ const createExecution = gql(/* GraphQL */ `
     $body: String
     $async: Boolean
     $path: String
-    $method: String
-    $headers: JSON
+    $method: String # $headers: JSON
   ) {
     functionsCreateExecution(
       functionId: $functionId
       body: $body
       async: $async
       path: $path
-      method: $method
-      headers: $headers
+      method: $method # headers: $headers
     ) {
       _id
       status
@@ -66,7 +64,7 @@ export function useFunction() {
       async = false,
       path = '/',
       method = 'POST',
-      headers = {},
+      // headers = {},
     }) => {
       setCurrentFunction(functionId)
 
@@ -78,7 +76,7 @@ export function useFunction() {
           async,
           path,
           method,
-          headers,
+          // headers: JSON.stringify(headers),
         },
       })
 
@@ -148,8 +146,8 @@ export function useSuspenseFunction({
   async = false,
   path = '',
   method = 'POST',
-  headers = {},
-}: Props) {
+}: // headers = {},
+Props) {
   const { graphql } = useAppwrite()
   const [currentExecution, setCurrentExecution] = useState<string | null>(null)
   const [currentFunction, setCurrentFunction] = useState<string | null>(null)
@@ -168,7 +166,7 @@ export function useSuspenseFunction({
             async,
             path,
             method,
-            headers,
+            // headers,
           },
         })
 
