@@ -1,4 +1,4 @@
-export { useCollection } from './useCollection'
+export { useCollection, useSuspenseCollection } from './useCollection'
 export { useCreateDocument } from './useCreateDocument'
 export { useDeleteDocument } from './useDeleteDocument'
 export { useDocument } from './useDocument'

@@ -18,8 +18,7 @@ export function useCreatePhoneVerification() {
 
   const queryResult = useMutation<
     CreatePhoneVerificationMutation['accountCreatePhoneVerification'],
-    AppwriteException,
-    void
+    AppwriteException
   >({
     mutationFn: async () => {
       const { data, errors } = await graphql.mutation({
