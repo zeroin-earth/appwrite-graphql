@@ -1,7 +1,7 @@
 export { useAccount } from './useAccount'
 export { useCreateAnonymousSession } from './useCreateAnonymousSession'
 export { useCreateEmailToken } from './useCreateEmailToken'
-export { useCreateJWT } from './useCreateJWT'
+export { useCreateJWT, useSuspenseCreateJWT } from './useCreateJWT'
 export { useCreateMagicURLToken } from './useCreateMagicURLToken'
 export { useCreateMfaAuthenticator } from './useCreateMfaAuthenticator'
 export { useCreateMfaChallenge } from './useCreateMfaChallenge'

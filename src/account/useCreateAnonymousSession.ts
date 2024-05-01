@@ -20,8 +20,7 @@ export function useCreateAnonymousSession() {
 
   const queryResult = useMutation<
     CreateAnonymousSessionMutation['accountCreateAnonymousSession'],
-    AppwriteException,
-    void
+    AppwriteException
   >({
     mutationFn: async () => {
       const { data, errors } = await graphql.mutation({

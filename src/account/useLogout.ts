@@ -38,8 +38,9 @@ export function useLogout() {
       return data?.accountDeleteSession
     },
     onSuccess: async () => {
-      queryClient.setQueryData(['appwrite', 'account'], null)
-      queryClient.removeQueries({ queryKey: ['appwrite', 'account'] })
+      queryClient.setQueryData(['appwrite'], null)
+      queryClient.removeQueries({ queryKey: ['appwrite'] })
+      queryClient.clear()
     },
   })
 
