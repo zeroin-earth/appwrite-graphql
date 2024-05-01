@@ -60,7 +60,14 @@ export function useFunction() {
   const [currentFunction, setCurrentFunction] = useState<string | null>(null)
 
   const executeFunction = useMutation<Record<string, unknown>, Error, Props, unknown>({
-    mutationFn: async ({ functionId, body = {}, async, path, method, headers }) => {
+    mutationFn: async ({
+      functionId,
+      body = {},
+      async = false,
+      path = '/',
+      method = 'POST',
+      headers = {},
+    }) => {
       setCurrentFunction(functionId)
 
       const { data } = await graphql.mutation({
