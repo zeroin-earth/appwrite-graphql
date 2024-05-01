@@ -10,11 +10,11 @@ import { useSuspenseQuery } from '../useSuspenseQuery'
 
 type Props = {
   functionId: string
-  body: Record<string, any>
-  async: boolean
-  path: string
-  method: string
-  headers: Record<string, any>
+  body?: Record<string, any>
+  async?: boolean
+  path?: string
+  method?: string
+  headers?: Record<string, any>
 }
 
 const createExecution = gql(/* GraphQL */ `
