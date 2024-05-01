@@ -10,11 +10,11 @@ import { useSuspenseQuery } from '../useSuspenseQuery'
 
 type Props = {
   functionId: string
-  body: Record<string, any>
-  async: boolean
-  path: string
-  method: string
-  headers: Record<string, any>
+  body?: Record<string, any>
+  async?: boolean
+  path?: string
+  method?: string
+  headers?: Record<string, any>
 }
 
 const createExecution = gql(/* GraphQL */ `
@@ -60,7 +60,14 @@ export function useFunction() {
   const [currentFunction, setCurrentFunction] = useState<string | null>(null)
 
   const executeFunction = useMutation<Record<string, unknown>, Error, Props, unknown>({
-    mutationFn: async ({ functionId, body = {}, async, path, method, headers }) => {
+    mutationFn: async ({
+      functionId,
+      body = {},
+      async = false,
+      path = '/',
+      method = 'POST',
+      headers = {},
+    }) => {
       setCurrentFunction(functionId)
 
       const { data } = await graphql.mutation({
