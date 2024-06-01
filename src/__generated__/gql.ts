@@ -13,7 +13,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
-    "\n  fragment Account_UserFragment on User {\n    name\n    email\n    prefs {\n      data\n    }\n  }\n": types.Account_UserFragmentFragmentDoc,
+    "\n  fragment Account_UserFragment on User {\n    _id\n    name\n    email\n    prefs {\n      data\n    }\n  }\n": types.Account_UserFragmentFragmentDoc,
     "\n  fragment Identity_ProviderFragment on Identity {\n    userId\n    provider\n  }\n": types.Identity_ProviderFragmentFragmentDoc,
     "\n  query AccountGet {\n    accountGet {\n      ...Account_UserFragment\n    }\n  }\n": types.AccountGetDocument,
     "\n  mutation CreateAnonymousSession {\n    accountCreateAnonymousSession {\n      _id\n      expire\n      current\n    }\n  }\n": types.CreateAnonymousSessionDocument,
@@ -81,7 +81,7 @@ export function gql(source: string): unknown;
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  fragment Account_UserFragment on User {\n    name\n    email\n    prefs {\n      data\n    }\n  }\n"): (typeof documents)["\n  fragment Account_UserFragment on User {\n    name\n    email\n    prefs {\n      data\n    }\n  }\n"];
+export function gql(source: "\n  fragment Account_UserFragment on User {\n    _id\n    name\n    email\n    prefs {\n      data\n    }\n  }\n"): (typeof documents)["\n  fragment Account_UserFragment on User {\n    _id\n    name\n    email\n    prefs {\n      data\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
