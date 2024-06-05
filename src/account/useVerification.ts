@@ -13,7 +13,9 @@ import { useQueryClient } from '../useQueryClient'
 const updateVerification = gql(/* GraphQL */ `
   mutation UpdateVerification($userId: String!, $secret: String!) {
     accountUpdateVerification(userId: $userId, secret: $secret) {
+      secret
       expire
+      userId
     }
   }
 `)

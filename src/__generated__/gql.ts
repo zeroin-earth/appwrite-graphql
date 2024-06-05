@@ -54,7 +54,7 @@ const documents = {
     "\n  mutation UpdatePhoneVerification($userId: String!, $secret: String!) {\n    accountUpdatePhoneVerification(userId: $userId, secret: $secret) {\n      expire\n    }\n  }\n": types.UpdatePhoneVerificationDocument,
     "\n  mutation UpdatePrefs($prefs: JSON!) {\n    accountUpdatePrefs(prefs: $prefs) {\n      prefs {\n        data\n      }\n    }\n  }\n": types.UpdatePrefsDocument,
     "\n  mutation UpdateSession($sessionId: String!) {\n    accountUpdateSession(sessionId: $sessionId) {\n      userId\n      expire\n      current\n    }\n  }\n": types.UpdateSessionDocument,
-    "\n  mutation UpdateVerification($userId: String!, $secret: String!) {\n    accountUpdateVerification(userId: $userId, secret: $secret) {\n      expire\n    }\n  }\n": types.UpdateVerificationDocument,
+    "\n  mutation UpdateVerification($userId: String!, $secret: String!) {\n    accountUpdateVerification(userId: $userId, secret: $secret) {\n      secret\n      expire\n      userId\n    }\n  }\n": types.UpdateVerificationDocument,
     "\n  query ListDocuments($databaseId: String!, $collectionId: String!, $queries: [String!]) {\n    databasesListDocuments(\n      databaseId: $databaseId\n      collectionId: $collectionId\n      queries: $queries\n    ) {\n      total\n      documents {\n        _id\n        data\n      }\n    }\n  }\n": types.ListDocumentsDocument,
     "\n  mutation CreateDocument(\n    $databaseId: String!\n    $collectionId: String!\n    $documentId: String!\n    $data: JSON!\n    $permissions: [String!]\n  ) {\n    databasesCreateDocument(\n      databaseId: $databaseId\n      collectionId: $collectionId\n      documentId: $documentId\n      data: $data\n      permissions: $permissions\n    ) {\n      _id\n    }\n  }\n": types.CreateDocumentDocument,
     "\n  mutation DeleteDocument($databaseId: String!, $collectionId: String!, $documentId: String!) {\n    databasesDeleteDocument(\n      databaseId: $databaseId\n      collectionId: $collectionId\n      documentId: $documentId\n    ) {\n      status\n    }\n  }\n": types.DeleteDocumentDocument,
@@ -245,7 +245,7 @@ export function gql(source: "\n  mutation UpdateSession($sessionId: String!) {\n
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  mutation UpdateVerification($userId: String!, $secret: String!) {\n    accountUpdateVerification(userId: $userId, secret: $secret) {\n      expire\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateVerification($userId: String!, $secret: String!) {\n    accountUpdateVerification(userId: $userId, secret: $secret) {\n      expire\n    }\n  }\n"];
+export function gql(source: "\n  mutation UpdateVerification($userId: String!, $secret: String!) {\n    accountUpdateVerification(userId: $userId, secret: $secret) {\n      secret\n      expire\n      userId\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateVerification($userId: String!, $secret: String!) {\n    accountUpdateVerification(userId: $userId, secret: $secret) {\n      secret\n      expire\n      userId\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

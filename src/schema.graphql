@@ -179,7 +179,9 @@ type Token {
   _id: String
   _createdAt: String
   userId: String
+  secret: String
   expire: Date
+  phrase: String
 }
 
 type Execution {
