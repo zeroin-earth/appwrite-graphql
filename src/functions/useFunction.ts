@@ -144,7 +144,7 @@ export function useSuspenseFunction({
   functionId,
   body = {},
   async = false,
-  path = '',
+  path = '/',
   method = 'POST',
 }: // headers = {},
 Props) {
@@ -154,7 +154,7 @@ Props) {
 
   const executeFunction = useSuspenseQuery<Record<string, unknown>, Error, Record<string, unknown>>(
     {
-      queryKey: ['appwrite', 'functions', functionId],
+      queryKey: ['appwrite', 'functions', functionId, path],
       queryFn: async () => {
         setCurrentFunction(functionId)
 
