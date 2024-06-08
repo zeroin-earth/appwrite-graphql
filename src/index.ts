@@ -6,13 +6,12 @@ export { useQueryClient } from './useQueryClient'
 export * from './account'
 export * from './databases'
 
-export { useFunction } from './functions/useFunction'
+export * from './functions/useFunction'
 
-import { Account_UserFragment, Identity_ProviderFragment } from './account/fragments'
+import * as frags from './account/fragments'
 
 export { getFragmentData } from './__generated__'
 
 export const fragments = {
-  Account_UserFragment,
-  Identity_ProviderFragment,
+  ...frags,
 }
