@@ -27,7 +27,7 @@ export function useUpdatePrefs() {
       const { data, errors } = await graphql.mutation({
         query: accountUpdatePrefs,
         variables: {
-          prefs,
+          prefs: JSON.stringify(prefs),
         },
       })
 

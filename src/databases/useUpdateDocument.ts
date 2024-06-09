@@ -1,18 +1,17 @@
-import { UseMutationOptions } from '@tanstack/react-query'
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
+import { InputMaybe, Scalars, UpdateDocumentMutationVariables } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import type { Document } from './types'
-import { UpdateDocumentMutation, UpdateDocumentMutationVariables } from '../__generated__/graphql'
 
 const updateDocument = gql(/* GraphQL */ `
   mutation UpdateDocument(
     $databaseId: String!
     $collectionId: String!
     $documentId: String!
-    $data: JSON!
+    $data: JSON
     $permissions: [String!]
   ) {
     databasesUpdateDocument(
@@ -23,46 +22,47 @@ const updateDocument = gql(/* GraphQL */ `
       permissions: $permissions
     ) {
       _id
-      _collectionId
-      _databaseId
-      _createdAt
-      _updatedAt
-      _permissions
-      data
     }
   }
 `)
 
 export function useUpdateDocument<TDocument>() {
-  const { graphql } = useAppwrite()
+  // const { graphql } = useAppwrite()
+  const { databases } = useAppwrite()
 
   const mutationResult = useMutation<
     Document<TDocument>,
     AppwriteException,
-    UpdateDocumentMutationVariables
+    Omit<UpdateDocumentMutationVariables, 'permissions'> & {
+      permissions?: InputMaybe<Array<Scalars['String']['input']>>
+    }
   >({
     mutationFn: async ({ databaseId, collectionId, documentId, data, permissions }) => {
-      const { data: mutationData, errors } = await graphql.mutation({
-        query: updateDocument,
-        variables: {
-          databaseId,
-          collectionId,
-          documentId,
-          data,
-          permissions,
-        },
-      })
+      const { data: mutationData, errors } = await databases.updateDocument(
+        databaseId,
+        collectionId,
+        documentId,
+        data,
+        permissions,
+      )
+      // Doesn't work for some reason
+      // const { data: mutationData, errors } = await graphql.mutation({
+      //   query: updateDocument,
+      //   variables: {
+      //     databaseId,
+      //     collectionId,
+      //     documentId,
+      //     data: JSON.stringify(data),
+      //     permissions,
+      //   },
+      // })
 
       if (errors) {
         throw errors
       }
 
-      const document = {
-        ...mutationData.databasesUpdateDocument,
-        ...(mutationData.databasesUpdateDocument
-          ? (JSON.parse(mutationData.databasesUpdateDocument.data) as TDocument)
-          : {}),
-      } as Document<TDocument>
+      // const document = mutationData.databasesUpdateDocument
+      const document = mutationData
 
       return document
     },
