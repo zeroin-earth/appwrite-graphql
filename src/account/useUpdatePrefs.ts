@@ -16,7 +16,7 @@ const accountUpdatePrefs = gql(/* GraphQL */ `
 `)
 
 export function useUpdatePrefs() {
-  const { graphql } = useAppwrite()
+  const { account } = useAppwrite()
 
   const queryResult = useMutation<
     UpdatePrefsMutation['accountUpdatePrefs'],
@@ -24,18 +24,8 @@ export function useUpdatePrefs() {
     { prefs: Record<string, string | number | boolean> }
   >({
     mutationFn: async ({ prefs }) => {
-      const { data, errors } = await graphql.mutation({
-        query: accountUpdatePrefs,
-        variables: {
-          prefs: JSON.stringify(prefs),
-        },
-      })
-
-      if (errors) {
-        throw errors
-      }
-
-      return data.accountUpdatePrefs
+      const newPrefs = await account.updatePrefs(prefs)
+      return newPrefs
     },
   })
 
