@@ -1,13 +1,13 @@
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'
-import { DeleteSessionMutation, DeleteSessionMutationVariables } from '../__generated__/graphql'
+import { DeleteSessionsMutation } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 
-const deleteSession = gql(/* GraphQL */ `
-  mutation DeleteSession($sessionId: String!) {
-    accountDeleteSession(sessionId: $sessionId) {
+const deleteSessions = gql(/* GraphQL */ `
+  mutation DeleteSessions {
+    accountDeleteSessions {
       status
     }
   }
@@ -17,23 +17,20 @@ export function useDeleteSessions() {
   const { graphql } = useAppwrite()
 
   const queryResult = useMutation<
-    DeleteSessionMutation['accountDeleteSession'],
+    DeleteSessionsMutation['accountDeleteSessions'],
     AppwriteException,
-    DeleteSessionMutationVariables
+    void
   >({
-    mutationFn: async ({ sessionId }) => {
+    mutationFn: async () => {
       const { data, errors } = await graphql.mutation({
-        query: deleteSession,
-        variables: {
-          sessionId,
-        },
+        query: deleteSessions,
       })
 
       if (errors) {
         throw errors
       }
 
-      return data.accountDeleteSession
+      return data.accountDeleteSessions
     },
   })
 

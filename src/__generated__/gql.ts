@@ -29,6 +29,7 @@ const documents = {
     "\n  mutation DeleteIdentity($identityId: String!) {\n    accountDeleteIdentity(identityId: $identityId) {\n      status\n    }\n  }\n": types.DeleteIdentityDocument,
     "\n  mutation DeleteMfaAuthenticator($type: String!, $otp: String!) {\n    accountDeleteMfaAuthenticator(type: $type, otp: $otp) {\n      mfa\n    }\n  }\n": types.DeleteMfaAuthenticatorDocument,
     "\n  mutation DeleteSession($sessionId: String!) {\n    accountDeleteSession(sessionId: $sessionId) {\n      status\n    }\n  }\n": types.DeleteSessionDocument,
+    "\n  mutation DeleteSessions {\n    accountDeleteSessions {\n      status\n    }\n  }\n": types.DeleteSessionsDocument,
     "\n  query GetMfaRecoveryCodes {\n    accountGetMfaRecoveryCodes {\n      recoveryCodes\n    }\n  }\n": types.GetMfaRecoveryCodesDocument,
     "\n  query GetPrefs {\n    accountGetPrefs {\n      data\n    }\n  }\n": types.GetPrefsDocument,
     "\n  query GetSession($sessionId: String!) {\n    accountGetSession(sessionId: $sessionId) {\n      userId\n      expire\n      current\n    }\n  }\n": types.GetSessionDocument,
@@ -142,6 +143,10 @@ export function gql(source: "\n  mutation DeleteMfaAuthenticator($type: String!,
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\n  mutation DeleteSession($sessionId: String!) {\n    accountDeleteSession(sessionId: $sessionId) {\n      status\n    }\n  }\n"): (typeof documents)["\n  mutation DeleteSession($sessionId: String!) {\n    accountDeleteSession(sessionId: $sessionId) {\n      status\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  mutation DeleteSessions {\n    accountDeleteSessions {\n      status\n    }\n  }\n"): (typeof documents)["\n  mutation DeleteSessions {\n    accountDeleteSessions {\n      status\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
