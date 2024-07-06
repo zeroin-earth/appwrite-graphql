@@ -10,7 +10,7 @@ const accountListIdentities = gql(/* GraphQL */ `
     accountListIdentities(queries: $queries) {
       total
       identities {
-        ...Identity_ProviderFragment
+        ...Identity_Provider
       }
     }
   }

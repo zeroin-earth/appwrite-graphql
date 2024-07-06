@@ -13,9 +13,9 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
-    "\n  fragment Account_UserFragment on User {\n    _id\n    name\n    email\n    prefs {\n      data\n    }\n  }\n": types.Account_UserFragmentFragmentDoc,
-    "\n  fragment Identity_ProviderFragment on Identity {\n    userId\n    provider\n  }\n": types.Identity_ProviderFragmentFragmentDoc,
-    "\n  query AccountGet {\n    accountGet {\n      ...Account_UserFragment\n    }\n  }\n": types.AccountGetDocument,
+    "\n  fragment Account_User on User {\n    _id\n    name\n    email\n    prefs {\n      data\n    }\n  }\n": types.Account_UserFragmentDoc,
+    "\n  fragment Identity_Provider on Identity {\n    userId\n    provider\n  }\n": types.Identity_ProviderFragmentDoc,
+    "\n  query AccountGet {\n    accountGet {\n      ...Account_User\n    }\n  }\n": types.AccountGetDocument,
     "\n  mutation CreateAnonymousSession {\n    accountCreateAnonymousSession {\n      _id\n      expire\n      current\n    }\n  }\n": types.CreateAnonymousSessionDocument,
     "\n  mutation CreateEmailToken($userId: String!, $email: String!, $phrase: Boolean) {\n    accountCreateEmailToken(userId: $userId, email: $email, phrase: $phrase) {\n      expire\n    }\n  }\n": types.CreateEmailTokenDocument,
     "\n  mutation CreateJWT {\n    accountCreateJWT {\n      jwt\n    }\n  }\n": types.CreateJwtDocument,
@@ -33,7 +33,7 @@ const documents = {
     "\n  query GetMfaRecoveryCodes {\n    accountGetMfaRecoveryCodes {\n      recoveryCodes\n    }\n  }\n": types.GetMfaRecoveryCodesDocument,
     "\n  query GetPrefs {\n    accountGetPrefs {\n      data\n    }\n  }\n": types.GetPrefsDocument,
     "\n  query GetSession($sessionId: String!) {\n    accountGetSession(sessionId: $sessionId) {\n      userId\n      expire\n      current\n    }\n  }\n": types.GetSessionDocument,
-    "\n  query ListIdentities($queries: [String!]) {\n    accountListIdentities(queries: $queries) {\n      total\n      identities {\n        ...Identity_ProviderFragment\n      }\n    }\n  }\n": types.ListIdentitiesDocument,
+    "\n  query ListIdentities($queries: [String!]) {\n    accountListIdentities(queries: $queries) {\n      total\n      identities {\n        ...Identity_Provider\n      }\n    }\n  }\n": types.ListIdentitiesDocument,
     "\n  query ListMfaFactors {\n    accountListMfaFactors {\n      totp\n      phone\n      email\n    }\n  }\n": types.ListMfaFactorsDocument,
     "\n  query ListSessions {\n    accountListSessions {\n      sessions {\n        _id\n        _createdAt\n        osName\n        clientName\n      }\n    }\n  }\n": types.ListSessionsDocument,
     "\n  mutation CreateEmailPasswordSession($email: String!, $password: String!) {\n    accountCreateEmailPasswordSession(email: $email, password: $password) {\n      userId\n      expire\n      current\n    }\n  }\n": types.CreateEmailPasswordSessionDocument,
@@ -82,15 +82,15 @@ export function gql(source: string): unknown;
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  fragment Account_UserFragment on User {\n    _id\n    name\n    email\n    prefs {\n      data\n    }\n  }\n"): (typeof documents)["\n  fragment Account_UserFragment on User {\n    _id\n    name\n    email\n    prefs {\n      data\n    }\n  }\n"];
+export function gql(source: "\n  fragment Account_User on User {\n    _id\n    name\n    email\n    prefs {\n      data\n    }\n  }\n"): (typeof documents)["\n  fragment Account_User on User {\n    _id\n    name\n    email\n    prefs {\n      data\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  fragment Identity_ProviderFragment on Identity {\n    userId\n    provider\n  }\n"): (typeof documents)["\n  fragment Identity_ProviderFragment on Identity {\n    userId\n    provider\n  }\n"];
+export function gql(source: "\n  fragment Identity_Provider on Identity {\n    userId\n    provider\n  }\n"): (typeof documents)["\n  fragment Identity_Provider on Identity {\n    userId\n    provider\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  query AccountGet {\n    accountGet {\n      ...Account_UserFragment\n    }\n  }\n"): (typeof documents)["\n  query AccountGet {\n    accountGet {\n      ...Account_UserFragment\n    }\n  }\n"];
+export function gql(source: "\n  query AccountGet {\n    accountGet {\n      ...Account_User\n    }\n  }\n"): (typeof documents)["\n  query AccountGet {\n    accountGet {\n      ...Account_User\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -162,7 +162,7 @@ export function gql(source: "\n  query GetSession($sessionId: String!) {\n    ac
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  query ListIdentities($queries: [String!]) {\n    accountListIdentities(queries: $queries) {\n      total\n      identities {\n        ...Identity_ProviderFragment\n      }\n    }\n  }\n"): (typeof documents)["\n  query ListIdentities($queries: [String!]) {\n    accountListIdentities(queries: $queries) {\n      total\n      identities {\n        ...Identity_ProviderFragment\n      }\n    }\n  }\n"];
+export function gql(source: "\n  query ListIdentities($queries: [String!]) {\n    accountListIdentities(queries: $queries) {\n      total\n      identities {\n        ...Identity_Provider\n      }\n    }\n  }\n"): (typeof documents)["\n  query ListIdentities($queries: [String!]) {\n    accountListIdentities(queries: $queries) {\n      total\n      identities {\n        ...Identity_Provider\n      }\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
