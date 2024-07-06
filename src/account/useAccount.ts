@@ -12,7 +12,7 @@ import { useQueryClient } from '../useQueryClient'
 export const getAccount = gql(/* GraphQL */ `
   query AccountGet {
     accountGet {
-      ...Account_UserFragment
+      ...Account_User
     }
   }
 `)

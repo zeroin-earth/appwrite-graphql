@@ -1,7 +1,7 @@
 import { gql } from '../__generated__'
 
-export const Account_UserFragment = gql(/* GraphQL */ `
-  fragment Account_UserFragment on User {
+export const Account_User = gql(/* GraphQL */ `
+  fragment Account_User on User {
     _id
     name
     email
@@ -11,8 +11,8 @@ export const Account_UserFragment = gql(/* GraphQL */ `
   }
 `)
 
-export const Identity_ProviderFragment = gql(/* GraphQL */ `
-  fragment Identity_ProviderFragment on Identity {
+export const Identity_Provider = gql(/* GraphQL */ `
+  fragment Identity_Provider on Identity {
     userId
     provider
   }
