@@ -1,3 +1,5 @@
+import * as frags from './account/fragments'
+
 export { useAppwrite } from './useAppwrite'
 export { useMutation } from './useMutation'
 export { useQuery } from './useQuery'
@@ -8,10 +10,9 @@ export * from './databases'
 
 export * from './functions/useFunction'
 
-import * as frags from './account/fragments'
-
 export { getFragmentData } from './__generated__'
 
-export const fragments = {
-  ...frags,
+export namespace fragments {
+  export const Account_UserFragment = frags.Account_UserFragment
+  export const Identity_ProviderFragment = frags.Identity_ProviderFragment
 }
