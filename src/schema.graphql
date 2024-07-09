@@ -57,12 +57,7 @@ type Mutation {
   accountUpdatePhoneSession(userId: String!, secret: String!): Session
   accountUpdatePhoneVerification(userId: String!, secret: String!): Token
   accountUpdatePrefs(prefs: JSON!): User
-  accountUpdateRecovery(
-    userId: String!
-    secret: String!
-    password: String!
-    passwordAgain: String!
-  ): Token
+  accountUpdateRecovery(userId: String!, secret: String!, password: String!): Token
   accountUpdateSession(sessionId: String!): Session
   accountUpdateVerification(userId: String!, secret: String!): Token
   databasesCreateDocument(

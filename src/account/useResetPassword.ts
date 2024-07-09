@@ -10,18 +10,8 @@ import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 
 const updateRecovery = gql(/* GraphQL */ `
-  mutation UpdateRecovery(
-    $userId: String!
-    $secret: String!
-    $password: String!
-    $passwordAgain: String!
-  ) {
-    accountUpdateRecovery(
-      userId: $userId
-      secret: $secret
-      password: $password
-      passwordAgain: $passwordAgain
-    ) {
+  mutation UpdateRecovery($userId: String!, $secret: String!, $password: String!) {
+    accountUpdateRecovery(userId: $userId, secret: $secret, password: $password) {
       expire
     }
   }
@@ -35,14 +25,13 @@ export function useResetPassword() {
     AppwriteException,
     UpdateRecoveryMutationVariables
   >({
-    mutationFn: async ({ userId, secret, password, passwordAgain: confirmPassword }) => {
+    mutationFn: async ({ userId, secret, password }) => {
       const { data, errors } = await graphql.mutation({
         query: updateRecovery,
         variables: {
           userId,
           secret,
           password,
-          passwordAgain: confirmPassword,
         },
       })
 
