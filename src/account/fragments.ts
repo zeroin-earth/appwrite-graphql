@@ -13,6 +13,7 @@ export const Account_User = gql(/* GraphQL */ `
 
 export const Identity_Provider = gql(/* GraphQL */ `
   fragment Identity_Provider on Identity {
+    _id
     userId
     provider
   }
