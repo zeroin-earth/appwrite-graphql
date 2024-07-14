@@ -39,7 +39,9 @@ export function useLogout() {
     },
     onSuccess: async () => {
       queryClient.setQueryData(['appwrite'], null)
+      queryClient.setQueryData(['appwrite', 'account'], null)
       queryClient.removeQueries({ queryKey: ['appwrite'] })
+      queryClient.removeQueries({ queryKey: ['appwrite', 'account'] })
       queryClient.clear()
     },
   })
