@@ -1,3 +1,4 @@
+// FIXME: This is a temporary solution to update user preferences.
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'

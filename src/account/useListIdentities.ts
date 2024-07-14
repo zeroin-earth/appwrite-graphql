@@ -3,11 +3,11 @@ import { AppwriteException } from 'appwrite'
 import { gql } from '../__generated__'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
-import { ListIdentitiesQuery, ListIdentitiesQueryVariables } from '../__generated__/graphql'
+import { ListIdentitiesQuery } from '../__generated__/graphql'
 
 const accountListIdentities = gql(/* GraphQL */ `
-  query ListIdentities($queries: [String]!) {
-    accountListIdentities(queries: $queries) {
+  query ListIdentities {
+    accountListIdentities {
       total
       identities {
         ...Identity_Provider
@@ -16,7 +16,7 @@ const accountListIdentities = gql(/* GraphQL */ `
   }
 `)
 
-export function useListIdentities({ queries = [] }: ListIdentitiesQueryVariables) {
+export function useListIdentities() {
   const { graphql } = useAppwrite()
 
   const queryResult = useQuery<
@@ -24,14 +24,10 @@ export function useListIdentities({ queries = [] }: ListIdentitiesQueryVariables
     AppwriteException,
     ListIdentitiesQuery['accountListIdentities']
   >({
-    queryKey: ['appwrite', 'account', 'identities', queries],
+    queryKey: ['appwrite', 'account', 'identities'],
     queryFn: async () => {
-      console.log('queries', queries)
       const { data, errors } = await graphql.query({
         query: accountListIdentities,
-        variables: {
-          queries: queries.length > 0 ? queries : '',
-        },
       })
 
       if (errors) {

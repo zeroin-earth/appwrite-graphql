@@ -33,7 +33,7 @@ const documents = {
     "\n  query GetMfaRecoveryCodes {\n    accountGetMfaRecoveryCodes {\n      recoveryCodes\n    }\n  }\n": types.GetMfaRecoveryCodesDocument,
     "\n  query GetPrefs {\n    accountGetPrefs {\n      data\n    }\n  }\n": types.GetPrefsDocument,
     "\n  query GetSession($sessionId: String!) {\n    accountGetSession(sessionId: $sessionId) {\n      userId\n      expire\n      current\n    }\n  }\n": types.GetSessionDocument,
-    "\n  query ListIdentities($queries: [String]!) {\n    accountListIdentities(queries: $queries) {\n      total\n      identities {\n        ...Identity_Provider\n      }\n    }\n  }\n": types.ListIdentitiesDocument,
+    "\n  query ListIdentities {\n    accountListIdentities {\n      total\n      identities {\n        ...Identity_Provider\n      }\n    }\n  }\n": types.ListIdentitiesDocument,
     "\n  query ListMfaFactors {\n    accountListMfaFactors {\n      totp\n      phone\n      email\n    }\n  }\n": types.ListMfaFactorsDocument,
     "\n  query ListSessions {\n    accountListSessions {\n      sessions {\n        _id\n        _createdAt\n        osName\n        clientName\n      }\n    }\n  }\n": types.ListSessionsDocument,
     "\n  mutation CreateEmailPasswordSession($email: String!, $password: String!) {\n    accountCreateEmailPasswordSession(email: $email, password: $password) {\n      userId\n      expire\n      current\n    }\n  }\n": types.CreateEmailPasswordSessionDocument,
@@ -162,7 +162,7 @@ export function gql(source: "\n  query GetSession($sessionId: String!) {\n    ac
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  query ListIdentities($queries: [String]!) {\n    accountListIdentities(queries: $queries) {\n      total\n      identities {\n        ...Identity_Provider\n      }\n    }\n  }\n"): (typeof documents)["\n  query ListIdentities($queries: [String]!) {\n    accountListIdentities(queries: $queries) {\n      total\n      identities {\n        ...Identity_Provider\n      }\n    }\n  }\n"];
+export function gql(source: "\n  query ListIdentities {\n    accountListIdentities {\n      total\n      identities {\n        ...Identity_Provider\n      }\n    }\n  }\n"): (typeof documents)["\n  query ListIdentities {\n    accountListIdentities {\n      total\n      identities {\n        ...Identity_Provider\n      }\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

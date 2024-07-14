@@ -1,3 +1,4 @@
+// FIXME: This is a temporary solution to create a document.
 import { AppwriteException } from 'appwrite'
 
 import { gql } from '../__generated__'

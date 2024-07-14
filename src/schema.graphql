@@ -11,7 +11,7 @@ type Query {
   accountGetPrefs: Preferences
   accountGetMfaRecoveryCodes: MFARecoveryCodes
   accountGetSession(sessionId: String!): Session
-  accountListIdentities(queries: [String]!): IdentityList
+  accountListIdentities: IdentityList
   accountListLogs(queries: [String!]): LogsList
   accountListMfaFactors: MFAFactors
   accountListSessions: SessionList
