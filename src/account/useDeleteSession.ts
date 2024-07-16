@@ -33,7 +33,7 @@ export function useDeleteSession() {
         throw errors
       }
 
-      return data.accountDeleteSession
+      return data?.accountDeleteSession ?? { status: false }
     },
   })
 

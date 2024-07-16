@@ -37,7 +37,7 @@ export function useUpdateMfaChallenge() {
         throw errors
       }
 
-      return data.accountUpdateMfaChallenge
+      return data?.accountUpdateMfaChallenge ?? { status: false }
     },
   })
 

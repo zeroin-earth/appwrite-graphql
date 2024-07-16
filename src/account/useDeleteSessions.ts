@@ -30,7 +30,7 @@ export function useDeleteSessions() {
         throw errors
       }
 
-      return data.accountDeleteSessions
+      return data?.accountDeleteSessions ?? { status: false }
     },
   })
 

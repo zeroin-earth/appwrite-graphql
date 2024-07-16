@@ -35,7 +35,7 @@ export function useLogout() {
         throw errors
       }
 
-      return data?.accountDeleteSession
+      return data?.accountDeleteSession ?? { status: false }
     },
     onSuccess: async () => {
       queryClient.setQueryData(['appwrite'], null)

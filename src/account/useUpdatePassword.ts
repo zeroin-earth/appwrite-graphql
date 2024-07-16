@@ -34,7 +34,7 @@ export function useUpdatePassword() {
         throw errors
       }
 
-      return data.accountUpdatePassword
+      return data?.accountUpdatePassword
     },
   })
 

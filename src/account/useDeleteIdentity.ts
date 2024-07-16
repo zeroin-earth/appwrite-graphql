@@ -33,7 +33,7 @@ export function useDeleteIdentity() {
         throw errors
       }
 
-      return data.accountDeleteIdentity ?? { status: false }
+      return data?.accountDeleteIdentity ?? { status: false }
     },
   })
 
