@@ -18,7 +18,7 @@ export function useUpdatePhone() {
 
   const queryResult = useMutation<
     UpdatePhoneMutation['accountUpdatePhone'],
-    AppwriteException,
+    AppwriteException[],
     UpdatePhoneMutationVariables
   >({
     mutationFn: async ({ phone, password }) => {

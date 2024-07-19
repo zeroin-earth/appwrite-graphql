@@ -18,7 +18,7 @@ export function useDeleteIdentity() {
 
   const queryResult = useMutation<
     DeleteIdentityMutation['accountDeleteIdentity'],
-    AppwriteException,
+    AppwriteException[],
     DeleteIdentityMutationVariables
   >({
     mutationFn: async ({ identityId }) => {

@@ -30,7 +30,7 @@ export function useDocument<TDocument>({
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useQuery<Document<TDocument>, AppwriteException, Document<TDocument>>({
+  const queryResult = useQuery<Document<TDocument>, AppwriteException[], Document<TDocument>>({
     queryKey: ['appwrite', 'databases', databaseId, collectionId, 'documents', documentId],
     queryFn: async () => {
       const { data, errors } = await graphql.query({

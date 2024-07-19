@@ -21,7 +21,7 @@ export function useCreateMagicURLToken() {
 
   const queryResult = useMutation<
     CreateMagicUrlTokenMutation['accountCreateMagicURLToken'],
-    AppwriteException,
+    AppwriteException[],
     CreateMagicUrlTokenMutationVariables
   >({
     mutationFn: async ({ userId, email, url, phrase }) => {

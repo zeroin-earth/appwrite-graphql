@@ -20,7 +20,7 @@ export function useLogout() {
 
   const queryResult = useMutation<
     DeleteSessionMutation['accountDeleteSession'],
-    AppwriteException,
+    AppwriteException[],
     DeleteSessionMutationVariables
   >({
     mutationFn: async ({ sessionId }) => {

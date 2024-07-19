@@ -33,7 +33,7 @@ export function useUpdateDocument<TDocument>() {
 
   const mutationResult = useMutation<
     Document<TDocument>,
-    AppwriteException,
+    AppwriteException[],
     Omit<UpdateDocumentMutationVariables, 'permissions'> & {
       permissions?: InputMaybe<Array<Scalars['String']['input']>>
     }

@@ -1,4 +1,4 @@
-import { ID } from 'appwrite'
+import { AppwriteException, ID } from 'appwrite'
 
 import { gql } from '../__generated__'
 import {
@@ -35,7 +35,7 @@ export function useSignUp() {
 
   const signUp = useMutation<
     CreateAccountMutation['accountCreate'],
-    Error,
+    AppwriteException[],
     CreateAccountMutationVariables
   >({
     mutationFn: async ({ userId, email, password, name }) => {

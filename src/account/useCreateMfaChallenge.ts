@@ -19,7 +19,7 @@ export function useCreateMfaChallenge() {
 
   const queryResult = useMutation<
     CreateMfaChallengeMutation['accountCreateMfaChallenge'],
-    AppwriteException,
+    AppwriteException[],
     { factor: 'email' | 'phone' | 'totp' | 'recoveryCode' }
   >({
     mutationFn: async ({ factor }) => {

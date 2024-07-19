@@ -21,8 +21,8 @@ export function useListIdentities() {
 
   const queryResult = useQuery<
     ListIdentitiesQuery['accountListIdentities'],
-    AppwriteException,
-    ListIdentitiesQuery['accountListIdentities']
+    AppwriteException[],
+    void
   >({
     queryKey: ['appwrite', 'account', 'identities'],
     queryFn: async () => {

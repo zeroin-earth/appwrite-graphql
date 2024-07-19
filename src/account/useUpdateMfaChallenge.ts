@@ -21,7 +21,7 @@ export function useUpdateMfaChallenge() {
 
   const queryResult = useMutation<
     UpdateMfaChallengeMutation['accountUpdateMfaChallenge'],
-    AppwriteException,
+    AppwriteException[],
     UpdateMfaChallengeMutationVariables
   >({
     mutationFn: async ({ challengeId, otp }) => {

@@ -22,7 +22,7 @@ export function useResetPassword() {
 
   const queryResult = useMutation<
     UpdateRecoveryMutation['accountUpdateRecovery'],
-    AppwriteException,
+    AppwriteException[],
     UpdateRecoveryMutationVariables
   >({
     mutationFn: async ({ userId, secret, password }) => {

@@ -21,7 +21,7 @@ export function useCreatePhoneToken() {
 
   const queryResult = useMutation<
     CreatePhoneTokenMutation['accountCreatePhoneToken'],
-    AppwriteException,
+    AppwriteException[],
     CreatePhoneTokenMutationVariables
   >({
     mutationFn: async ({ userId, phone }) => {

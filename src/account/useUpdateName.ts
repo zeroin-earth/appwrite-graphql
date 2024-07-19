@@ -17,7 +17,7 @@ export function useUpdateName() {
 
   const queryResult = useMutation<
     UpdateNameMutation['accountUpdateName'],
-    AppwriteException,
+    AppwriteException[],
     UpdateNameMutationVariables
   >({
     mutationFn: async ({ name }) => {

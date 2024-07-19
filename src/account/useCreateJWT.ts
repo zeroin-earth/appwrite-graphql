@@ -19,7 +19,7 @@ export function useCreateJWT({ gcTime = 600000 }: { gcTime?: number } = {}) {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useMutation<CreateJwtMutation['accountCreateJWT'], AppwriteException>({
+  const queryResult = useMutation<CreateJwtMutation['accountCreateJWT'], AppwriteException[]>({
     gcTime,
     mutationKey: ['appwrite', 'jwt'],
     mutationFn: async () => {
@@ -47,7 +47,7 @@ export function useSuspenseCreateJWT({ gcTime = 600000 }: { gcTime?: number } = 
 
   const queryResult = useSuspenseQuery<
     CreateJwtMutation['accountCreateJWT'],
-    AppwriteException,
+    AppwriteException[],
     CreateJwtMutation['accountCreateJWT']
   >({
     gcTime,

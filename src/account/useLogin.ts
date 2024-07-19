@@ -29,7 +29,7 @@ export function useLogin() {
 
   const login = useMutation<
     CreateEmailPasswordSessionMutation['accountCreateEmailPasswordSession'],
-    AppwriteException,
+    AppwriteException[],
     CreateEmailPasswordSessionMutationVariables
   >({
     mutationFn: async ({ email, password }) => {
@@ -49,7 +49,7 @@ export function useLogin() {
     },
   })
 
-  const oAuthLogin = useMutation<void | URL, AppwriteException, OAuthLoginProps>({
+  const oAuthLogin = useMutation<void | URL, AppwriteException[], OAuthLoginProps>({
     mutationFn: async ({ provider, success, failure }) => {
       return account.createOAuth2Session(provider, success, failure)
     },

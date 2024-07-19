@@ -18,7 +18,7 @@ export function useUpdatePassword() {
 
   const queryResult = useMutation<
     UpdatePasswordMutation['accountUpdatePassword'],
-    AppwriteException,
+    AppwriteException[],
     UpdatePasswordMutationVariables
   >({
     mutationFn: async ({ password, oldPassword }) => {

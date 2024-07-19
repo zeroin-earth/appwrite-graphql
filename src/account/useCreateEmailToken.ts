@@ -21,7 +21,7 @@ export function useCreateEmailToken() {
 
   const queryResult = useMutation<
     CreateEmailTokenMutation['accountCreateEmailToken'],
-    AppwriteException,
+    AppwriteException[],
     CreateEmailTokenMutationVariables
   >({
     mutationFn: async ({ userId, email, phrase }) => {

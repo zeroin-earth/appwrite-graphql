@@ -21,7 +21,7 @@ export function usePasswordRecovery() {
 
   const queryResult = useMutation<
     CreateRecoveryMutation['accountCreateRecovery'],
-    AppwriteException,
+    AppwriteException[],
     CreateRecoveryMutationVariables
   >({
     mutationFn: async ({ email, url: resetUrl }) => {

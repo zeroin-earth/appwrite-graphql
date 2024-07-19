@@ -18,7 +18,7 @@ export function useCreateMfaRecoveryCodes() {
 
   const queryResult = useMutation<
     CreateMfaRecoveryCodesMutation['accountCreateMfaRecoveryCodes'],
-    AppwriteException
+    AppwriteException[]
   >({
     mutationFn: async () => {
       const { data, errors } = await graphql.mutation({

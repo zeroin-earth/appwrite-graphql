@@ -23,7 +23,7 @@ export function useUpdatePhoneSession() {
 
   const queryResult = useMutation<
     UpdatePhoneSessionMutation['accountUpdatePhoneSession'],
-    AppwriteException,
+    AppwriteException[],
     UpdatePhoneSessionMutationVariables
   >({
     mutationFn: async ({ userId, secret }) => {

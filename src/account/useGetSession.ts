@@ -20,8 +20,8 @@ export function useGetSession({ sessionId }: GetSessionQueryVariables) {
 
   const queryResult = useQuery<
     GetSessionQuery['accountGetSession'],
-    AppwriteException,
-    GetSessionQuery['accountGetSession']
+    AppwriteException[],
+    GetSessionQueryVariables
   >({
     queryKey: ['appwrite', 'account', 'session', sessionId],
     queryFn: async () => {

@@ -37,7 +37,7 @@ export function useCreateDocument() {
 
   const mutationResult = useMutation<
     CreateDocumentMutation['databasesCreateDocument'],
-    AppwriteException,
+    AppwriteException[],
     Omit<CreateDocumentMutationVariables, 'permissions'> & {
       permissions?: InputMaybe<Array<Scalars['String']['input']>>
     }

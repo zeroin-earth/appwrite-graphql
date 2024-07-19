@@ -18,7 +18,7 @@ export function useUpdateMfa() {
 
   const queryResult = useMutation<
     UpdateMfaMutation['accountUpdateMFA'],
-    AppwriteException,
+    AppwriteException[],
     UpdateMfaMutationVariables
   >({
     mutationFn: async ({ mfa }) => {

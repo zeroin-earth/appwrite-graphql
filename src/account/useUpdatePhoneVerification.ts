@@ -21,7 +21,7 @@ export function useUpdatePhoneVerification() {
 
   const queryResult = useMutation<
     UpdatePhoneVerificationMutation['accountUpdatePhoneVerification'],
-    AppwriteException,
+    AppwriteException[],
     UpdatePhoneVerificationMutationVariables
   >({
     mutationFn: async ({ userId, secret }) => {

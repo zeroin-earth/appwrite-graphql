@@ -22,7 +22,7 @@ export function useCreateMfaAuthenticator() {
 
   const queryResult = useMutation<
     CreateMfaAuthenticatorMutation['accountCreateMfaAuthenticator'],
-    AppwriteException,
+    AppwriteException[],
     CreateMfaAuthenticatorMutationVariables
   >({
     mutationFn: async ({ type = 'totp' }) => {

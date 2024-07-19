@@ -20,7 +20,7 @@ export function useUpdateSession() {
 
   const queryResult = useMutation<
     UpdateSessionMutation['accountUpdateSession'],
-    AppwriteException,
+    AppwriteException[],
     UpdateSessionMutationVariables
   >({
     mutationFn: async ({ sessionId }) => {

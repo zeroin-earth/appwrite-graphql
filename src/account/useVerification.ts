@@ -26,7 +26,7 @@ export function useVerification() {
 
   const queryResult = useMutation<
     UpdateVerificationMutation['accountUpdateVerification'],
-    AppwriteException,
+    AppwriteException[],
     UpdateVerificationMutationVariables
   >({
     mutationFn: async ({ userId, secret }) => {

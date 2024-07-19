@@ -24,7 +24,7 @@ export function useDeleteDocument() {
 
   const mutationResult = useMutation<
     DeleteDocumentMutation['databasesDeleteDocument'],
-    AppwriteException,
+    AppwriteException[],
     DeleteDocumentMutationVariables
   >({
     mutationFn: async ({ databaseId, collectionId, documentId }) => {

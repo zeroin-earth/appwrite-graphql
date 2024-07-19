@@ -23,7 +23,7 @@ export function useAccount<Preferences extends Models.Preferences>() {
 
   const queryResult = useQuery<
     AccountGetQuery['accountGet'],
-    AppwriteException,
+    AppwriteException[],
     AccountGetQuery['accountGet']
   >({
     queryKey: ['appwrite', 'account'],

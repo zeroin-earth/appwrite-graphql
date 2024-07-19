@@ -20,7 +20,7 @@ export function useCreateSession() {
 
   const queryResult = useMutation<
     CreateSessionMutation['accountCreateSession'],
-    AppwriteException,
+    AppwriteException[],
     CreateSessionMutationVariables
   >({
     mutationFn: async ({ userId, secret }) => {

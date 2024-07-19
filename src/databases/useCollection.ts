@@ -41,7 +41,7 @@ export function useCollection<TDocument>({
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const collection = useQuery<Collection<TDocument>, AppwriteException, Collection<TDocument>>({
+  const collection = useQuery<Collection<TDocument>, AppwriteException[], Collection<TDocument>>({
     queryKey: ['appwrite', 'databases', databaseId, collectionId, { queries }],
     queryFn: async () => {
       const { data, errors } = await graphql.query({
@@ -126,7 +126,7 @@ export function useSuspenseCollection<TDocument>({
 
   const collection = useSuspenseQuery<
     Collection<TDocument>,
-    AppwriteException,
+    AppwriteException[],
     Collection<TDocument>
   >({
     queryKey: ['appwrite', 'databases', databaseId, collectionId, { queries }],

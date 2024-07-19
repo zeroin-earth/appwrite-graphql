@@ -21,7 +21,7 @@ export function useUpdatePrefs() {
 
   const queryResult = useMutation<
     UpdatePrefsMutation['accountUpdatePrefs'],
-    AppwriteException,
+    AppwriteException[],
     { prefs: Record<string, string | number | boolean> }
   >({
     mutationFn: async ({ prefs }) => {

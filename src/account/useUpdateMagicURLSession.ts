@@ -23,7 +23,7 @@ export function useUpdateMagicURLSession() {
 
   const queryResult = useMutation<
     UpdateMagicUrlSessionMutation['accountUpdateMagicURLSession'],
-    AppwriteException,
+    AppwriteException[],
     UpdateMagicUrlSessionMutationVariables
   >({
     mutationFn: async ({ userId, secret }) => {

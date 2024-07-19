@@ -21,7 +21,7 @@ export function useDeleteMfaAuthenticator() {
 
   const queryResult = useMutation<
     DeleteMfaAuthenticatorMutation['accountDeleteMfaAuthenticator'],
-    AppwriteException,
+    AppwriteException[],
     DeleteMfaAuthenticatorMutationVariables
   >({
     mutationFn: async ({ type = 'totp', otp }) => {

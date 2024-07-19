@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { Models } from 'appwrite'
+import { AppwriteException, Models } from 'appwrite'
 
 import { gql } from '../__generated__'
 import { useAppwrite } from '../useAppwrite'
@@ -57,105 +57,16 @@ export function useFunction() {
   const [currentExecution, setCurrentExecution] = useState<string | null>(null)
   const [currentFunction, setCurrentFunction] = useState<string | null>(null)
 
-  const executeFunction = useMutation<Record<string, unknown>, Error, Props, unknown>({
-    mutationFn: async ({
-      functionId,
-      body = {},
-      async = false,
-      path = '/',
-      method = 'POST',
-      // headers = {},
-    }) => {
-      setCurrentFunction(functionId)
-
-      const { data } = await graphql.mutation({
-        query: createExecution,
-        variables: {
-          functionId,
-          body: JSON.stringify(body),
-          async,
-          path,
-          method,
-          // headers: JSON.stringify(headers),
-        },
-      })
-
-      let unsubscribe: (() => void) | null = null
-
-      const { _id, status, responseBody, errors } = data.functionsCreateExecution ?? {}
-
-      if (status === 'completed') {
-        return JSON.parse(responseBody ?? '{}')
-      }
-
-      if (status === 'failed' && errors) {
-        throw new Error(errors)
-      }
-
-      setCurrentExecution(_id ?? null)
-
-      const response = await new Promise((resolve, reject) => {
-        unsubscribe = graphql.client.subscribe<Models.Execution>(`executions.${_id}`, (event) => {
-          switch (event.payload.status) {
-            case 'completed':
-              setCurrentExecution(null)
-              resolve(JSON.parse(event.payload.responseBody))
-              break
-            case 'failed':
-              setCurrentExecution(null)
-              reject(event.payload.errors)
-              break
-          }
-          return 1
-        })
-      })
-
-      unsubscribe?.()
-
-      return response
-    },
-  })
-
-  const getExecution = useQuery({
-    queryKey: ['appwrite', 'functions', currentFunction, currentExecution],
-    queryFn: async () => {
-      if (!currentExecution || !currentFunction) {
-        return null
-      }
-      const { data } = await graphql.query({
-        query: getFunctionExecution,
-        variables: {
-          functionId: currentFunction,
-          executionId: currentExecution,
-        },
-      })
-
-      return data.functionsGetExecution ?? {}
-    },
-  })
-
-  return {
-    executeFunction,
-    currentExecution: getExecution,
-  }
-}
-
-export function useSuspenseFunction({
-  functionId,
-  body = {},
-  async = false,
-  path = '/',
-  method = 'POST',
-}: // headers = {},
-Props) {
-  const { graphql } = useAppwrite()
-  const [currentExecution, setCurrentExecution] = useState<string | null>(null)
-  const [currentFunction, setCurrentFunction] = useState<string | null>(null)
-
-  const executeFunction = useSuspenseQuery<Record<string, unknown>, Error, Record<string, unknown>>(
+  const executeFunction = useMutation<Record<string, unknown>, AppwriteException[], Props, unknown>(
     {
-      queryKey: ['appwrite', 'functions', functionId, path],
-      queryFn: async () => {
+      mutationFn: async ({
+        functionId,
+        body = {},
+        async = false,
+        path = '/',
+        method = 'POST',
+        // headers = {},
+      }) => {
         setCurrentFunction(functionId)
 
         const { data } = await graphql.mutation({
@@ -166,7 +77,7 @@ Props) {
             async,
             path,
             method,
-            // headers,
+            // headers: JSON.stringify(headers),
           },
         })
 
@@ -206,6 +117,99 @@ Props) {
       },
     },
   )
+
+  const getExecution = useQuery({
+    queryKey: ['appwrite', 'functions', currentFunction, currentExecution],
+    queryFn: async () => {
+      if (!currentExecution || !currentFunction) {
+        return null
+      }
+      const { data } = await graphql.query({
+        query: getFunctionExecution,
+        variables: {
+          functionId: currentFunction,
+          executionId: currentExecution,
+        },
+      })
+
+      return data.functionsGetExecution ?? {}
+    },
+  })
+
+  return {
+    executeFunction,
+    currentExecution: getExecution,
+  }
+}
+
+export function useSuspenseFunction({
+  functionId,
+  body = {},
+  async = false,
+  path = '/',
+  method = 'POST',
+}: // headers = {},
+Props) {
+  const { graphql } = useAppwrite()
+  const [currentExecution, setCurrentExecution] = useState<string | null>(null)
+  const [currentFunction, setCurrentFunction] = useState<string | null>(null)
+
+  const executeFunction = useSuspenseQuery<
+    Record<string, unknown>,
+    AppwriteException[],
+    Record<string, unknown>
+  >({
+    queryKey: ['appwrite', 'functions', functionId, path],
+    queryFn: async () => {
+      setCurrentFunction(functionId)
+
+      const { data } = await graphql.mutation({
+        query: createExecution,
+        variables: {
+          functionId,
+          body: JSON.stringify(body),
+          async,
+          path,
+          method,
+          // headers,
+        },
+      })
+
+      let unsubscribe: (() => void) | null = null
+
+      const { _id, status, responseBody, errors } = data.functionsCreateExecution ?? {}
+
+      if (status === 'completed') {
+        return JSON.parse(responseBody ?? '{}')
+      }
+
+      if (status === 'failed' && errors) {
+        throw new Error(errors)
+      }
+
+      setCurrentExecution(_id ?? null)
+
+      const response = await new Promise((resolve, reject) => {
+        unsubscribe = graphql.client.subscribe<Models.Execution>(`executions.${_id}`, (event) => {
+          switch (event.payload.status) {
+            case 'completed':
+              setCurrentExecution(null)
+              resolve(JSON.parse(event.payload.responseBody))
+              break
+            case 'failed':
+              setCurrentExecution(null)
+              reject(event.payload.errors)
+              break
+          }
+          return 1
+        })
+      })
+
+      unsubscribe?.()
+
+      return response
+    },
+  })
 
   const getExecution = useQuery({
     queryKey: ['appwrite', 'functions', currentFunction, currentExecution],

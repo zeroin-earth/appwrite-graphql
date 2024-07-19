@@ -19,7 +19,7 @@ export function useUpdateEmail() {
 
   const queryResult = useMutation<
     UpdateEmailMutation['accountUpdateEmail'],
-    AppwriteException,
+    AppwriteException[],
     UpdateEmailMutationVariables
   >({
     mutationFn: async ({ email, password }) => {
