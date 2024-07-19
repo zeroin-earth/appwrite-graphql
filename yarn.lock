@@ -2760,7 +2760,7 @@ __metadata:
     tsup: "npm:^8.1.0"
     typescript: "npm:^5.4.5"
   peerDependencies:
-    jotai: ^2.6.1
+    jotai: ^2.8.3
     react: ^18.2.0
   languageName: unknown
   linkType: soft

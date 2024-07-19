@@ -31,10 +31,12 @@ export function useCollection<TDocument>({
   databaseId,
   collectionId,
   queries,
+  subscribe = true,
 }: {
   databaseId: string
   collectionId: string
   queries: string[]
+  subscribe?: boolean
 }) {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
@@ -69,6 +71,10 @@ export function useCollection<TDocument>({
   })
 
   useEffect(() => {
+    if (!subscribe) {
+      return
+    }
+
     const unsubscribe = graphql.client.subscribe(
       `databases.${databaseId}.collections.${collectionId}.documents`,
       (response) => {
@@ -95,7 +101,7 @@ export function useCollection<TDocument>({
     )
 
     return unsubscribe
-  }, [databaseId, collectionId, graphql.client, queryClient, queries])
+  }, [databaseId, collectionId, graphql.client, queryClient, queries, subscribe])
 
   return {
     ...collection,
@@ -108,10 +114,12 @@ export function useSuspenseCollection<TDocument>({
   databaseId,
   collectionId,
   queries,
+  subscribe = true,
 }: {
   databaseId: string
   collectionId: string
   queries: string[]
+  subscribe?: boolean
 }) {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
@@ -150,6 +158,10 @@ export function useSuspenseCollection<TDocument>({
   })
 
   useEffect(() => {
+    if (!subscribe) {
+      return
+    }
+
     const unsubscribe = graphql.client.subscribe(
       `databases.${databaseId}.collections.${collectionId}.documents`,
       (response) => {
