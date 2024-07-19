@@ -16,7 +16,11 @@ const accountGetPrefs = gql(/* GraphQL */ `
 export function useGetPrefs() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<GetPrefsQuery['accountGetPrefs'], AppwriteException[], void>({
+  const queryResult = useQuery<
+    GetPrefsQuery['accountGetPrefs'],
+    AppwriteException[],
+    GetPrefsQuery['accountGetPrefs']
+  >({
     queryKey: ['appwrite', 'account', 'prefs'],
     queryFn: async () => {
       const { data, errors } = await graphql.query({

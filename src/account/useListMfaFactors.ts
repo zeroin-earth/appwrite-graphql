@@ -21,7 +21,7 @@ export function useListMfaFactors() {
   const queryResult = useQuery<
     ListMfaFactorsQuery['accountListMfaFactors'],
     AppwriteException[],
-    void
+    ListMfaFactorsQuery['accountListMfaFactors']
   >({
     queryKey: ['appwrite', 'account', 'mfa', 'factors'],
     queryFn: async () => {

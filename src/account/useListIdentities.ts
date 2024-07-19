@@ -22,7 +22,7 @@ export function useListIdentities() {
   const queryResult = useQuery<
     ListIdentitiesQuery['accountListIdentities'],
     AppwriteException[],
-    void
+    ListIdentitiesQuery['accountListIdentities']
   >({
     queryKey: ['appwrite', 'account', 'identities'],
     queryFn: async () => {

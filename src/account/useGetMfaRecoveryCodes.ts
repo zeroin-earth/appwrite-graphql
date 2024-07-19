@@ -19,7 +19,7 @@ export function useGetMfaRecoveryCodes() {
   const queryResult = useQuery<
     GetMfaRecoveryCodesQuery['accountGetMfaRecoveryCodes'],
     AppwriteException[],
-    void
+    GetMfaRecoveryCodesQuery['accountGetMfaRecoveryCodes']
   >({
     queryKey: ['appwrite', 'account', 'mfa', 'recovery-codes'],
     queryFn: async () => {

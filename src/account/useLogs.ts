@@ -43,7 +43,7 @@ export function useLogs({ queries }: ListLogsQueryVariables) {
   const queryResult = useQuery<
     ListLogsQuery['accountListLogs'],
     AppwriteException[],
-    ListLogsQueryVariables
+    ListLogsQuery['accountListLogs']
   >({
     queryKey: ['appwrite', 'account', 'logs', queries],
     queryFn: async () => {

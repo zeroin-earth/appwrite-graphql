@@ -21,22 +21,24 @@ const accountListSessions = gql(/* GraphQL */ `
 export function useListSessions() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<ListSessionsQuery['accountListSessions'], AppwriteException[], void>(
-    {
-      queryKey: ['appwrite', 'account', 'sessions'],
-      queryFn: async () => {
-        const { data, errors } = await graphql.query({
-          query: accountListSessions,
-        })
+  const queryResult = useQuery<
+    ListSessionsQuery['accountListSessions'],
+    AppwriteException[],
+    ListSessionsQuery['accountListSessions']
+  >({
+    queryKey: ['appwrite', 'account', 'sessions'],
+    queryFn: async () => {
+      const { data, errors } = await graphql.query({
+        query: accountListSessions,
+      })
 
-        if (errors) {
-          throw errors
-        }
+      if (errors) {
+        throw errors
+      }
 
-        return data.accountListSessions
-      },
+      return data.accountListSessions
     },
-  )
+  })
 
   return { ...queryResult }
 }
