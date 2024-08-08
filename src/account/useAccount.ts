@@ -22,7 +22,7 @@ export function useLazyAccount<Preferences extends Models.Preferences>() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const [query, queryResult] = useLazyQuery<
+  const queryResult = useLazyQuery<
     AccountGetQuery['accountGet'],
     AppwriteException[],
     AccountGetQuery['accountGet']
@@ -70,7 +70,7 @@ export function useLazyAccount<Preferences extends Models.Preferences>() {
     return unsubscribe
   }, [graphql.client, queryClient])
 
-  return [query, queryResult]
+  return queryResult
 }
 
 export function useAccount<Preferences extends Models.Preferences>() {

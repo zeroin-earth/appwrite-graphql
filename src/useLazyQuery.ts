@@ -20,5 +20,5 @@ export function useLazyQuery<TQueryFnData, TError, TData, TQueryKey extends Quer
     queryClient,
   )
 
-  return [query.refetch, query]
+  return { run: query.refetch, query }
 }
