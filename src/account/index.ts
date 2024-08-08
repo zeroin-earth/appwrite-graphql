@@ -1,4 +1,4 @@
-export { useAccount } from './useAccount'
+export { useAccount, useLazyAccount } from './useAccount'
 export { useCreateAnonymousSession } from './useCreateAnonymousSession'
 export { useCreateEmailToken } from './useCreateEmailToken'
 export { useCreateJWT, useSuspenseCreateJWT } from './useCreateJWT'
