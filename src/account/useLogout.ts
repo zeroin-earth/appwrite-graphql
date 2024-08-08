@@ -40,6 +40,8 @@ export function useLogout() {
     onSuccess: async () => {
       queryClient.setQueryData(['appwrite'], null)
       queryClient.setQueryData(['appwrite', 'account'], null)
+      queryClient.invalidateQueries({ queryKey: ['appwrite'] })
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
       queryClient.removeQueries({ queryKey: ['appwrite'] })
       queryClient.removeQueries({ queryKey: ['appwrite', 'account'] })
       queryClient.clear()
