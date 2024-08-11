@@ -7,9 +7,15 @@ import { print } from 'graphql'
 const client = new Client()
 
 const endpoint =
-  process.env.APPWRITE_ENDPOINT ?? process.env.NEXT_PUBLIC_APPWRITE_URL ?? 'http://localhost/v1'
+  process.env.APPWRITE_ENDPOINT ??
+  process.env.EXPO_PUBLIC_APPWRITE_URL ??
+  process.env.NEXT_PUBLIC_APPWRITE_URL ??
+  'http://localhost/v1'
 const projectId =
-  process.env.APPWRITE_PROJECT_ID ?? process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID ?? '[PROJECT_ID]'
+  process.env.APPWRITE_PROJECT_ID ??
+  process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID ??
+  process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID ??
+  '[PROJECT_ID]'
 
 client.setEndpoint(endpoint).setProject(projectId)
 
