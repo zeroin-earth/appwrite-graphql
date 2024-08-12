@@ -16,8 +16,9 @@
   "author": "Matt Suhay <matthew.suhay@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "tsup && tsup --config tsup.native.config.ts",
+    "build": "tsup && tsup --config tsup.native.config.ts && node post-build.js",
     "codegen": "graphql-codegen --config codegen.ts",
+    "prepublishOnly": "yarn tsc && yarn codegen && yarn build",
     "tsc": "tsc --noEmit",
     "test": "jest"
   },
