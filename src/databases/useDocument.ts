@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-import { AppwriteException } from 'appwrite'
+import { AppwriteException } from '../types'
 
 import { gql } from '../__generated__'
 import { useAppwrite } from '../useAppwrite'

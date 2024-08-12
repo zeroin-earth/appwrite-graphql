@@ -1,4 +1,4 @@
-import { AppwriteException, ID } from 'appwrite'
+import { AppwriteException, ID } from '../types'
 
 import { gql } from '../__generated__'
 import {

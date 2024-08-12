@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { AppwriteException, Models } from 'appwrite'
+import { AppwriteException, Models } from '../types'
 
 import { gql } from '../__generated__'
 import { useAppwrite } from '../useAppwrite'

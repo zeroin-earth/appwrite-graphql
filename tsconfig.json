@@ -4,6 +4,7 @@
     "module": "CommonJS",
     "sourceMap": true,
     "outDir": "./out",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "jsx": "react"
   }
 }

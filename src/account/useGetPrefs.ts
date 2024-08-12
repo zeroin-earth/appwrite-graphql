@@ -1,4 +1,4 @@
-import { AppwriteException } from 'appwrite'
+import { AppwriteException } from '../types'
 
 import { gql } from '../__generated__'
 import { GetPrefsQuery } from '../__generated__/graphql'

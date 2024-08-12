@@ -1,5 +1,5 @@
 // FIXME: This is a temporary solution to update a document.
-import { AppwriteException } from 'appwrite'
+import { AppwriteException } from '../types'
 
 import { gql } from '../__generated__'
 import { InputMaybe, Scalars, UpdateDocumentMutationVariables } from '../__generated__/graphql'

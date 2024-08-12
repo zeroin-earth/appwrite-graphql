@@ -1,5 +1,5 @@
 // FIXME: This is a temporary solution to update user preferences.
-import { AppwriteException } from 'appwrite'
+import { AppwriteException } from '../types'
 
 import { gql } from '../__generated__'
 import { UpdatePrefsMutation } from '../__generated__/graphql'

@@ -4,5 +4,6 @@
 # Include specific files
 !src/
 !dist/
+!react-native/
 !package.json
 !README.md

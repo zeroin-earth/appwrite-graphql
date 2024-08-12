@@ -19,10 +19,21 @@ You must provide the Appwrite URL and Project ID as environment variables. It do
 /* Endpoint - Pick one */
 APPWRITE_ENDPOINT=
 NEXT_PUBLIC_APPWRITE_URL=
+EXPO_PUBLIC_APPWRITE_URL=
 
 /* Project ID - Pick one */
 APPWRITE_PROJECT_ID=
 NEXT_PUBLIC_APPWRITE_PROJECT_ID
+EXPO_PUBLIC_APPWRITE_PROJECT_ID
+```
+
+### Provider
+If you need to provide a custom endpoint and project ID, and can't use one of the above environment variables, you may override the default variables using the `<AppwriteProvider>`:
+
+```jsx
+<AppwriteProvider endpoint="https://api.example.com/v1" projectId="jhkeri4889dfg7fg78f7g">
+  <App />
+</AppwriteProvider>
 ```
 
 ### Hooks
@@ -35,7 +46,7 @@ export function LogIn() {
   const { login, oAuthLogin } = useLogin();
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    login.mutate(data, {
+    await login.mutateAsync(data, {
       onSuccess: () => {
         router.push("/profile");
       },

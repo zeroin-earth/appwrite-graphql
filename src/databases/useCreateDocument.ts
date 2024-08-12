@@ -1,5 +1,5 @@
 // FIXME: This is a temporary solution to create a document.
-import { AppwriteException } from 'appwrite'
+import { AppwriteException } from '../types'
 
 import { gql } from '../__generated__'
 import { useAppwrite } from '../useAppwrite'

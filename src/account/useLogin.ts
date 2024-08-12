@@ -1,10 +1,9 @@
-import { AppwriteException, OAuthProvider } from 'appwrite'
-
 import { gql } from '../__generated__/gql'
 import {
   CreateEmailPasswordSessionMutation,
   CreateEmailPasswordSessionMutationVariables,
 } from '../__generated__/graphql'
+import { AppwriteException, OAuthProvider } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 

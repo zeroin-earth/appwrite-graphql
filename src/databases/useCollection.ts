@@ -1,13 +1,12 @@
 import { useEffect } from 'react'
 
-import { AppwriteException } from 'appwrite'
-
 import { gql } from '../__generated__'
+import { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 import { useQueryClient } from '../useQueryClient'
-import type { Collection, Document } from './types'
 import { useSuspenseQuery } from '../useSuspenseQuery'
+import type { Collection, Document } from './types'
 
 type DocumentOperation = 'create' | 'update' | 'delete'
 

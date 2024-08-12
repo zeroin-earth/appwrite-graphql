@@ -1,7 +1,6 @@
-import { AppwriteException } from 'appwrite'
-
 import { gql } from '../__generated__'
 import { CreateAnonymousSessionMutation } from '../__generated__/graphql'
+import { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 

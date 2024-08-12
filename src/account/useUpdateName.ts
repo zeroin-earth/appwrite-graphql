@@ -2,7 +2,7 @@ import { gql } from '../__generated__'
 import { UpdateNameMutation, UpdateNameMutationVariables, User } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
-import { AppwriteException } from 'appwrite'
+import { AppwriteException } from '../types'
 
 const accountUpdateName = gql(/* GraphQL */ `
   mutation UpdateName($name: String!) {

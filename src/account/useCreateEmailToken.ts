@@ -1,10 +1,9 @@
-import { AppwriteException } from 'appwrite'
-
 import { gql } from '../__generated__'
 import {
   CreateEmailTokenMutation,
   CreateEmailTokenMutationVariables,
 } from '../__generated__/graphql'
+import { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 
