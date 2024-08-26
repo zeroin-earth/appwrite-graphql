@@ -62,7 +62,7 @@ const documents = {
     "\n  query GetDocument($databaseId: String!, $collectionId: String!, $documentId: String!) {\n    databasesGetDocument(\n      databaseId: $databaseId\n      collectionId: $collectionId\n      documentId: $documentId\n    ) {\n      _id\n      data\n    }\n  }\n": types.GetDocumentDocument,
     "\n  mutation UpdateDocument(\n    $databaseId: String!\n    $collectionId: String!\n    $documentId: String!\n    $data: JSON\n    $permissions: [String!]\n  ) {\n    databasesUpdateDocument(\n      databaseId: $databaseId\n      collectionId: $collectionId\n      documentId: $documentId\n      data: $data\n      permissions: $permissions\n    ) {\n      _id\n    }\n  }\n": types.UpdateDocumentDocument,
     "\n  mutation CreateExecution(\n    $functionId: String!\n    $body: String\n    $async: Boolean\n    $path: String\n    $method: String # $headers: JSON\n  ) {\n    functionsCreateExecution(\n      functionId: $functionId\n      body: $body\n      async: $async\n      path: $path\n      method: $method # headers: $headers\n    ) {\n      _id\n      status\n      responseStatusCode\n      responseBody\n      errors\n      duration\n    }\n  }\n": types.CreateExecutionDocument,
-    "\n  query GetFunctionExecution($functionId: String!, $executionId: String!) {\n    functionsGetExecution(functionId: $functionId, executionId: $executionId) {\n      status\n      errors\n      duration\n    }\n  }\n": types.GetFunctionExecutionDocument,
+    "\n  query GetFunctionExecution($functionId: String!, $executionId: String!) {\n    functionsGetExecution(functionId: $functionId, executionId: $executionId) {\n      status\n      errors\n      duration\n      responseBody\n    }\n  }\n": types.GetFunctionExecutionDocument,
 };
 
 /**
@@ -278,7 +278,7 @@ export function gql(source: "\n  mutation CreateExecution(\n    $functionId: Str
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  query GetFunctionExecution($functionId: String!, $executionId: String!) {\n    functionsGetExecution(functionId: $functionId, executionId: $executionId) {\n      status\n      errors\n      duration\n    }\n  }\n"): (typeof documents)["\n  query GetFunctionExecution($functionId: String!, $executionId: String!) {\n    functionsGetExecution(functionId: $functionId, executionId: $executionId) {\n      status\n      errors\n      duration\n    }\n  }\n"];
+export function gql(source: "\n  query GetFunctionExecution($functionId: String!, $executionId: String!) {\n    functionsGetExecution(functionId: $functionId, executionId: $executionId) {\n      status\n      errors\n      duration\n      responseBody\n    }\n  }\n"): (typeof documents)["\n  query GetFunctionExecution($functionId: String!, $executionId: String!) {\n    functionsGetExecution(functionId: $functionId, executionId: $executionId) {\n      status\n      errors\n      duration\n      responseBody\n    }\n  }\n"];
 
 export function gql(source: string) {
   return (documents as any)[source] ?? {};

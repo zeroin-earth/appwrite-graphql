@@ -9,8 +9,8 @@ import { useMutation } from '../useMutation'
 
 type OAuthLoginProps = {
   provider: OAuthProvider
-  success: string
-  failure: string
+  success?: string
+  failure?: string
 }
 
 const accountCreateEmailPasswordSession = gql(/* GraphQL */ `
