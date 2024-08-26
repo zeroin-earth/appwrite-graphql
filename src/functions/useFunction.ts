@@ -1,13 +1,13 @@
 import { useState } from 'react'
 
-import { AppwriteException, Models } from '../types'
+import { AppwriteException } from '../types'
 
 import { gql } from '../__generated__'
-import { useAppwrite } from '../useAppwrite'
-import { useMutation } from '../useMutation'
-import { useSuspenseQuery } from '../useSuspenseQuery'
-import { useLazyQuery } from '../useLazyQuery'
 import { GetFunctionExecutionQuery } from '../__generated__/graphql'
+import { useAppwrite } from '../useAppwrite'
+import { useLazyQuery } from '../useLazyQuery'
+import { useMutation } from '../useMutation'
+import { useQuery } from '../useQuery'
 
 type Props = {
   functionId: string
@@ -15,7 +15,6 @@ type Props = {
   async?: boolean
   path?: string
   method?: string
-  waitForCompletion?: boolean
   // headers?: Record<string, any>
 }
 
@@ -51,6 +50,7 @@ const getFunctionExecution = gql(/* GraphQL */ `
       errors
       duration
       responseBody
+      requestPath
     }
   }
 `)
@@ -103,7 +103,6 @@ export function useFunction() {
         async = false,
         path = '/',
         method = 'POST',
-        waitForCompletion = false,
         // headers = {},
       }) => {
         setCurrentFunction(functionId)
@@ -120,47 +119,20 @@ export function useFunction() {
           },
         })
 
-        let unsubscribe: (() => void) | null = null
-
         const { _id, status, responseBody, errors } = data.functionsCreateExecution ?? {}
 
         if (status === 'failed') {
           throw new Error(errors)
         }
 
-        if (!waitForCompletion) {
-          return JSON.parse(responseBody ?? '{}')
-        }
-
         setCurrentExecution(_id ?? null)
 
-        const response = await new Promise<Record<string, unknown>>(async (resolve, reject) => {
-          unsubscribe = graphql.client.subscribe<Models.Execution>(`executions.${_id}`, (event) => {
-            switch (event.payload.status) {
-              case 'completed':
-                setCurrentExecution(null)
-                resolve(JSON.parse(event.payload.responseBody ?? '{}'))
-                break
-              case 'failed':
-                setCurrentExecution(null)
-                reject(event.payload.errors ?? 'Unknown error')
-                break
-            }
-            return 1
-          })
+        let parsedResponseBody = {}
+        try {
+          parsedResponseBody = JSON.parse(responseBody ?? '{}')
+        } catch (error) {}
 
-          // Check if the execution is already completed and we missed the event
-          const execution = await getExecution.run()
-          if (execution.status === 'success') {
-            resolve(execution.data)
-          } else if (execution.status === 'error') {
-            reject(execution.error)
-          }
-        })
-
-        unsubscribe?.()
-
-        return response
+        return parsedResponseBody
       },
     },
   )
@@ -177,15 +149,14 @@ export function useSuspenseFunction({
   async = false,
   path = '/',
   method = 'POST',
-  waitForCompletion = false,
 }: // headers = {},
 Props) {
   const { graphql } = useAppwrite()
   const [currentExecution, setCurrentExecution] = useState<string | null>(null)
   const [currentFunction, setCurrentFunction] = useState<string | null>(null)
-  const getExecution = useCurrentExecution({ currentExecution, currentFunction })
+  // const getExecution = useCurrentExecution({ currentExecution, currentFunction })
 
-  const executeFunction = useSuspenseQuery<
+  const executeFunction = useQuery<
     Record<string, unknown>,
     AppwriteException[],
     Record<string, unknown>
@@ -206,52 +177,25 @@ Props) {
         },
       })
 
-      let unsubscribe: (() => void) | null = null
-
       const { _id, status, responseBody, errors } = data.functionsCreateExecution ?? {}
 
       if (status === 'failed') {
         throw new Error(errors)
       }
 
-      if (!waitForCompletion) {
-        return JSON.parse(responseBody ?? '{}')
-      }
-
       setCurrentExecution(_id ?? null)
 
-      const response = await new Promise(async (resolve, reject) => {
-        unsubscribe = graphql.client.subscribe<Models.Execution>(`executions.${_id}`, (event) => {
-          switch (event.payload.status) {
-            case 'completed':
-              setCurrentExecution(null)
-              resolve(JSON.parse(event.payload.responseBody))
-              break
-            case 'failed':
-              setCurrentExecution(null)
-              reject(event.payload.errors)
-              break
-          }
-          return 1
-        })
+      let parsedResponseBody = {}
+      try {
+        parsedResponseBody = JSON.parse(responseBody ?? '{}')
+      } catch (error) {}
 
-        // Check if the execution is already completed and we missed the event
-        const execution = await getExecution.run()
-        if (execution.status === 'success') {
-          resolve(execution.data)
-        } else if (execution.status === 'error') {
-          reject(execution.error)
-        }
-      })
-
-      unsubscribe?.()
-
-      return response
+      return parsedResponseBody
     },
   })
 
   return {
     executeFunction,
-    currentExecution: getExecution,
+    // currentExecution: getExecution,
   }
 }
