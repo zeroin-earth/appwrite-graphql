@@ -40,7 +40,7 @@ export function usePasswordRecovery() {
       return data.accountCreateRecovery
     },
     onSuccess: async (_, variables) => {
-      localStorage.setItem('email', variables.email)
+      localStorage?.setItem('email', variables.email)
     },
   })
 
