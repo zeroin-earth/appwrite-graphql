@@ -40,7 +40,13 @@ export function usePasswordRecovery() {
       return data.accountCreateRecovery
     },
     onSuccess: async (_, variables) => {
-      localStorage?.setItem('email', variables.email)
+      try {
+        localStorage?.setItem('email', variables.email)
+      } catch (e) {
+        console.error(
+          'Could not save email to local storage. If you are using react-native, this is expected.',
+        )
+      }
     },
   })
 
