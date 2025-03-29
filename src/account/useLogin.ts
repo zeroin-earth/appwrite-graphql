@@ -48,7 +48,7 @@ export function useLogin() {
     },
   })
 
-  const oAuthLogin = useMutation<void | URL, AppwriteException[], OAuthLoginProps>({
+  const oAuthLogin = useMutation<void | string, AppwriteException[], OAuthLoginProps>({
     mutationFn: async ({ provider, success, failure }) => {
       return account.createOAuth2Session(provider, success, failure)
     },

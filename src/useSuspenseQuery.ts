@@ -1,8 +1,6 @@
 import {
-  DefinedInitialDataOptions,
   QueryKey,
-  UndefinedInitialDataOptions,
-  UseQueryOptions,
+  UseSuspenseQueryOptions,
   useSuspenseQuery as useSuspenseReactQuery,
 } from '@tanstack/react-query'
 
@@ -13,12 +11,7 @@ export function useSuspenseQuery<
   TError,
   TData,
   TQueryKey extends QueryKey = QueryKey,
->(
-  options:
-    | UndefinedInitialDataOptions<TQueryFnData, TError, TData, TQueryKey>
-    | DefinedInitialDataOptions<TQueryFnData, TError, TData, TQueryKey>
-    | UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>,
-) {
+>(options: UseSuspenseQueryOptions<TQueryFnData, TError, TData, TQueryKey>) {
   const queryClient = useQueryClient()
   return useSuspenseReactQuery<TQueryFnData, TError, TData, TQueryKey>(options, queryClient)
 }

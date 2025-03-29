@@ -1,4 +1,3 @@
-import { UseQueryOptions } from '@tanstack/react-query'
 import { AppwriteException } from '../types'
 
 import { gql } from '../__generated__'
