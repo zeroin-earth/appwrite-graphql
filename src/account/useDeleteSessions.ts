@@ -4,6 +4,7 @@ import { gql } from '../__generated__'
 import { DeleteSessionsMutation } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
+import { useQueryClient } from '../useQueryClient'
 
 const deleteSessions = gql(/* GraphQL */ `
   mutation DeleteSessions {
@@ -15,6 +16,7 @@ const deleteSessions = gql(/* GraphQL */ `
 
 export function useDeleteSessions() {
   const { graphql } = useAppwrite()
+  const queryClient = useQueryClient()
 
   const queryResult = useMutation<
     DeleteSessionsMutation['accountDeleteSessions'],
@@ -29,7 +31,11 @@ export function useDeleteSessions() {
         throw errors
       }
 
-      return data?.accountDeleteSessions ?? { status: false }
+      return data?.accountDeleteSessions ?? { status: true }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'sessions'] })
     },
   })
 

@@ -7,6 +7,7 @@ import {
 } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
+import { useQueryClient } from '../useQueryClient'
 
 const updateMagicURLSession = gql(/* GraphQL */ `
   mutation UpdateMagicURLSession($userId: String!, $secret: String!) {
@@ -20,6 +21,7 @@ const updateMagicURLSession = gql(/* GraphQL */ `
 
 export function useUpdateMagicURLSession() {
   const { graphql } = useAppwrite()
+  const queryClient = useQueryClient()
 
   const queryResult = useMutation<
     UpdateMagicUrlSessionMutation['accountUpdateMagicURLSession'],
@@ -40,6 +42,10 @@ export function useUpdateMagicURLSession() {
       }
 
       return data.accountUpdateMagicURLSession
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'sessions'] })
     },
   })
 

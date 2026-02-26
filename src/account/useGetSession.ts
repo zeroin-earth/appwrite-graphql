@@ -23,7 +23,7 @@ export function useGetSession({ sessionId }: GetSessionQueryVariables) {
     AppwriteException[],
     GetSessionQueryVariables
   >({
-    queryKey: ['appwrite', 'account', 'session', sessionId],
+    queryKey: ['appwrite', 'account', 'sessions', sessionId],
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: getSession,

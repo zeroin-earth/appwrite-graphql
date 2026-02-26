@@ -4,6 +4,7 @@ import { gql } from '../__generated__'
 import { DeleteIdentityMutation, DeleteIdentityMutationVariables } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
+import { useQueryClient } from '../useQueryClient'
 
 const accountDeleteIdentity = gql(/* GraphQL */ `
   mutation DeleteIdentity($identityId: String!) {
@@ -15,6 +16,7 @@ const accountDeleteIdentity = gql(/* GraphQL */ `
 
 export function useDeleteIdentity() {
   const { graphql } = useAppwrite()
+  const queryClient = useQueryClient()
 
   const queryResult = useMutation<
     DeleteIdentityMutation['accountDeleteIdentity'],
@@ -33,7 +35,10 @@ export function useDeleteIdentity() {
         throw errors
       }
 
-      return data?.accountDeleteIdentity ?? { status: false }
+      return data?.accountDeleteIdentity ?? { status: true }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
     },
   })
 

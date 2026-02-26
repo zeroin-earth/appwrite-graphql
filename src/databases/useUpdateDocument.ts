@@ -1,18 +1,22 @@
-// FIXME: This is a temporary solution to update a document.
 import { AppwriteException } from '../types'
 
 import { gql } from '../__generated__'
-import { InputMaybe, Scalars, UpdateDocumentMutationVariables } from '../__generated__/graphql'
+import {
+  CreateDocumentMutation,
+  InputMaybe,
+  Scalars,
+  UpdateDocumentMutationVariables,
+} from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
-import type { Document } from './types'
+import { useQueryClient } from '../useQueryClient'
 
 const updateDocument = gql(/* GraphQL */ `
   mutation UpdateDocument(
     $databaseId: String!
     $collectionId: String!
     $documentId: String!
-    $data: JSON
+    $data: Json
     $permissions: [String!]
   ) {
     databasesUpdateDocument(
@@ -28,44 +32,37 @@ const updateDocument = gql(/* GraphQL */ `
 `)
 
 export function useUpdateDocument<TDocument>() {
-  // const { graphql } = useAppwrite()
-  const { databases } = useAppwrite()
+  const { graphql } = useAppwrite()
+  const queryClient = useQueryClient()
 
   const mutationResult = useMutation<
-    Document<TDocument>,
+    CreateDocumentMutation['databasesCreateDocument'],
     AppwriteException[],
     Omit<UpdateDocumentMutationVariables, 'permissions'> & {
       permissions?: InputMaybe<Array<Scalars['String']['input']>>
     }
   >({
     mutationFn: async ({ databaseId, collectionId, documentId, data, permissions }) => {
-      const { data: mutationData, errors } = await databases.updateDocument(
-        databaseId,
-        collectionId,
-        documentId,
-        data,
-        permissions,
-      )
-      // Doesn't work for some reason
-      // const { data: mutationData, errors } = await graphql.mutation({
-      //   query: updateDocument,
-      //   variables: {
-      //     databaseId,
-      //     collectionId,
-      //     documentId,
-      //     data: JSON.stringify(data),
-      //     permissions,
-      //   },
-      // })
+      const { data: mutationData, errors } = await graphql.mutation({
+        query: updateDocument,
+        variables: {
+          databaseId,
+          collectionId,
+          documentId,
+          data: JSON.stringify(data),
+          permissions,
+        },
+      })
 
       if (errors) {
         throw errors
       }
-
-      // const document = mutationData.databasesUpdateDocument
-      const document = mutationData
-
-      return document
+      return mutationData.databasesUpdateDocument
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['appwrite', 'databases', variables.databaseId, variables.collectionId],
+      })
     },
   })
 

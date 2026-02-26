@@ -4,6 +4,7 @@ import { gql } from '../__generated__'
 import { UpdatePasswordMutation, UpdatePasswordMutationVariables } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
+import { useQueryClient } from '../useQueryClient'
 
 const updatePassword = gql(/* GraphQL */ `
   mutation UpdatePassword($password: String!, $oldPassword: String!) {
@@ -15,6 +16,7 @@ const updatePassword = gql(/* GraphQL */ `
 
 export function useUpdatePassword() {
   const { graphql } = useAppwrite()
+  const queryClient = useQueryClient()
 
   const queryResult = useMutation<
     UpdatePasswordMutation['accountUpdatePassword'],
@@ -35,6 +37,9 @@ export function useUpdatePassword() {
       }
 
       return data?.accountUpdatePassword
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
     },
   })
 

@@ -1,10 +1,19 @@
 export {
   AppwriteException,
-  Models,
+  Client,
+  Account,
+  Avatars,
+  Databases,
+  Functions,
+  Graphql,
+  Locale,
+  Messaging,
+  Storage,
+  TablesDB,
+  Teams,
+  Realtime,
   OAuthProvider,
   ID,
-  Account,
-  Client,
-  Databases,
-  Graphql,
 } from 'appwrite'
+
+export type { Models, Browser, CreditCard, Flag, ImageGravity, ImageFormat } from 'appwrite'

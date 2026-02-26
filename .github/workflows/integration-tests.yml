@@ -1,0 +1,57 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Type check
+        run: bun run typecheck
+
+      - name: Build
+        run: bun run build
+
+      - name: Start Appwrite
+        run: docker compose -f tests/docker-compose.yml --env-file tests/.env up -d
+
+      - name: Wait for Appwrite
+        run: |
+          echo "Waiting for Appwrite to be ready..."
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost/v1/locale > /dev/null 2>&1; then
+              echo "Appwrite is ready!"
+              exit 0
+            fi
+            echo "Attempt $i/60 - waiting 5s..."
+            sleep 5
+          done
+          echo "Appwrite failed to start"
+          docker compose -f tests/docker-compose.yml logs appwrite
+          exit 1
+
+      - name: Setup test environment
+        run: bun run test:setup
+
+      - name: Run integration tests
+        run: bun test --timeout 30000
+
+      - name: Teardown
+        if: always()
+        run: docker compose -f tests/docker-compose.yml --env-file tests/.env down -v

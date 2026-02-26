@@ -4,6 +4,7 @@ import { gql } from '../__generated__'
 import { UpdateEmailMutation, UpdateEmailMutationVariables } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
+import { useQueryClient } from '../useQueryClient'
 
 const accountUpdateEmail = gql(/* GraphQL */ `
   mutation UpdateEmail($email: String!, $password: String!) {
@@ -16,6 +17,7 @@ const accountUpdateEmail = gql(/* GraphQL */ `
 
 export function useUpdateEmail() {
   const { graphql } = useAppwrite()
+  const queryClient = useQueryClient()
 
   const queryResult = useMutation<
     UpdateEmailMutation['accountUpdateEmail'],
@@ -36,6 +38,9 @@ export function useUpdateEmail() {
       }
 
       return data.accountUpdateEmail
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
     },
   })
 

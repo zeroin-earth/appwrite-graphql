@@ -1,0 +1,8 @@
+export { useAvatarBrowser } from './useAvatarBrowser'
+export { useAvatarCreditCard } from './useAvatarCreditCard'
+export { useAvatarFavicon } from './useAvatarFavicon'
+export { useAvatarFlag } from './useAvatarFlag'
+export { useAvatarImage } from './useAvatarImage'
+export { useAvatarInitials } from './useAvatarInitials'
+export { useAvatarQR } from './useAvatarQR'
+export { useAvatarScreenshot } from './useAvatarScreenshot'

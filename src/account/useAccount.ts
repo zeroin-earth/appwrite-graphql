@@ -1,10 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 import { castDraft, produce } from 'immer'
 
 import { gql } from '../__generated__/gql'
 import { AccountGetQuery } from '../__generated__/graphql'
-import type { AppwriteException, Models } from '../types'
+import type { AppwriteException, Models, Realtime } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useLazyQuery } from '../useLazyQuery'
 import { useQuery } from '../useQuery'
@@ -19,8 +19,9 @@ export const getAccount = gql(/* GraphQL */ `
 `)
 
 export function useLazyAccount() {
-  const { graphql } = useAppwrite()
+  const { graphql, realtime } = useAppwrite()
   const queryClient = useQueryClient()
+  const [isActive, setIsActive] = useState(false)
 
   const queryResult = useLazyQuery<
     AccountGetQuery['accountGet'],
@@ -29,15 +30,25 @@ export function useLazyAccount() {
   >(getAccountQueryOptions(graphql))
 
   useEffect(() => {
-    const unsubscribe = subscription(graphql, queryClient)
-    return unsubscribe
-  }, [graphql.client, queryClient])
+    if (!isActive) return
 
-  return queryResult
+    const subscriptionPromise = subscribe(realtime, queryClient)
+    return () => {
+      subscriptionPromise.then((sub) => sub.close())
+    }
+  }, [isActive, realtime, queryClient])
+
+  return {
+    ...queryResult,
+    run: () => {
+      setIsActive(true)
+      return queryResult.run()
+    },
+  }
 }
 
 export function useAccount() {
-  const { graphql } = useAppwrite()
+  const { graphql, realtime } = useAppwrite()
   const queryClient = useQueryClient()
 
   const queryResult = useQuery<
@@ -47,9 +58,11 @@ export function useAccount() {
   >(getAccountQueryOptions(graphql))
 
   useEffect(() => {
-    const unsubscribe = subscription(graphql, queryClient)
-    return unsubscribe
-  }, [graphql.client, queryClient])
+    const subscriptionPromise = subscribe(realtime, queryClient)
+    return () => {
+      subscriptionPromise.then((sub) => sub.close())
+    }
+  }, [realtime, queryClient])
 
   return queryResult
 }
@@ -72,18 +85,18 @@ function getAccountQueryOptions(graphql: ReturnType<typeof useAppwrite>['graphql
   }
 }
 
-function subscription<Preferences extends Models.Preferences>(
-  graphql: ReturnType<typeof useAppwrite>['graphql'],
+function subscribe<Preferences extends Models.Preferences>(
+  realtime: Realtime,
   queryClient: ReturnType<typeof useQueryClient>,
 ) {
-  return graphql.client.subscribe<Models.User<Preferences>>('account', (response) => {
+  return realtime.subscribe<Models.User<Preferences>>('account', (response) => {
     const isUpdatingPreferences = response.events.some((event) => event.endsWith('prefs'))
 
     if (isUpdatingPreferences) {
       queryClient.setQueryData<Models.User<Preferences>>(['appwrite', 'account'], (account) =>
         produce(account, (draft) => {
           if (draft) {
-            draft.prefs = castDraft(response.payload.prefs)
+            draft.prefs = castDraft(response.payload.prefs) as typeof draft.prefs
           }
         }),
       )

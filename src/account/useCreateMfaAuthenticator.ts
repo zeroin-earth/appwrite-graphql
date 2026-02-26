@@ -6,6 +6,7 @@ import {
 import { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
+import { useQueryClient } from '../useQueryClient'
 
 const accountCreateMfaAuthenticator = gql(/* GraphQL */ `
   mutation CreateMfaAuthenticator($type: String!) {
@@ -18,6 +19,7 @@ const accountCreateMfaAuthenticator = gql(/* GraphQL */ `
 
 export function useCreateMfaAuthenticator() {
   const { graphql } = useAppwrite()
+  const queryClient = useQueryClient()
 
   const queryResult = useMutation<
     CreateMfaAuthenticatorMutation['accountCreateMfaAuthenticator'],
@@ -37,6 +39,9 @@ export function useCreateMfaAuthenticator() {
       }
 
       return data.accountCreateMfaAuthenticator
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'mfa', 'factors'] })
     },
   })
 

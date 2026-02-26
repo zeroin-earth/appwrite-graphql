@@ -1,9 +1,10 @@
-// FIXME: This is a temporary solution to create a document.
+import { Models } from 'appwrite'
 import { AppwriteException } from '../types'
 
 import { gql } from '../__generated__'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
+import { useQueryClient } from '../useQueryClient'
 import {
   CreateDocumentMutation,
   CreateDocumentMutationVariables,
@@ -16,7 +17,7 @@ const createDocument = gql(/* GraphQL */ `
     $databaseId: String!
     $collectionId: String!
     $documentId: String!
-    $data: JSON!
+    $data: Json!
     $permissions: [String!]
   ) {
     databasesCreateDocument(
@@ -32,8 +33,8 @@ const createDocument = gql(/* GraphQL */ `
 `)
 
 export function useCreateDocument() {
-  // const { graphql } = useAppwrite()
-  const { databases } = useAppwrite()
+  const { graphql } = useAppwrite()
+  const queryClient = useQueryClient()
 
   const mutationResult = useMutation<
     CreateDocumentMutation['databasesCreateDocument'],
@@ -43,31 +44,26 @@ export function useCreateDocument() {
     }
   >({
     mutationFn: async ({ databaseId, collectionId, documentId, data, permissions }) => {
-      const { data: mutationData, errors } = await databases.createDocument(
-        databaseId,
-        collectionId,
-        documentId,
-        data,
-        permissions,
-      )
-      // Doesn't work for some reason
-      // const { data: mutationData, errors } = await graphql.mutation({
-      //   query: createDocument,
-      //   variables: {
-      //     databaseId,
-      //     collectionId,
-      //     documentId,
-      //     data: JSON.stringify(data),
-      //     permissions,
-      //   },
-      // })
+      const { data: mutationData, errors } = await graphql.mutation({
+        query: createDocument,
+        variables: {
+          databaseId,
+          collectionId,
+          documentId,
+          data: JSON.stringify(data),
+          permissions,
+        },
+      })
 
       if (errors) {
         throw errors
       }
-
-      return mutationData
-      // return mutationData.databasesCreateDocument
+      return mutationData.databasesCreateDocument
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['appwrite', 'databases', variables.databaseId, variables.collectionId],
+      })
     },
   })
 

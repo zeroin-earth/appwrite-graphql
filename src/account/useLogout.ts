@@ -35,18 +35,12 @@ export function useLogout() {
         throw errors
       }
 
-      return data?.accountDeleteSession ?? { status: false }
+      return data?.accountDeleteSession ?? { status: true }
     },
     onSuccess: async () => {
-      queryClient.setQueryData(['appwrite'], null)
-      queryClient.setQueryData(['appwrite', 'account'], null)
-      queryClient.invalidateQueries({ queryKey: ['appwrite'] })
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
-      queryClient.removeQueries({ queryKey: ['appwrite'] })
-      queryClient.removeQueries({ queryKey: ['appwrite', 'account'] })
       queryClient.clear()
     },
   })
 
-  return { ...queryResult, mutate: queryResult.mutate }
+  return { ...queryResult }
 }

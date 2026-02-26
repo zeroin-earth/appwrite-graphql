@@ -10,9 +10,15 @@ export { useQueryClient } from './useQueryClient'
 export { AppwriteProvider } from './AppwriteProvider'
 
 export * from './account'
+export * from './avatars'
 export * from './databases'
+export * from './locale'
+export * from './storage'
+export * from './teams'
 
 export * from './functions/useFunction'
+export * from './functions/useGetExecution'
+export * from './functions/useListExecutions'
 
 export { getFragmentData } from './__generated__'
 

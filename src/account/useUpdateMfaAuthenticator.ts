@@ -7,6 +7,7 @@ import {
 } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
+import { useQueryClient } from '../useQueryClient'
 
 const updateMFAAuthenticator = gql(/* GraphQL */ `
   mutation UpdateMfaAuthenticator($type: String!, $otp: String!) {
@@ -18,6 +19,7 @@ const updateMFAAuthenticator = gql(/* GraphQL */ `
 
 export function useUpdateMfaAuthenticator() {
   const { graphql } = useAppwrite()
+  const queryClient = useQueryClient()
 
   const queryResult = useMutation<
     UpdateMfaAuthenticatorMutation['accountUpdateMfaAuthenticator'],
@@ -38,6 +40,10 @@ export function useUpdateMfaAuthenticator() {
       }
 
       return data.accountUpdateMfaAuthenticator
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'mfa', 'factors'] })
     },
   })
 
