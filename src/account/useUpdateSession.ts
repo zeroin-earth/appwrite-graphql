@@ -4,6 +4,7 @@ import { gql } from '../__generated__'
 import { UpdateSessionMutation, UpdateSessionMutationVariables } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
+import { useQueryClient } from '../useQueryClient'
 
 const updateSession = gql(/* GraphQL */ `
   mutation UpdateSession($sessionId: String!) {
@@ -17,6 +18,7 @@ const updateSession = gql(/* GraphQL */ `
 
 export function useUpdateSession() {
   const { graphql } = useAppwrite()
+  const queryClient = useQueryClient()
 
   const queryResult = useMutation<
     UpdateSessionMutation['accountUpdateSession'],
@@ -36,6 +38,9 @@ export function useUpdateSession() {
       }
 
       return data.accountUpdateSession
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'sessions'] })
     },
   })
 

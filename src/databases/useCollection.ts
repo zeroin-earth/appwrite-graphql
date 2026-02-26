@@ -37,8 +37,9 @@ export function useCollection<TDocument>({
   queries: string[]
   subscribe?: boolean
 }) {
-  const { graphql } = useAppwrite()
+  const { graphql, realtime } = useAppwrite()
   const queryClient = useQueryClient()
+  const queriesKey = JSON.stringify(queries)
 
   const collection = useQuery<Collection<TDocument>, AppwriteException[], Collection<TDocument>>({
     queryKey: ['appwrite', 'databases', databaseId, collectionId, { queries }],
@@ -74,7 +75,7 @@ export function useCollection<TDocument>({
       return
     }
 
-    const unsubscribe = graphql.client.subscribe(
+    const subscriptionPromise = realtime.subscribe(
       `databases.${databaseId}.collections.${collectionId}.documents`,
       (response) => {
         const [, operation] = response.events[0].match(/\.(\w+)$/) as RegExpMatchArray
@@ -99,8 +100,10 @@ export function useCollection<TDocument>({
       },
     )
 
-    return unsubscribe
-  }, [databaseId, collectionId, graphql.client, queryClient, queries, subscribe])
+    return () => {
+      subscriptionPromise.then((sub) => sub.close())
+    }
+  }, [databaseId, collectionId, realtime, queryClient, queriesKey, subscribe])
 
   return {
     ...collection,
@@ -120,8 +123,9 @@ export function useSuspenseCollection<TDocument>({
   queries: string[]
   subscribe?: boolean
 }) {
-  const { graphql } = useAppwrite()
+  const { graphql, realtime } = useAppwrite()
   const queryClient = useQueryClient()
+  const queriesKey = JSON.stringify(queries)
 
   const collection = useSuspenseQuery<
     Collection<TDocument>,
@@ -161,7 +165,7 @@ export function useSuspenseCollection<TDocument>({
       return
     }
 
-    const unsubscribe = graphql.client.subscribe(
+    const subscriptionPromise = realtime.subscribe(
       `databases.${databaseId}.collections.${collectionId}.documents`,
       (response) => {
         const [, operation] = response.events[0].match(/\.(\w+)$/) as RegExpMatchArray
@@ -186,8 +190,10 @@ export function useSuspenseCollection<TDocument>({
       },
     )
 
-    return unsubscribe
-  }, [databaseId, collectionId, graphql.client, queryClient, queries])
+    return () => {
+      subscriptionPromise.then((sub) => sub.close())
+    }
+  }, [databaseId, collectionId, realtime, queryClient, queriesKey])
 
   return {
     ...collection,

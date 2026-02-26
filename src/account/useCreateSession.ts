@@ -4,6 +4,7 @@ import { gql } from '../__generated__'
 import { CreateSessionMutation, CreateSessionMutationVariables } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
+import { useQueryClient } from '../useQueryClient'
 
 const createSession = gql(/* GraphQL */ `
   mutation CreateSession($userId: String!, $secret: String!) {
@@ -17,6 +18,7 @@ const createSession = gql(/* GraphQL */ `
 
 export function useCreateSession() {
   const { graphql } = useAppwrite()
+  const queryClient = useQueryClient()
 
   const queryResult = useMutation<
     CreateSessionMutation['accountCreateSession'],
@@ -37,6 +39,10 @@ export function useCreateSession() {
       }
 
       return data.accountCreateSession
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'sessions'] })
     },
   })
 

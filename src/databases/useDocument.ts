@@ -27,7 +27,7 @@ export function useDocument<TDocument>({
   collectionId,
   documentId,
 }: GetDocumentQueryVariables) {
-  const { graphql } = useAppwrite()
+  const { graphql, realtime } = useAppwrite()
   const queryClient = useQueryClient()
 
   const queryResult = useQuery<Document<TDocument>, AppwriteException[], Document<TDocument>>({
@@ -58,7 +58,7 @@ export function useDocument<TDocument>({
   })
 
   useEffect(() => {
-    const unsubscribe = graphql.client.subscribe(
+    const subscriptionPromise = realtime.subscribe(
       `databases.${databaseId}.collections.${collectionId}.documents.${documentId}`,
       (response) => {
         queryClient.setQueryData(
@@ -68,8 +68,10 @@ export function useDocument<TDocument>({
       },
     )
 
-    return unsubscribe
-  }, [databaseId, collectionId, documentId, graphql.client, queryClient])
+    return () => {
+      subscriptionPromise.then((sub) => sub.close())
+    }
+  }, [databaseId, collectionId, documentId, realtime, queryClient])
 
   return { ...queryResult }
 }

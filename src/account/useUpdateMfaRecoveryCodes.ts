@@ -4,6 +4,7 @@ import { gql } from '../__generated__'
 import { UpdateMfaRecoveryCodesMutation } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
+import { useQueryClient } from '../useQueryClient'
 
 const accountUpdateMfaRecoveryCodes = gql(/* GraphQL */ `
   mutation UpdateMfaRecoveryCodes {
@@ -15,6 +16,7 @@ const accountUpdateMfaRecoveryCodes = gql(/* GraphQL */ `
 
 export function useUpdateMfaRecoveryCodes() {
   const { graphql } = useAppwrite()
+  const queryClient = useQueryClient()
 
   const queryResult = useMutation<
     UpdateMfaRecoveryCodesMutation['accountUpdateMfaRecoveryCodes'],
@@ -30,6 +32,9 @@ export function useUpdateMfaRecoveryCodes() {
       }
 
       return data.accountUpdateMfaRecoveryCodes
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'mfa', 'recovery-codes'] })
     },
   })
 

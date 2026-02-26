@@ -5,9 +5,10 @@ import { gql } from '../__generated__'
 import { UpdatePrefsMutation } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
+import { useQueryClient } from '../useQueryClient'
 
 const accountUpdatePrefs = gql(/* GraphQL */ `
-  mutation UpdatePrefs($prefs: JSON!) {
+  mutation UpdatePrefs($prefs: Json!) {
     accountUpdatePrefs(prefs: $prefs) {
       prefs {
         data
@@ -18,6 +19,7 @@ const accountUpdatePrefs = gql(/* GraphQL */ `
 
 export function useUpdatePrefs() {
   const { account } = useAppwrite()
+  const queryClient = useQueryClient()
 
   const queryResult = useMutation<
     UpdatePrefsMutation['accountUpdatePrefs'],
@@ -25,8 +27,11 @@ export function useUpdatePrefs() {
     { prefs: Record<string, string | number | boolean> }
   >({
     mutationFn: async ({ prefs }) => {
-      const newPrefs = await account.updatePrefs(prefs)
+      const newPrefs = await account.updatePrefs({ prefs })
       return newPrefs
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
     },
   })
 

@@ -129,3 +129,6 @@ react-native
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+copilot-instructions.md
+tests/.test-config.json

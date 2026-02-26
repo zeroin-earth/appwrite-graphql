@@ -6,6 +6,7 @@ import {
 import { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
+import { useQueryClient } from '../useQueryClient'
 
 const updatePhoneSession = gql(/* GraphQL */ `
   mutation UpdatePhoneSession($userId: String!, $secret: String!) {
@@ -19,6 +20,7 @@ const updatePhoneSession = gql(/* GraphQL */ `
 
 export function useUpdatePhoneSession() {
   const { graphql } = useAppwrite()
+  const queryClient = useQueryClient()
 
   const queryResult = useMutation<
     UpdatePhoneSessionMutation['accountUpdatePhoneSession'],
@@ -39,6 +41,10 @@ export function useUpdatePhoneSession() {
       }
 
       return data.accountUpdatePhoneSession
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'sessions'] })
     },
   })
 

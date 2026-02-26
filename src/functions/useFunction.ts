@@ -24,7 +24,7 @@ const createExecution = gql(/* GraphQL */ `
     $body: String
     $async: Boolean
     $path: String
-    $method: String # $headers: JSON
+    $method: String # $headers: Json
   ) {
     functionsCreateExecution(
       functionId: $functionId
@@ -152,9 +152,6 @@ export function useSuspenseFunction({
 }: // headers = {},
 Props) {
   const { graphql } = useAppwrite()
-  const [currentExecution, setCurrentExecution] = useState<string | null>(null)
-  const [currentFunction, setCurrentFunction] = useState<string | null>(null)
-  // const getExecution = useCurrentExecution({ currentExecution, currentFunction })
 
   const executeFunction = useQuery<
     Record<string, unknown>,
@@ -163,8 +160,6 @@ Props) {
   >({
     queryKey: ['appwrite', 'functions', functionId, path],
     queryFn: async () => {
-      setCurrentFunction(functionId)
-
       const { data } = await graphql.mutation({
         query: createExecution,
         variables: {
@@ -177,13 +172,11 @@ Props) {
         },
       })
 
-      const { _id, status, responseBody, errors } = data.functionsCreateExecution ?? {}
+      const { status, responseBody, errors } = data.functionsCreateExecution ?? {}
 
       if (status === 'failed') {
         throw new Error(errors)
       }
-
-      setCurrentExecution(_id ?? null)
 
       let parsedResponseBody = {}
       try {
@@ -196,6 +189,5 @@ Props) {
 
   return {
     executeFunction,
-    // currentExecution: getExecution,
   }
 }

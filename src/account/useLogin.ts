@@ -6,6 +6,7 @@ import {
 import { AppwriteException, OAuthProvider } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
+import { useQueryClient } from '../useQueryClient'
 
 type OAuthLoginProps = {
   provider: OAuthProvider
@@ -25,6 +26,7 @@ const accountCreateEmailPasswordSession = gql(/* GraphQL */ `
 
 export function useLogin() {
   const { account, graphql } = useAppwrite()
+  const queryClient = useQueryClient()
 
   const login = useMutation<
     CreateEmailPasswordSessionMutation['accountCreateEmailPasswordSession'],
@@ -46,11 +48,15 @@ export function useLogin() {
 
       return data.accountCreateEmailPasswordSession
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'sessions'] })
+    },
   })
 
   const oAuthLogin = useMutation<void | string, AppwriteException[], OAuthLoginProps>({
     mutationFn: async ({ provider, success, failure }) => {
-      return account.createOAuth2Session(provider, success, failure)
+      return account.createOAuth2Session({ provider, success, failure })
     },
   })
 

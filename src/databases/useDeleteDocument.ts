@@ -40,20 +40,9 @@ export function useDeleteDocument() {
         throw errors
       }
 
-      return mutationData.databasesDeleteDocument
+      return mutationData?.databasesDeleteDocument ?? { status: true }
     },
     onSuccess: async (_, variables) => {
-      queryClient.setQueryData(
-        [
-          'appwrite',
-          'databases',
-          variables.databaseId,
-          variables.collectionId,
-          'documents',
-          variables.documentId,
-        ],
-        null,
-      )
       queryClient.removeQueries({
         queryKey: [
           'appwrite',
@@ -63,6 +52,9 @@ export function useDeleteDocument() {
           'documents',
           variables.documentId,
         ],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['appwrite', 'databases', variables.databaseId, variables.collectionId],
       })
     },
   })

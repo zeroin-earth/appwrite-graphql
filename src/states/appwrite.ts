@@ -2,13 +2,16 @@ import { ResultOf, TypedDocumentNode } from '@graphql-typed-document-node/core'
 import { print } from 'graphql'
 import { atom } from 'jotai'
 
-import { Account, Client, Databases, Graphql } from '../types'
+import { Account, Avatars, Client, Databases, Graphql, Realtime, Storage } from '../types'
 
 type Variables = Record<string, unknown>
 
 type AtomProps = {
   account: Account | null
+  avatars: Avatars | null
   databases: Databases | null
+  realtime: Realtime
+  storage: Storage | null
   graphql: {
     client: Graphql['client']
     query: <T, V extends Variables = Variables>({
@@ -53,8 +56,7 @@ const graphqlObject = (graphqlAppwrite: Graphql) => ({
     variables?: V
   }) => {
     const { data, errors } = (await graphqlAppwrite.query({
-      query: print(query),
-      variables,
+      query: { query: print(query), variables },
     })) as { data: ResultOf<typeof query>; errors: unknown[] }
     return { data, errors }
   },
@@ -66,8 +68,7 @@ const graphqlObject = (graphqlAppwrite: Graphql) => ({
     variables?: V
   }) => {
     const { data, errors } = (await graphqlAppwrite.mutation({
-      query: print(query),
-      variables,
+      query: { query: print(query), variables },
     })) as { data: ResultOf<typeof query>; errors: unknown[] }
     return { data, errors }
   },
@@ -75,7 +76,10 @@ const graphqlObject = (graphqlAppwrite: Graphql) => ({
 
 const appwriteModelsAtom = atom<AtomProps>({
   account: new Account(defaultAppwriteClient),
+  avatars: new Avatars(defaultAppwriteClient),
   databases: new Databases(defaultAppwriteClient),
+  realtime: new Realtime(defaultAppwriteClient),
+  storage: new Storage(defaultAppwriteClient),
   graphql: graphqlObject(new Graphql(defaultAppwriteClient)),
 })
 
@@ -86,12 +90,18 @@ export const appwriteAtom = atom(
     client.setEndpoint(endpoint).setProject(projectId)
 
     const account = new Account(client)
+    const avatars = new Avatars(client)
     const databases = new Databases(client)
+    const realtime = new Realtime(client)
+    const storage = new Storage(client)
     const graphqlAppwrite = new Graphql(client)
 
     set(appwriteModelsAtom, {
       account,
+      avatars,
       databases,
+      realtime,
+      storage,
       graphql: graphqlObject(graphqlAppwrite),
     })
   },

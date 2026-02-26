@@ -4,6 +4,7 @@ import { gql } from '../__generated__'
 import { UpdateMfaMutation, UpdateMfaMutationVariables } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
+import { useQueryClient } from '../useQueryClient'
 
 const accountUpdateMFA = gql(/* GraphQL */ `
   mutation UpdateMFA($mfa: Boolean!) {
@@ -15,6 +16,7 @@ const accountUpdateMFA = gql(/* GraphQL */ `
 
 export function useUpdateMfa() {
   const { graphql } = useAppwrite()
+  const queryClient = useQueryClient()
 
   const queryResult = useMutation<
     UpdateMfaMutation['accountUpdateMFA'],
@@ -34,6 +36,10 @@ export function useUpdateMfa() {
       }
 
       return data.accountUpdateMFA
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'mfa'] })
     },
   })
 
