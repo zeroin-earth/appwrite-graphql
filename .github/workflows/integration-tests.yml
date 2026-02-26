@@ -29,9 +29,7 @@ jobs:
         run: bun run build
 
       - name: Start Appwrite
-        run: docker compose -f tests/docker-compose.yml up -d
-        env:
-          _APP_OPENSSL_KEY_V1: your-secret-key-min-128-bits!!
+        run: docker compose -f tests/docker-compose.yml --env-file tests/.env up -d
 
       - name: Wait for Appwrite
         run: |
@@ -56,4 +54,4 @@ jobs:
 
       - name: Teardown
         if: always()
-        run: docker compose -f tests/docker-compose.yml down -v
+        run: docker compose -f tests/docker-compose.yml --env-file tests/.env down -v
