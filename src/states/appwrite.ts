@@ -2,14 +2,13 @@ import { ResultOf, TypedDocumentNode } from '@graphql-typed-document-node/core'
 import { print } from 'graphql'
 import { atom } from 'jotai'
 
-import { Account, Avatars, Client, Databases, Graphql, Realtime, Storage } from '../types'
+import { Account, Avatars, Client, Graphql, Realtime, Storage } from '../types'
 
 type Variables = Record<string, unknown>
 
 type AtomProps = {
   account: Account | null
   avatars: Avatars | null
-  databases: Databases | null
   realtime: Realtime
   storage: Storage | null
   graphql: {
@@ -77,7 +76,6 @@ const graphqlObject = (graphqlAppwrite: Graphql) => ({
 const appwriteModelsAtom = atom<AtomProps>({
   account: new Account(defaultAppwriteClient),
   avatars: new Avatars(defaultAppwriteClient),
-  databases: new Databases(defaultAppwriteClient),
   realtime: new Realtime(defaultAppwriteClient),
   storage: new Storage(defaultAppwriteClient),
   graphql: graphqlObject(new Graphql(defaultAppwriteClient)),
@@ -91,7 +89,6 @@ export const appwriteAtom = atom(
 
     const account = new Account(client)
     const avatars = new Avatars(client)
-    const databases = new Databases(client)
     const realtime = new Realtime(client)
     const storage = new Storage(client)
     const graphqlAppwrite = new Graphql(client)
@@ -99,7 +96,6 @@ export const appwriteAtom = atom(
     set(appwriteModelsAtom, {
       account,
       avatars,
-      databases,
       realtime,
       storage,
       graphql: graphqlObject(graphqlAppwrite),
