@@ -1,7 +1,6 @@
-import { describe, test, expect } from 'bun:test'
 import { renderHook, waitFor } from '@testing-library/react'
+import { describe, expect, test } from 'bun:test'
 
-import { createWrapper } from '../setup/wrapper'
 import {
   useLocale,
   useLocaleCodes,
@@ -12,6 +11,7 @@ import {
   useLocaleCurrencies,
   useLocaleLanguages,
 } from '../../src'
+import { createWrapper } from '../setup/wrapper'
 
 /*
  * Locale hooks are read-only and don't require authentication.

@@ -1,23 +1,23 @@
-import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
+import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 
-import { createWrapper, createQueryClient } from '../setup/wrapper'
 import {
-  createTestUser,
-  deleteTestUser,
-  createTestDocument,
-  deleteTestDocument,
-  getTestConfig,
-} from '../setup/helpers'
-import {
-  useLogin,
   useCreateDocument,
+  useDeleteDocument,
   useDocument,
+  useLogin,
   useUpdateDocument,
   useUpsertDocument,
-  useDeleteDocument,
 } from '../../src'
 import { ID } from '../../src/types'
+import {
+  createTestDocument,
+  createTestUser,
+  deleteTestDocument,
+  deleteTestUser,
+  getTestConfig,
+} from '../setup/helpers'
+import { createWrapper } from '../setup/wrapper'
 
 interface TestDocumentData {
   name: string
@@ -216,10 +216,9 @@ describe('Document CRUD hooks', () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
 
-      const { result: updateResult } = renderHook(
-        () => useUpdateDocument<TestDocumentData>(),
-        { wrapper },
-      )
+      const { result: updateResult } = renderHook(() => useUpdateDocument<TestDocumentData>(), {
+        wrapper,
+      })
 
       await act(async () => {
         updateResult.current.mutateAsync({

@@ -1,17 +1,17 @@
-import { describe, test, expect, beforeAll, afterAll, beforeEach } from 'bun:test'
-import { renderHook, act, waitFor } from '@testing-library/react'
 import { QueryClient } from '@tanstack/react-query'
-import { createWrapper, createQueryClient } from '../setup/wrapper'
-import { createTestUser, deleteTestUser } from '../setup/helpers'
+import { act, renderHook, waitFor } from '@testing-library/react'
+import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test'
 import {
-  useLogin,
-  useListSessions,
-  useGetSession,
   useCreateJWT,
-  useUpdateSession,
   useDeleteSession,
   useDeleteSessions,
+  useGetSession,
+  useListSessions,
+  useLogin,
+  useUpdateSession,
 } from '../../src'
+import { createTestUser, deleteTestUser } from '../setup/helpers'
+import { createQueryClient, createWrapper } from '../setup/wrapper'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -106,10 +106,7 @@ describe('useGetSession', () => {
   test('gets the current session', async () => {
     await loginUser(email, password, wrapper)
 
-    const { result } = renderHook(
-      () => useGetSession({ sessionId: 'current' }),
-      { wrapper },
-    )
+    const { result } = renderHook(() => useGetSession({ sessionId: 'current' }), { wrapper })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 

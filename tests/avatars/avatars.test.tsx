@@ -1,7 +1,6 @@
-import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
-import { renderHook, waitFor } from '@testing-library/react'
+import { renderHook } from '@testing-library/react'
+import { describe, expect, test } from 'bun:test'
 
-import { createWrapper } from '../setup/wrapper'
 import {
   useAvatarBrowser,
   useAvatarCreditCard,
@@ -13,6 +12,7 @@ import {
   useAvatarScreenshot,
 } from '../../src'
 import { Browser, CreditCard, Flag } from '../../src/types'
+import { createWrapper } from '../setup/wrapper'
 
 /*
  * Avatar hooks return URL strings (synchronous, no API call).
@@ -23,10 +23,7 @@ describe('Avatar hooks', () => {
   describe('useAvatarBrowser', () => {
     test('returns a URL for a browser avatar', () => {
       const wrapper = createWrapper()
-      const { result } = renderHook(
-        () => useAvatarBrowser({ code: 'ff' as Browser }),
-        { wrapper },
-      )
+      const { result } = renderHook(() => useAvatarBrowser({ code: 'ff' as Browser }), { wrapper })
 
       expect(result.current).toBeDefined()
       expect(typeof result.current).toBe('string')
@@ -48,10 +45,9 @@ describe('Avatar hooks', () => {
   describe('useAvatarCreditCard', () => {
     test('returns a URL for a credit card avatar', () => {
       const wrapper = createWrapper()
-      const { result } = renderHook(
-        () => useAvatarCreditCard({ code: 'visa' as CreditCard }),
-        { wrapper },
-      )
+      const { result } = renderHook(() => useAvatarCreditCard({ code: 'visa' as CreditCard }), {
+        wrapper,
+      })
 
       expect(result.current).toBeDefined()
       expect(typeof result.current).toBe('string')
@@ -62,10 +58,9 @@ describe('Avatar hooks', () => {
   describe('useAvatarFavicon', () => {
     test('returns a URL for a favicon', () => {
       const wrapper = createWrapper()
-      const { result } = renderHook(
-        () => useAvatarFavicon({ url: 'https://example.com' }),
-        { wrapper },
-      )
+      const { result } = renderHook(() => useAvatarFavicon({ url: 'https://example.com' }), {
+        wrapper,
+      })
 
       expect(result.current).toBeDefined()
       expect(typeof result.current).toBe('string')
@@ -77,10 +72,7 @@ describe('Avatar hooks', () => {
   describe('useAvatarFlag', () => {
     test('returns a URL for a country flag', () => {
       const wrapper = createWrapper()
-      const { result } = renderHook(
-        () => useAvatarFlag({ code: 'us' as Flag }),
-        { wrapper },
-      )
+      const { result } = renderHook(() => useAvatarFlag({ code: 'us' as Flag }), { wrapper })
 
       expect(result.current).toBeDefined()
       expect(typeof result.current).toBe('string')
@@ -106,10 +98,7 @@ describe('Avatar hooks', () => {
   describe('useAvatarInitials', () => {
     test('returns a URL for initials avatar', () => {
       const wrapper = createWrapper()
-      const { result } = renderHook(
-        () => useAvatarInitials({ name: 'John Doe' }),
-        { wrapper },
-      )
+      const { result } = renderHook(() => useAvatarInitials({ name: 'John Doe' }), { wrapper })
 
       expect(result.current).toBeDefined()
       expect(typeof result.current).toBe('string')
@@ -118,10 +107,7 @@ describe('Avatar hooks', () => {
 
     test('works with no parameters (defaults)', () => {
       const wrapper = createWrapper()
-      const { result } = renderHook(
-        () => useAvatarInitials(),
-        { wrapper },
-      )
+      const { result } = renderHook(() => useAvatarInitials(), { wrapper })
 
       expect(result.current).toBeDefined()
       expect(typeof result.current).toBe('string')
@@ -132,10 +118,7 @@ describe('Avatar hooks', () => {
   describe('useAvatarQR', () => {
     test('returns a URL for a QR code', () => {
       const wrapper = createWrapper()
-      const { result } = renderHook(
-        () => useAvatarQR({ text: 'hello world' }),
-        { wrapper },
-      )
+      const { result } = renderHook(() => useAvatarQR({ text: 'hello world' }), { wrapper })
 
       expect(result.current).toBeDefined()
       expect(typeof result.current).toBe('string')
@@ -147,10 +130,9 @@ describe('Avatar hooks', () => {
   describe('useAvatarScreenshot', () => {
     test('returns a URL for a website screenshot', () => {
       const wrapper = createWrapper()
-      const { result } = renderHook(
-        () => useAvatarScreenshot({ url: 'https://example.com' }),
-        { wrapper },
-      )
+      const { result } = renderHook(() => useAvatarScreenshot({ url: 'https://example.com' }), {
+        wrapper,
+      })
 
       expect(result.current).toBeDefined()
       expect(typeof result.current).toBe('string')

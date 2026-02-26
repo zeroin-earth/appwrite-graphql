@@ -1,18 +1,9 @@
-import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
+import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 
-import { createWrapper } from '../setup/wrapper'
+import { useDecrementAttribute, useIncrementAttribute, useLogin } from '../../src'
 import { createTestUser, deleteTestUser, getTestConfig } from '../setup/helpers'
-import {
-  useLogin,
-  useCreateDocuments,
-  useUpdateDocuments,
-  useDeleteDocuments,
-  useUpsertDocuments,
-  useIncrementAttribute,
-  useDecrementAttribute,
-} from '../../src'
-import { ID } from '../../src/types'
+import { createWrapper } from '../setup/wrapper'
 
 type Wrapper = ReturnType<typeof createWrapper>
 
@@ -122,9 +113,7 @@ describe('Database batch & atomic hooks', () => {
         })
       })
 
-      await waitFor(() =>
-        expect(result.current.isSuccess || result.current.isError).toBe(true),
-      )
+      await waitFor(() => expect(result.current.isSuccess || result.current.isError).toBe(true))
 
       await deleteTestDocument(doc.$id)
     })

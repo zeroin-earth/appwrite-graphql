@@ -1,15 +1,9 @@
-import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
+import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 
+import { useAccount, useCreateEmailVerification, useDeleteAccount, useLogin } from '../../src'
+import { createTestUser, deleteTestUser } from '../setup/helpers'
 import { createWrapper } from '../setup/wrapper'
-import { createTestUser, deleteTestUser, getTestConfig } from '../setup/helpers'
-import {
-  useLogin,
-  useDeleteAccount,
-  useCreateEmailVerification,
-  useAccount,
-} from '../../src'
-import { ID } from '../../src/types'
 
 type Wrapper = ReturnType<typeof createWrapper>
 
@@ -77,9 +71,7 @@ describe('New account hooks', () => {
       })
 
       // This may fail if SMTP is not configured, which is expected in test environments
-      await waitFor(() =>
-        expect(result.current.isSuccess || result.current.isError).toBe(true),
-      )
+      await waitFor(() => expect(result.current.isSuccess || result.current.isError).toBe(true))
 
       // If it succeeded, it should return a token
       if (result.current.isSuccess) {

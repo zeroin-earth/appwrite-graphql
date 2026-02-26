@@ -1,13 +1,9 @@
-import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
+import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 
-import { createWrapper, createQueryClient } from '../setup/wrapper'
+import { useListIdentities, useLogin, useLogs } from '../../src'
 import { createTestUser, deleteTestUser } from '../setup/helpers'
-import {
-  useLogin,
-  useListIdentities,
-  useLogs,
-} from '../../src'
+import { createQueryClient, createWrapper } from '../setup/wrapper'
 
 async function loginUser(
   email: string,

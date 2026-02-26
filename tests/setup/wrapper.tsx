@@ -1,9 +1,9 @@
-import * as React from 'react'
-const { Suspense } = React
 import { QueryClient } from '@tanstack/react-query'
 import { Provider } from 'jotai'
+import * as React from 'react'
 import { AppwriteProvider } from '../../src/AppwriteProvider'
 import { getTestConfig } from './helpers'
+const { Suspense } = React
 
 export function createWrapper(opts?: { queryClient?: QueryClient; suspense?: boolean }) {
   const config = getTestConfig()

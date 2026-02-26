@@ -1,14 +1,8 @@
-import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { renderHook } from '@testing-library/react'
+import { describe, expect, test } from 'bun:test'
 
+import { useFileDownload, useFilePreview, useFileView } from '../../src'
 import { createWrapper } from '../setup/wrapper'
-import { createTestUser, deleteTestUser, getTestConfig } from '../setup/helpers'
-import {
-  useLogin,
-  useFileDownload,
-  useFilePreview,
-  useFileView,
-} from '../../src'
 
 /*
  * Storage content hooks (useFileDownload, useFilePreview, useFileView)

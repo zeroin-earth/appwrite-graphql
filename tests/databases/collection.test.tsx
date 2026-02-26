@@ -1,16 +1,15 @@
-import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
+import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 
-import { createWrapper, createQueryClient } from '../setup/wrapper'
+import { useCollection, useLogin, useSuspenseCollection } from '../../src'
 import {
-  createTestUser,
-  deleteTestUser,
   createTestDocument,
+  createTestUser,
   deleteTestDocument,
+  deleteTestUser,
   getTestConfig,
 } from '../setup/helpers'
-import { useLogin, useCollection, useSuspenseCollection } from '../../src'
-import { ID } from '../../src/types'
+import { createWrapper } from '../setup/wrapper'
 
 interface TestDocumentData {
   name: string
@@ -113,7 +112,7 @@ describe('Collection query hooks', () => {
       expect(matchedDocuments.length).toBe(testDocuments.length)
 
       for (const doc of matchedDocuments) {
-        expect(((doc as any)._id)).toBeDefined()
+        expect((doc as any)._id).toBeDefined()
         expect(typeof doc.name).toBe('string')
       }
     })
@@ -138,7 +137,7 @@ describe('Collection query hooks', () => {
       const alice = documents.find((doc) => doc.name === 'Alice')
 
       expect(alice).toBeDefined()
-      expect(((alice as any)?._id)).toBeDefined()
+      expect((alice as any)?._id).toBeDefined()
       expect(alice?.name).toBe('Alice')
       expect(alice?.age).toBe(25)
       expect(alice?.active).toBe(true)

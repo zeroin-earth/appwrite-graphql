@@ -1,24 +1,22 @@
-import { describe, test, expect, beforeAll, afterAll, beforeEach } from 'bun:test'
-import { renderHook, act, waitFor } from '@testing-library/react'
-import { QueryClient } from '@tanstack/react-query'
-import { Client as ServerClient, Teams as ServerTeams, ID as ServerID } from 'node-appwrite'
+import { act, renderHook, waitFor } from '@testing-library/react'
+import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
+import { Client as ServerClient, ID as ServerID, Teams as ServerTeams } from 'node-appwrite'
 
-import { createWrapper, createQueryClient } from '../setup/wrapper'
-import { createTestUser, deleteTestUser, getTestConfig } from '../setup/helpers'
 import {
-  useLogin,
-  useTeams,
-  useTeam,
-  useTeamPrefs,
-  useCreateTeam,
-  useUpdateTeamName,
-  useUpdateTeamPrefs,
-  useDeleteTeam,
-  useTeamMemberships,
   useCreateMembership,
-  useDeleteMembership,
+  useCreateTeam,
+  useDeleteTeam,
+  useLogin,
+  useTeam,
+  useTeamMemberships,
+  useTeamPrefs,
+  useTeams,
+  useUpdateTeamName,
+  useUpdateTeamPrefs
 } from '../../src'
 import { ID } from '../../src/types'
+import { createTestUser, deleteTestUser, getTestConfig } from '../setup/helpers'
+import { createWrapper } from '../setup/wrapper'
 
 type Wrapper = ReturnType<typeof createWrapper>
 
@@ -118,12 +116,12 @@ describe('Teams hooks', () => {
     beforeAll(async () => {
       // Create a team via server SDK for reading
       const teams = createServerTeams()
-      const team = await teams.create(ServerID.unique(), 'Get Team Test')
+      const team = await teams.create({ teamId: ServerID.unique(), name: 'Get Team Test' })
       teamId = team.$id
       createdTeamIds.push(teamId)
 
       // Add user as member
-      await teams.createMembership(teamId, [], userEmail)
+      await teams.createMembership({ teamId, roles: [], email: userEmail })
     })
 
     test('reads a team by ID', async () => {
@@ -173,12 +171,12 @@ describe('Teams hooks', () => {
     beforeAll(async () => {
       // Create a team via server SDK
       const teams = createServerTeams()
-      const team = await teams.create(ServerID.unique(), 'Prefs Team Test')
+      const team = await teams.create({ teamId: ServerID.unique(), name: 'Prefs Team Test' })
       teamId = team.$id
       createdTeamIds.push(teamId)
 
       // Add user as owner so they can update prefs
-      await teams.createMembership(teamId, ['owner'], userEmail)
+      await teams.createMembership({ teamId, roles: ['owner'], email: userEmail })
     })
 
     test('updates and reads team preferences', async () => {
@@ -231,22 +229,19 @@ describe('Teams hooks', () => {
 
     beforeAll(async () => {
       const teams = createServerTeams()
-      const team = await teams.create(ServerID.unique(), 'Membership Team Test')
+      const team = await teams.create({ teamId: ServerID.unique(), name: 'Membership Team Test' })
       teamId = team.$id
       createdTeamIds.push(teamId)
 
       // Add the test user as owner
-      await teams.createMembership(teamId, ['owner'], userEmail)
+      await teams.createMembership({ teamId, roles: ['owner'], email: userEmail })
     })
 
     test('lists team memberships', async () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
 
-      const { result } = renderHook(
-        () => useTeamMemberships({ teamId }),
-        { wrapper },
-      )
+      const { result } = renderHook(() => useTeamMemberships({ teamId }), { wrapper })
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
@@ -275,9 +270,7 @@ describe('Teams hooks', () => {
 
       // SMTP is not configured in test env, so this may fail with SMTP error
       // We verify the hook executes and returns either success or a known SMTP error
-      await waitFor(() =>
-        expect(result.current.isSuccess || result.current.isError).toBe(true),
-      )
+      await waitFor(() => expect(result.current.isSuccess || result.current.isError).toBe(true))
 
       if (result.current.isSuccess) {
         expect(result.current.data).toBeDefined()

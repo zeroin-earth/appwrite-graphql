@@ -1,22 +1,20 @@
-import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
-import { renderHook, act, waitFor } from '@testing-library/react'
 import { QueryClient } from '@tanstack/react-query'
+import { act, renderHook, waitFor } from '@testing-library/react'
+import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { TOTP } from 'otpauth'
-import { createWrapper, createQueryClient } from '../setup/wrapper'
-import { createTestUser, deleteTestUser } from '../setup/helpers'
 import {
+  useCreateMfaAuthenticator,
+  useCreateMfaRecoveryCodes,
+  useDeleteMfaAuthenticator,
+  useGetMfaRecoveryCodes,
+  useListMfaFactors,
   useLogin,
   useUpdateMfa,
-  useCreateMfaAuthenticator,
   useUpdateMfaAuthenticator,
-  useDeleteMfaAuthenticator,
-  useListMfaFactors,
-  useCreateMfaRecoveryCodes,
-  useGetMfaRecoveryCodes,
   useUpdateMfaRecoveryCodes,
-  useCreateMfaChallenge,
-  useUpdateMfaChallenge,
 } from '../../src'
+import { createTestUser, deleteTestUser } from '../setup/helpers'
+import { createQueryClient, createWrapper } from '../setup/wrapper'
 
 // ---------------------------------------------------------------------------
 // Helpers

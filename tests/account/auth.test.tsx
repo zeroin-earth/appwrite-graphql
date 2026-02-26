@@ -1,19 +1,19 @@
-import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
+import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 
-import { createWrapper, createQueryClient } from '../setup/wrapper'
-import { createTestUser, deleteTestUser } from '../setup/helpers'
 import {
-  useSignUp,
+  fragments,
+  getFragmentData,
+  useAccount,
+  useCreateAnonymousSession,
+  useLazyAccount,
   useLogin,
   useLogout,
-  useAccount,
-  useLazyAccount,
-  useCreateAnonymousSession,
-  getFragmentData,
-  fragments,
+  useSignUp,
 } from '../../src'
 import { ID } from '../../src/types'
+import { createTestUser, deleteTestUser } from '../setup/helpers'
+import { createQueryClient, createWrapper } from '../setup/wrapper'
 
 /*
  * Integration tests for account authentication hooks.
