@@ -59,7 +59,7 @@ type Documents = {
     "\n  mutation UpdatePhone($phone: String!, $password: String!) {\n    accountUpdatePhone(phone: $phone, password: $password) {\n      phone\n    }\n  }\n": typeof types.UpdatePhoneDocument,
     "\n  mutation UpdatePhoneSession($userId: String!, $secret: String!) {\n    accountUpdatePhoneSession(userId: $userId, secret: $secret) {\n      userId\n      expire\n      current\n    }\n  }\n": typeof types.UpdatePhoneSessionDocument,
     "\n  mutation UpdatePhoneVerification($userId: String!, $secret: String!) {\n    accountUpdatePhoneVerification(userId: $userId, secret: $secret) {\n      expire\n    }\n  }\n": typeof types.UpdatePhoneVerificationDocument,
-    "\n  mutation UpdatePrefs($prefs: Json!) {\n    accountUpdatePrefs(prefs: $prefs) {\n      prefs {\n        data\n      }\n    }\n  }\n": typeof types.UpdatePrefsDocument,
+    "\n  mutation UpdatePrefs($prefs: Assoc!) {\n    accountUpdatePrefs(prefs: $prefs) {\n      prefs {\n        data\n      }\n    }\n  }\n": typeof types.UpdatePrefsDocument,
     "\n  mutation UpdatePushTarget($targetId: String!, $identifier: String!) {\n    accountUpdatePushTarget(targetId: $targetId, identifier: $identifier) {\n      _id\n      userId\n      providerType\n      identifier\n    }\n  }\n": typeof types.UpdatePushTargetDocument,
     "\n  mutation UpdateSession($sessionId: String!) {\n    accountUpdateSession(sessionId: $sessionId) {\n      userId\n      expire\n      current\n    }\n  }\n": typeof types.UpdateSessionDocument,
     "\n  mutation UpdateStatus {\n    accountUpdateStatus {\n      _id\n      status\n    }\n  }\n": typeof types.UpdateStatusDocument,
@@ -159,7 +159,7 @@ const documents: Documents = {
     "\n  mutation UpdatePhone($phone: String!, $password: String!) {\n    accountUpdatePhone(phone: $phone, password: $password) {\n      phone\n    }\n  }\n": types.UpdatePhoneDocument,
     "\n  mutation UpdatePhoneSession($userId: String!, $secret: String!) {\n    accountUpdatePhoneSession(userId: $userId, secret: $secret) {\n      userId\n      expire\n      current\n    }\n  }\n": types.UpdatePhoneSessionDocument,
     "\n  mutation UpdatePhoneVerification($userId: String!, $secret: String!) {\n    accountUpdatePhoneVerification(userId: $userId, secret: $secret) {\n      expire\n    }\n  }\n": types.UpdatePhoneVerificationDocument,
-    "\n  mutation UpdatePrefs($prefs: Json!) {\n    accountUpdatePrefs(prefs: $prefs) {\n      prefs {\n        data\n      }\n    }\n  }\n": types.UpdatePrefsDocument,
+    "\n  mutation UpdatePrefs($prefs: Assoc!) {\n    accountUpdatePrefs(prefs: $prefs) {\n      prefs {\n        data\n      }\n    }\n  }\n": types.UpdatePrefsDocument,
     "\n  mutation UpdatePushTarget($targetId: String!, $identifier: String!) {\n    accountUpdatePushTarget(targetId: $targetId, identifier: $identifier) {\n      _id\n      userId\n      providerType\n      identifier\n    }\n  }\n": types.UpdatePushTargetDocument,
     "\n  mutation UpdateSession($sessionId: String!) {\n    accountUpdateSession(sessionId: $sessionId) {\n      userId\n      expire\n      current\n    }\n  }\n": types.UpdateSessionDocument,
     "\n  mutation UpdateStatus {\n    accountUpdateStatus {\n      _id\n      status\n    }\n  }\n": types.UpdateStatusDocument,
@@ -411,7 +411,7 @@ export function gql(source: "\n  mutation UpdatePhoneVerification($userId: Strin
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  mutation UpdatePrefs($prefs: Json!) {\n    accountUpdatePrefs(prefs: $prefs) {\n      prefs {\n        data\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation UpdatePrefs($prefs: Json!) {\n    accountUpdatePrefs(prefs: $prefs) {\n      prefs {\n        data\n      }\n    }\n  }\n"];
+export function gql(source: "\n  mutation UpdatePrefs($prefs: Assoc!) {\n    accountUpdatePrefs(prefs: $prefs) {\n      prefs {\n        data\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation UpdatePrefs($prefs: Assoc!) {\n    accountUpdatePrefs(prefs: $prefs) {\n      prefs {\n        data\n      }\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

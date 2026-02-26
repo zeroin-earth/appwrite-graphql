@@ -1,14 +1,13 @@
-// FIXME: This is a temporary solution to update user preferences.
 import { AppwriteException } from '../types'
 
 import { gql } from '../__generated__'
-import { UpdatePrefsMutation } from '../__generated__/graphql'
+import { UpdatePrefsMutation, UpdatePrefsMutationVariables } from '../__generated__/graphql'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
 const accountUpdatePrefs = gql(/* GraphQL */ `
-  mutation UpdatePrefs($prefs: Json!) {
+  mutation UpdatePrefs($prefs: Assoc!) {
     accountUpdatePrefs(prefs: $prefs) {
       prefs {
         data
@@ -18,17 +17,25 @@ const accountUpdatePrefs = gql(/* GraphQL */ `
 `)
 
 export function useUpdatePrefs() {
-  const { account } = useAppwrite()
+  const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
   const queryResult = useMutation<
     UpdatePrefsMutation['accountUpdatePrefs'],
     AppwriteException[],
-    { prefs: Record<string, string | number | boolean> }
+    UpdatePrefsMutationVariables
   >({
     mutationFn: async ({ prefs }) => {
-      const newPrefs = await account.updatePrefs({ prefs })
-      return newPrefs
+      const { data, errors } = await graphql.mutation({
+        query: accountUpdatePrefs,
+        variables: { prefs },
+      })
+
+      if (errors) {
+        throw errors
+      }
+
+      return data?.accountUpdatePrefs
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })

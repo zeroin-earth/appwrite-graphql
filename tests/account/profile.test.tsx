@@ -1,17 +1,16 @@
-import { describe, test, expect, beforeAll, afterAll, beforeEach } from 'bun:test'
-import { renderHook, act, waitFor } from '@testing-library/react'
 import { QueryClient } from '@tanstack/react-query'
-import { createWrapper, createQueryClient } from '../setup/wrapper'
-import { createTestUser, deleteTestUser } from '../setup/helpers'
+import { act, renderHook, waitFor } from '@testing-library/react'
+import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test'
 import {
+  useGetPrefs,
   useLogin,
-  useUpdateName,
   useUpdateEmail,
+  useUpdateName,
   useUpdatePassword,
   useUpdatePrefs,
-  useGetPrefs,
-  useUpdateStatus,
 } from '../../src'
+import { createTestUser, deleteTestUser } from '../setup/helpers'
+import { createQueryClient, createWrapper } from '../setup/wrapper'
 
 // ---------------------------------------------------------------------------
 // Helpers
