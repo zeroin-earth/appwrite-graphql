@@ -15,7 +15,7 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   Assoc: { input: any; output: any; }
-  Date: { input: any; output: any; }
+  InputFile: { input: any; output: any; }
   Json: { input: any; output: any; }
 };
 
@@ -141,7 +141,7 @@ export type IdentityList = {
 };
 
 export type Jwt = {
-  __typename?: 'JWT';
+  __typename?: 'Jwt';
   jwt?: Maybe<Scalars['String']['output']>;
 };
 
@@ -183,9 +183,6 @@ export type LocaleCodeList = {
 
 export type Log = {
   __typename?: 'Log';
-  _createdAt?: Maybe<Scalars['String']['output']>;
-  _id?: Maybe<Scalars['String']['output']>;
-  _updatedAt?: Maybe<Scalars['String']['output']>;
   clientCode?: Maybe<Scalars['String']['output']>;
   clientEngine?: Maybe<Scalars['String']['output']>;
   clientEngineVersion?: Maybe<Scalars['String']['output']>;
@@ -209,18 +206,10 @@ export type Log = {
   userName?: Maybe<Scalars['String']['output']>;
 };
 
-export type LogsList = {
-  __typename?: 'LogsList';
+export type LogList = {
+  __typename?: 'LogList';
   logs?: Maybe<Array<Log>>;
   total: Scalars['Int']['output'];
-};
-
-export type MfaChallenge = {
-  __typename?: 'MFAChallenge';
-  _createdAt?: Maybe<Scalars['Date']['output']>;
-  _id?: Maybe<Scalars['String']['output']>;
-  expire?: Maybe<Scalars['Date']['output']>;
-  userId?: Maybe<Scalars['String']['output']>;
 };
 
 export type Membership = {
@@ -246,10 +235,19 @@ export type MembershipList = {
   total?: Maybe<Scalars['Int']['output']>;
 };
 
+export type MfaChallenge = {
+  __typename?: 'MfaChallenge';
+  _createdAt?: Maybe<Scalars['String']['output']>;
+  _id?: Maybe<Scalars['String']['output']>;
+  expire?: Maybe<Scalars['String']['output']>;
+  userId?: Maybe<Scalars['String']['output']>;
+};
+
 export type MfaFactors = {
   __typename?: 'MfaFactors';
   email?: Maybe<Scalars['Boolean']['output']>;
   phone?: Maybe<Scalars['Boolean']['output']>;
+  recoveryCode?: Maybe<Scalars['Boolean']['output']>;
   totp?: Maybe<Scalars['Boolean']['output']>;
 };
 
@@ -272,12 +270,10 @@ export type Mutation = {
   accountCreateEmailToken?: Maybe<Token>;
   accountCreateEmailVerification?: Maybe<Token>;
   accountCreateJWT?: Maybe<Jwt>;
-  accountCreateMagicURLSession?: Maybe<Token>;
   accountCreateMagicURLToken?: Maybe<Token>;
   accountCreateMfaAuthenticator?: Maybe<MfaType>;
   accountCreateMfaChallenge?: Maybe<MfaChallenge>;
   accountCreateMfaRecoveryCodes?: Maybe<MfaRecoveryCodes>;
-  accountCreatePhoneSession?: Maybe<Token>;
   accountCreatePhoneToken?: Maybe<Token>;
   accountCreatePhoneVerification?: Maybe<Token>;
   accountCreatePushTarget?: Maybe<Target>;
@@ -285,17 +281,17 @@ export type Mutation = {
   accountCreateSession?: Maybe<Session>;
   accountCreateVerification?: Maybe<Token>;
   accountDelete?: Maybe<None>;
-  accountDeleteIdentity?: Maybe<Status>;
+  accountDeleteIdentity?: Maybe<None>;
   accountDeleteMfaAuthenticator?: Maybe<None>;
-  accountDeletePushTarget?: Maybe<Status>;
-  accountDeleteSession?: Maybe<Status>;
-  accountDeleteSessions?: Maybe<Status>;
+  accountDeletePushTarget?: Maybe<None>;
+  accountDeleteSession?: Maybe<None>;
+  accountDeleteSessions?: Maybe<None>;
   accountUpdateEmail?: Maybe<User>;
   accountUpdateEmailVerification?: Maybe<Token>;
   accountUpdateMFA?: Maybe<User>;
   accountUpdateMagicURLSession?: Maybe<Session>;
   accountUpdateMfaAuthenticator?: Maybe<User>;
-  accountUpdateMfaChallenge?: Maybe<Status>;
+  accountUpdateMfaChallenge?: Maybe<Session>;
   accountUpdateMfaRecoveryCodes?: Maybe<MfaRecoveryCodes>;
   accountUpdateName?: Maybe<User>;
   accountUpdatePassword?: Maybe<User>;
@@ -313,7 +309,7 @@ export type Mutation = {
   databasesCreateOperations?: Maybe<Transaction>;
   databasesCreateTransaction?: Maybe<Transaction>;
   databasesDecrementDocumentAttribute?: Maybe<Document>;
-  databasesDeleteDocument?: Maybe<Status>;
+  databasesDeleteDocument?: Maybe<None>;
   databasesDeleteDocuments?: Maybe<DocumentList>;
   databasesDeleteTransaction?: Maybe<None>;
   databasesIncrementDocumentAttribute?: Maybe<Document>;
@@ -363,13 +359,6 @@ export type MutationAccountCreateEmailVerificationArgs = {
 };
 
 
-export type MutationAccountCreateMagicUrlSessionArgs = {
-  email: Scalars['String']['input'];
-  url?: InputMaybe<Scalars['String']['input']>;
-  userId: Scalars['String']['input'];
-};
-
-
 export type MutationAccountCreateMagicUrlTokenArgs = {
   email: Scalars['String']['input'];
   phrase?: InputMaybe<Scalars['Boolean']['input']>;
@@ -385,12 +374,6 @@ export type MutationAccountCreateMfaAuthenticatorArgs = {
 
 export type MutationAccountCreateMfaChallengeArgs = {
   factor: Scalars['String']['input'];
-};
-
-
-export type MutationAccountCreatePhoneSessionArgs = {
-  phone: Scalars['String']['input'];
-  userId: Scalars['String']['input'];
 };
 
 
@@ -650,12 +633,13 @@ export type MutationFunctionsCreateExecutionArgs = {
   headers?: InputMaybe<Scalars['Json']['input']>;
   method?: InputMaybe<Scalars['String']['input']>;
   path?: InputMaybe<Scalars['String']['input']>;
+  scheduledAt?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type MutationStorageCreateFileArgs = {
   bucketId: Scalars['String']['input'];
-  file: Scalars['String']['input'];
+  file: Scalars['InputFile']['input'];
   fileId: Scalars['String']['input'];
   permissions?: InputMaybe<Array<Scalars['String']['input']>>;
 };
@@ -732,7 +716,7 @@ export type MutationTeamsUpdatePrefsArgs = {
 
 export type None = {
   __typename?: 'None';
-  status?: Maybe<Scalars['Boolean']['output']>;
+  status?: Maybe<Scalars['String']['output']>;
 };
 
 export type Phone = {
@@ -760,7 +744,7 @@ export type Query = {
   accountGetPrefs?: Maybe<Preferences>;
   accountGetSession?: Maybe<Session>;
   accountListIdentities?: Maybe<IdentityList>;
-  accountListLogs?: Maybe<LogsList>;
+  accountListLogs?: Maybe<LogList>;
   accountListMfaFactors?: Maybe<MfaFactors>;
   accountListSessions?: Maybe<SessionList>;
   databasesGetDocument?: Maybe<Document>;
@@ -876,7 +860,7 @@ export type QueryTeamsListMembershipsArgs = {
 
 export type Session = {
   __typename?: 'Session';
-  _createdAt?: Maybe<Scalars['Date']['output']>;
+  _createdAt?: Maybe<Scalars['String']['output']>;
   _id?: Maybe<Scalars['String']['output']>;
   clientCode?: Maybe<Scalars['String']['output']>;
   clientEngine?: Maybe<Scalars['String']['output']>;
@@ -890,16 +874,16 @@ export type Session = {
   deviceBrand?: Maybe<Scalars['String']['output']>;
   deviceModel?: Maybe<Scalars['String']['output']>;
   deviceName?: Maybe<Scalars['String']['output']>;
-  expire?: Maybe<Scalars['Date']['output']>;
+  expire?: Maybe<Scalars['String']['output']>;
   factors?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   ip?: Maybe<Scalars['String']['output']>;
-  mfaUpdatedAt?: Maybe<Scalars['Date']['output']>;
+  mfaUpdatedAt?: Maybe<Scalars['String']['output']>;
   osCode?: Maybe<Scalars['String']['output']>;
   osName?: Maybe<Scalars['String']['output']>;
   osVersion?: Maybe<Scalars['String']['output']>;
   provider?: Maybe<Scalars['String']['output']>;
   providerAccessToken?: Maybe<Scalars['String']['output']>;
-  providerAccessTokenExpiry?: Maybe<Scalars['Date']['output']>;
+  providerAccessTokenExpiry?: Maybe<Scalars['String']['output']>;
   providerRefreshToken?: Maybe<Scalars['String']['output']>;
   providerUid?: Maybe<Scalars['String']['output']>;
   secret?: Maybe<Scalars['String']['output']>;
@@ -912,16 +896,11 @@ export type SessionList = {
   total?: Maybe<Scalars['Int']['output']>;
 };
 
-export type Status = {
-  __typename?: 'Status';
-  status?: Maybe<Scalars['Boolean']['output']>;
-};
-
 export type Target = {
   __typename?: 'Target';
-  _createdAt?: Maybe<Scalars['Date']['output']>;
+  _createdAt?: Maybe<Scalars['String']['output']>;
   _id?: Maybe<Scalars['String']['output']>;
-  _updatedAt?: Maybe<Scalars['Date']['output']>;
+  _updatedAt?: Maybe<Scalars['String']['output']>;
   expired?: Maybe<Scalars['Boolean']['output']>;
   identifier?: Maybe<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
@@ -950,7 +929,7 @@ export type Token = {
   __typename?: 'Token';
   _createdAt?: Maybe<Scalars['String']['output']>;
   _id?: Maybe<Scalars['String']['output']>;
-  expire?: Maybe<Scalars['Date']['output']>;
+  expire?: Maybe<Scalars['String']['output']>;
   phrase?: Maybe<Scalars['String']['output']>;
   secret?: Maybe<Scalars['String']['output']>;
   userId?: Maybe<Scalars['String']['output']>;
@@ -974,9 +953,9 @@ export type TransactionList = {
 
 export type User = {
   __typename?: 'User';
-  _createdAt?: Maybe<Scalars['Date']['output']>;
+  _createdAt?: Maybe<Scalars['String']['output']>;
   _id?: Maybe<Scalars['String']['output']>;
-  _updatedAt?: Maybe<Scalars['Date']['output']>;
+  _updatedAt?: Maybe<Scalars['String']['output']>;
   accessedAt?: Maybe<Scalars['String']['output']>;
   email?: Maybe<Scalars['String']['output']>;
   emailVerification?: Maybe<Scalars['Boolean']['output']>;
@@ -1006,7 +985,7 @@ export type AccountGetQuery = { __typename?: 'Query', accountGet?: (
 export type CreateAnonymousSessionMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CreateAnonymousSessionMutation = { __typename?: 'Mutation', accountCreateAnonymousSession?: { __typename?: 'Session', _id?: string | null, expire?: any | null, current?: boolean | null } | null };
+export type CreateAnonymousSessionMutation = { __typename?: 'Mutation', accountCreateAnonymousSession?: { __typename?: 'Session', _id?: string | null, expire?: string | null, current?: boolean | null } | null };
 
 export type CreateEmailTokenMutationVariables = Exact<{
   userId: Scalars['String']['input'];
@@ -1015,19 +994,19 @@ export type CreateEmailTokenMutationVariables = Exact<{
 }>;
 
 
-export type CreateEmailTokenMutation = { __typename?: 'Mutation', accountCreateEmailToken?: { __typename?: 'Token', expire?: any | null } | null };
+export type CreateEmailTokenMutation = { __typename?: 'Mutation', accountCreateEmailToken?: { __typename?: 'Token', expire?: string | null } | null };
 
 export type CreateEmailVerificationMutationVariables = Exact<{
   url: Scalars['String']['input'];
 }>;
 
 
-export type CreateEmailVerificationMutation = { __typename?: 'Mutation', accountCreateEmailVerification?: { __typename?: 'Token', _id?: string | null, userId?: string | null, secret?: string | null, expire?: any | null } | null };
+export type CreateEmailVerificationMutation = { __typename?: 'Mutation', accountCreateEmailVerification?: { __typename?: 'Token', _id?: string | null, userId?: string | null, secret?: string | null, expire?: string | null } | null };
 
 export type CreateJwtMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CreateJwtMutation = { __typename?: 'Mutation', accountCreateJWT?: { __typename?: 'JWT', jwt?: string | null } | null };
+export type CreateJwtMutation = { __typename?: 'Mutation', accountCreateJWT?: { __typename?: 'Jwt', jwt?: string | null } | null };
 
 export type CreateMagicUrlTokenMutationVariables = Exact<{
   userId: Scalars['String']['input'];
@@ -1037,7 +1016,7 @@ export type CreateMagicUrlTokenMutationVariables = Exact<{
 }>;
 
 
-export type CreateMagicUrlTokenMutation = { __typename?: 'Mutation', accountCreateMagicURLToken?: { __typename?: 'Token', expire?: any | null } | null };
+export type CreateMagicUrlTokenMutation = { __typename?: 'Mutation', accountCreateMagicURLToken?: { __typename?: 'Token', expire?: string | null } | null };
 
 export type CreateMfaAuthenticatorMutationVariables = Exact<{
   type: Scalars['String']['input'];
@@ -1051,7 +1030,7 @@ export type CreateMfaChallengeMutationVariables = Exact<{
 }>;
 
 
-export type CreateMfaChallengeMutation = { __typename?: 'Mutation', accountCreateMfaChallenge?: { __typename?: 'MFAChallenge', userId?: string | null, expire?: any | null } | null };
+export type CreateMfaChallengeMutation = { __typename?: 'Mutation', accountCreateMfaChallenge?: { __typename?: 'MfaChallenge', _id?: string | null, userId?: string | null, expire?: string | null } | null };
 
 export type CreateMfaRecoveryCodesMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -1064,12 +1043,12 @@ export type CreatePhoneTokenMutationVariables = Exact<{
 }>;
 
 
-export type CreatePhoneTokenMutation = { __typename?: 'Mutation', accountCreatePhoneToken?: { __typename?: 'Token', expire?: any | null } | null };
+export type CreatePhoneTokenMutation = { __typename?: 'Mutation', accountCreatePhoneToken?: { __typename?: 'Token', expire?: string | null } | null };
 
 export type CreatePhoneVerificationMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CreatePhoneVerificationMutation = { __typename?: 'Mutation', accountCreatePhoneVerification?: { __typename?: 'Token', expire?: any | null } | null };
+export type CreatePhoneVerificationMutation = { __typename?: 'Mutation', accountCreatePhoneVerification?: { __typename?: 'Token', expire?: string | null } | null };
 
 export type CreatePushTargetMutationVariables = Exact<{
   targetId: Scalars['String']['input'];
@@ -1086,45 +1065,45 @@ export type CreateSessionMutationVariables = Exact<{
 }>;
 
 
-export type CreateSessionMutation = { __typename?: 'Mutation', accountCreateSession?: { __typename?: 'Session', userId?: string | null, expire?: any | null, current?: boolean | null } | null };
+export type CreateSessionMutation = { __typename?: 'Mutation', accountCreateSession?: { __typename?: 'Session', userId?: string | null, expire?: string | null, current?: boolean | null } | null };
 
 export type DeleteAccountMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DeleteAccountMutation = { __typename?: 'Mutation', accountDelete?: { __typename?: 'None', status?: boolean | null } | null };
+export type DeleteAccountMutation = { __typename?: 'Mutation', accountDelete?: { __typename?: 'None', status?: string | null } | null };
 
 export type DeleteIdentityMutationVariables = Exact<{
   identityId: Scalars['String']['input'];
 }>;
 
 
-export type DeleteIdentityMutation = { __typename?: 'Mutation', accountDeleteIdentity?: { __typename?: 'Status', status?: boolean | null } | null };
+export type DeleteIdentityMutation = { __typename?: 'Mutation', accountDeleteIdentity?: { __typename?: 'None', status?: string | null } | null };
 
 export type DeleteMfaAuthenticatorMutationVariables = Exact<{
   type: Scalars['String']['input'];
 }>;
 
 
-export type DeleteMfaAuthenticatorMutation = { __typename?: 'Mutation', accountDeleteMfaAuthenticator?: { __typename?: 'None', status?: boolean | null } | null };
+export type DeleteMfaAuthenticatorMutation = { __typename?: 'Mutation', accountDeleteMfaAuthenticator?: { __typename?: 'None', status?: string | null } | null };
 
 export type DeletePushTargetMutationVariables = Exact<{
   targetId: Scalars['String']['input'];
 }>;
 
 
-export type DeletePushTargetMutation = { __typename?: 'Mutation', accountDeletePushTarget?: { __typename?: 'Status', status?: boolean | null } | null };
+export type DeletePushTargetMutation = { __typename?: 'Mutation', accountDeletePushTarget?: { __typename?: 'None', status?: string | null } | null };
 
 export type DeleteSessionMutationVariables = Exact<{
   sessionId: Scalars['String']['input'];
 }>;
 
 
-export type DeleteSessionMutation = { __typename?: 'Mutation', accountDeleteSession?: { __typename?: 'Status', status?: boolean | null } | null };
+export type DeleteSessionMutation = { __typename?: 'Mutation', accountDeleteSession?: { __typename?: 'None', status?: string | null } | null };
 
 export type DeleteSessionsMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DeleteSessionsMutation = { __typename?: 'Mutation', accountDeleteSessions?: { __typename?: 'Status', status?: boolean | null } | null };
+export type DeleteSessionsMutation = { __typename?: 'Mutation', accountDeleteSessions?: { __typename?: 'None', status?: string | null } | null };
 
 export type GetMfaRecoveryCodesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1141,7 +1120,7 @@ export type GetSessionQueryVariables = Exact<{
 }>;
 
 
-export type GetSessionQuery = { __typename?: 'Query', accountGetSession?: { __typename?: 'Session', userId?: string | null, expire?: any | null, current?: boolean | null } | null };
+export type GetSessionQuery = { __typename?: 'Query', accountGetSession?: { __typename?: 'Session', userId?: string | null, expire?: string | null, current?: boolean | null } | null };
 
 export type ListIdentitiesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1159,7 +1138,7 @@ export type ListMfaFactorsQuery = { __typename?: 'Query', accountListMfaFactors?
 export type ListSessionsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ListSessionsQuery = { __typename?: 'Query', accountListSessions?: { __typename?: 'SessionList', sessions?: Array<{ __typename?: 'Session', _id?: string | null, _createdAt?: any | null, osName?: string | null, clientName?: string | null } | null> | null } | null };
+export type ListSessionsQuery = { __typename?: 'Query', accountListSessions?: { __typename?: 'SessionList', sessions?: Array<{ __typename?: 'Session', _id?: string | null, _createdAt?: string | null, osName?: string | null, clientName?: string | null } | null> | null } | null };
 
 export type CreateEmailPasswordSessionMutationVariables = Exact<{
   email: Scalars['String']['input'];
@@ -1167,14 +1146,14 @@ export type CreateEmailPasswordSessionMutationVariables = Exact<{
 }>;
 
 
-export type CreateEmailPasswordSessionMutation = { __typename?: 'Mutation', accountCreateEmailPasswordSession?: { __typename?: 'Session', userId?: string | null, expire?: any | null, current?: boolean | null } | null };
+export type CreateEmailPasswordSessionMutation = { __typename?: 'Mutation', accountCreateEmailPasswordSession?: { __typename?: 'Session', userId?: string | null, expire?: string | null, current?: boolean | null } | null };
 
 export type ListLogsQueryVariables = Exact<{
   queries?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
 }>;
 
 
-export type ListLogsQuery = { __typename?: 'Query', accountListLogs?: { __typename?: 'LogsList', total: number, logs?: Array<{ __typename?: 'Log', event?: string | null, userId?: string | null, userEmail?: string | null, userName?: string | null, mode?: string | null, ip?: string | null, time?: string | null, osCode?: string | null, osName?: string | null, osVersion?: string | null, clientType?: string | null, clientCode?: string | null, clientName?: string | null, clientVersion?: string | null, clientEngine?: string | null, clientEngineVersion?: string | null, deviceName?: string | null, deviceBrand?: string | null, deviceModel?: string | null, countryCode?: string | null, countryName?: string | null }> | null } | null };
+export type ListLogsQuery = { __typename?: 'Query', accountListLogs?: { __typename?: 'LogList', total: number, logs?: Array<{ __typename?: 'Log', event?: string | null, userId?: string | null, userEmail?: string | null, userName?: string | null, mode?: string | null, ip?: string | null, time?: string | null, osCode?: string | null, osName?: string | null, osVersion?: string | null, clientType?: string | null, clientCode?: string | null, clientName?: string | null, clientVersion?: string | null, clientEngine?: string | null, clientEngineVersion?: string | null, deviceName?: string | null, deviceBrand?: string | null, deviceModel?: string | null, countryCode?: string | null, countryName?: string | null }> | null } | null };
 
 export type CreateRecoveryMutationVariables = Exact<{
   email: Scalars['String']['input'];
@@ -1182,7 +1161,7 @@ export type CreateRecoveryMutationVariables = Exact<{
 }>;
 
 
-export type CreateRecoveryMutation = { __typename?: 'Mutation', accountCreateRecovery?: { __typename?: 'Token', expire?: any | null } | null };
+export type CreateRecoveryMutation = { __typename?: 'Mutation', accountCreateRecovery?: { __typename?: 'Token', expire?: string | null } | null };
 
 export type UpdateRecoveryMutationVariables = Exact<{
   userId: Scalars['String']['input'];
@@ -1191,7 +1170,7 @@ export type UpdateRecoveryMutationVariables = Exact<{
 }>;
 
 
-export type UpdateRecoveryMutation = { __typename?: 'Mutation', accountUpdateRecovery?: { __typename?: 'Token', expire?: any | null } | null };
+export type UpdateRecoveryMutation = { __typename?: 'Mutation', accountUpdateRecovery?: { __typename?: 'Token', expire?: string | null } | null };
 
 export type CreateAccountMutationVariables = Exact<{
   userId: Scalars['String']['input'];
@@ -1208,7 +1187,7 @@ export type VerifyEmailMutationVariables = Exact<{
 }>;
 
 
-export type VerifyEmailMutation = { __typename?: 'Mutation', accountCreateVerification?: { __typename?: 'Token', expire?: any | null } | null };
+export type VerifyEmailMutation = { __typename?: 'Mutation', accountCreateVerification?: { __typename?: 'Token', expire?: string | null } | null };
 
 export type UpdateEmailMutationVariables = Exact<{
   email: Scalars['String']['input'];
@@ -1224,7 +1203,7 @@ export type UpdateEmailVerificationMutationVariables = Exact<{
 }>;
 
 
-export type UpdateEmailVerificationMutation = { __typename?: 'Mutation', accountUpdateEmailVerification?: { __typename?: 'Token', _id?: string | null, userId?: string | null, secret?: string | null, expire?: any | null } | null };
+export type UpdateEmailVerificationMutation = { __typename?: 'Mutation', accountUpdateEmailVerification?: { __typename?: 'Token', _id?: string | null, userId?: string | null, secret?: string | null, expire?: string | null } | null };
 
 export type UpdateMagicUrlSessionMutationVariables = Exact<{
   userId: Scalars['String']['input'];
@@ -1232,7 +1211,7 @@ export type UpdateMagicUrlSessionMutationVariables = Exact<{
 }>;
 
 
-export type UpdateMagicUrlSessionMutation = { __typename?: 'Mutation', accountUpdateMagicURLSession?: { __typename?: 'Session', userId?: string | null, expire?: any | null, current?: boolean | null } | null };
+export type UpdateMagicUrlSessionMutation = { __typename?: 'Mutation', accountUpdateMagicURLSession?: { __typename?: 'Session', userId?: string | null, expire?: string | null, current?: boolean | null } | null };
 
 export type UpdateMfaMutationVariables = Exact<{
   mfa: Scalars['Boolean']['input'];
@@ -1255,7 +1234,7 @@ export type UpdateMfaChallengeMutationVariables = Exact<{
 }>;
 
 
-export type UpdateMfaChallengeMutation = { __typename?: 'Mutation', accountUpdateMfaChallenge?: { __typename?: 'Status', status?: boolean | null } | null };
+export type UpdateMfaChallengeMutation = { __typename?: 'Mutation', accountUpdateMfaChallenge?: { __typename?: 'Session', _id?: string | null, userId?: string | null, expire?: string | null, current?: boolean | null } | null };
 
 export type UpdateMfaRecoveryCodesMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -1291,7 +1270,7 @@ export type UpdatePhoneSessionMutationVariables = Exact<{
 }>;
 
 
-export type UpdatePhoneSessionMutation = { __typename?: 'Mutation', accountUpdatePhoneSession?: { __typename?: 'Session', userId?: string | null, expire?: any | null, current?: boolean | null } | null };
+export type UpdatePhoneSessionMutation = { __typename?: 'Mutation', accountUpdatePhoneSession?: { __typename?: 'Session', userId?: string | null, expire?: string | null, current?: boolean | null } | null };
 
 export type UpdatePhoneVerificationMutationVariables = Exact<{
   userId: Scalars['String']['input'];
@@ -1299,7 +1278,7 @@ export type UpdatePhoneVerificationMutationVariables = Exact<{
 }>;
 
 
-export type UpdatePhoneVerificationMutation = { __typename?: 'Mutation', accountUpdatePhoneVerification?: { __typename?: 'Token', expire?: any | null } | null };
+export type UpdatePhoneVerificationMutation = { __typename?: 'Mutation', accountUpdatePhoneVerification?: { __typename?: 'Token', expire?: string | null } | null };
 
 export type UpdatePrefsMutationVariables = Exact<{
   prefs: Scalars['Assoc']['input'];
@@ -1321,7 +1300,7 @@ export type UpdateSessionMutationVariables = Exact<{
 }>;
 
 
-export type UpdateSessionMutation = { __typename?: 'Mutation', accountUpdateSession?: { __typename?: 'Session', userId?: string | null, expire?: any | null, current?: boolean | null } | null };
+export type UpdateSessionMutation = { __typename?: 'Mutation', accountUpdateSession?: { __typename?: 'Session', userId?: string | null, expire?: string | null, current?: boolean | null } | null };
 
 export type UpdateStatusMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -1334,7 +1313,7 @@ export type UpdateVerificationMutationVariables = Exact<{
 }>;
 
 
-export type UpdateVerificationMutation = { __typename?: 'Mutation', accountUpdateVerification?: { __typename?: 'Token', secret?: string | null, expire?: any | null, userId?: string | null } | null };
+export type UpdateVerificationMutation = { __typename?: 'Mutation', accountUpdateVerification?: { __typename?: 'Token', secret?: string | null, expire?: string | null, userId?: string | null } | null };
 
 export type ListDocumentsQueryVariables = Exact<{
   databaseId: Scalars['String']['input'];
@@ -1399,7 +1378,7 @@ export type DeleteDocumentMutationVariables = Exact<{
 }>;
 
 
-export type DeleteDocumentMutation = { __typename?: 'Mutation', databasesDeleteDocument?: { __typename?: 'Status', status?: boolean | null } | null };
+export type DeleteDocumentMutation = { __typename?: 'Mutation', databasesDeleteDocument?: { __typename?: 'None', status?: string | null } | null };
 
 export type DeleteDocumentsMutationVariables = Exact<{
   databaseId: Scalars['String']['input'];
@@ -1415,7 +1394,7 @@ export type DeleteTransactionMutationVariables = Exact<{
 }>;
 
 
-export type DeleteTransactionMutation = { __typename?: 'Mutation', databasesDeleteTransaction?: { __typename?: 'None', status?: boolean | null } | null };
+export type DeleteTransactionMutation = { __typename?: 'Mutation', databasesDeleteTransaction?: { __typename?: 'None', status?: string | null } | null };
 
 export type GetDocumentQueryVariables = Exact<{
   databaseId: Scalars['String']['input'];
@@ -1493,21 +1472,14 @@ export type UpsertDocumentMutationVariables = Exact<{
 
 export type UpsertDocumentMutation = { __typename?: 'Mutation', databasesUpsertDocument?: { __typename?: 'Document', _id?: string | null } | null };
 
-export type UpsertDocumentsMutationVariables = Exact<{
-  databaseId: Scalars['String']['input'];
-  collectionId: Scalars['String']['input'];
-  documents: Array<Scalars['Json']['input']> | Scalars['Json']['input'];
-}>;
-
-
-export type UpsertDocumentsMutation = { __typename?: 'Mutation', databasesUpsertDocuments?: { __typename?: 'DocumentList', total?: number | null, documents?: Array<{ __typename?: 'Document', _id?: string | null } | null> | null } | null };
-
 export type CreateExecutionMutationVariables = Exact<{
   functionId: Scalars['String']['input'];
   body?: InputMaybe<Scalars['String']['input']>;
   async?: InputMaybe<Scalars['Boolean']['input']>;
   path?: InputMaybe<Scalars['String']['input']>;
   method?: InputMaybe<Scalars['String']['input']>;
+  headers?: InputMaybe<Scalars['Json']['input']>;
+  scheduledAt?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -1577,23 +1549,13 @@ export type ListLanguagesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type ListLanguagesQuery = { __typename?: 'Query', localeListLanguages?: { __typename?: 'LanguageList', total?: number | null, languages?: Array<{ __typename?: 'Language', name?: string | null, code?: string | null, nativeName?: string | null } | null> | null } | null };
 
-export type CreateFileMutationVariables = Exact<{
-  bucketId: Scalars['String']['input'];
-  fileId: Scalars['String']['input'];
-  file: Scalars['String']['input'];
-  permissions?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
-}>;
-
-
-export type CreateFileMutation = { __typename?: 'Mutation', storageCreateFile?: { __typename?: 'File', _id?: string | null, bucketId?: string | null, name?: string | null, mimeType?: string | null, sizeOriginal?: number | null } | null };
-
 export type DeleteFileMutationVariables = Exact<{
   bucketId: Scalars['String']['input'];
   fileId: Scalars['String']['input'];
 }>;
 
 
-export type DeleteFileMutation = { __typename?: 'Mutation', storageDeleteFile?: { __typename?: 'None', status?: boolean | null } | null };
+export type DeleteFileMutation = { __typename?: 'Mutation', storageDeleteFile?: { __typename?: 'None', status?: string | null } | null };
 
 export type GetFileQueryVariables = Exact<{
   bucketId: Scalars['String']['input'];
@@ -1650,14 +1612,14 @@ export type DeleteMembershipMutationVariables = Exact<{
 }>;
 
 
-export type DeleteMembershipMutation = { __typename?: 'Mutation', teamsDeleteMembership?: { __typename?: 'None', status?: boolean | null } | null };
+export type DeleteMembershipMutation = { __typename?: 'Mutation', teamsDeleteMembership?: { __typename?: 'None', status?: string | null } | null };
 
 export type DeleteTeamMutationVariables = Exact<{
   teamId: Scalars['String']['input'];
 }>;
 
 
-export type DeleteTeamMutation = { __typename?: 'Mutation', teamsDelete?: { __typename?: 'None', status?: boolean | null } | null };
+export type DeleteTeamMutation = { __typename?: 'Mutation', teamsDelete?: { __typename?: 'None', status?: string | null } | null };
 
 export type GetTeamQueryVariables = Exact<{
   teamId: Scalars['String']['input'];
@@ -1742,7 +1704,7 @@ export const CreateEmailVerificationDocument = {"kind":"Document","definitions":
 export const CreateJwtDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateJWT"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"accountCreateJWT"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"jwt"}}]}}]}}]} as unknown as DocumentNode<CreateJwtMutation, CreateJwtMutationVariables>;
 export const CreateMagicUrlTokenDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateMagicURLToken"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"url"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"phrase"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"accountCreateMagicURLToken"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"userId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userId"}}},{"kind":"Argument","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}},{"kind":"Argument","name":{"kind":"Name","value":"url"},"value":{"kind":"Variable","name":{"kind":"Name","value":"url"}}},{"kind":"Argument","name":{"kind":"Name","value":"phrase"},"value":{"kind":"Variable","name":{"kind":"Name","value":"phrase"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"expire"}}]}}]}}]} as unknown as DocumentNode<CreateMagicUrlTokenMutation, CreateMagicUrlTokenMutationVariables>;
 export const CreateMfaAuthenticatorDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateMfaAuthenticator"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"type"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"accountCreateMfaAuthenticator"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"type"},"value":{"kind":"Variable","name":{"kind":"Name","value":"type"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"secret"}},{"kind":"Field","name":{"kind":"Name","value":"uri"}}]}}]}}]} as unknown as DocumentNode<CreateMfaAuthenticatorMutation, CreateMfaAuthenticatorMutationVariables>;
-export const CreateMfaChallengeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateMfaChallenge"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"factor"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"accountCreateMfaChallenge"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"factor"},"value":{"kind":"Variable","name":{"kind":"Name","value":"factor"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"expire"}}]}}]}}]} as unknown as DocumentNode<CreateMfaChallengeMutation, CreateMfaChallengeMutationVariables>;
+export const CreateMfaChallengeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateMfaChallenge"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"factor"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"accountCreateMfaChallenge"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"factor"},"value":{"kind":"Variable","name":{"kind":"Name","value":"factor"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"expire"}}]}}]}}]} as unknown as DocumentNode<CreateMfaChallengeMutation, CreateMfaChallengeMutationVariables>;
 export const CreateMfaRecoveryCodesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateMfaRecoveryCodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"accountCreateMfaRecoveryCodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"recoveryCodes"}}]}}]}}]} as unknown as DocumentNode<CreateMfaRecoveryCodesMutation, CreateMfaRecoveryCodesMutationVariables>;
 export const CreatePhoneTokenDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreatePhoneToken"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"phone"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"accountCreatePhoneToken"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"userId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userId"}}},{"kind":"Argument","name":{"kind":"Name","value":"phone"},"value":{"kind":"Variable","name":{"kind":"Name","value":"phone"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"expire"}}]}}]}}]} as unknown as DocumentNode<CreatePhoneTokenMutation, CreatePhoneTokenMutationVariables>;
 export const CreatePhoneVerificationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreatePhoneVerification"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"accountCreatePhoneVerification"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"expire"}}]}}]}}]} as unknown as DocumentNode<CreatePhoneVerificationMutation, CreatePhoneVerificationMutationVariables>;
@@ -1771,7 +1733,7 @@ export const UpdateEmailVerificationDocument = {"kind":"Document","definitions":
 export const UpdateMagicUrlSessionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateMagicURLSession"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"secret"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"accountUpdateMagicURLSession"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"userId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userId"}}},{"kind":"Argument","name":{"kind":"Name","value":"secret"},"value":{"kind":"Variable","name":{"kind":"Name","value":"secret"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"expire"}},{"kind":"Field","name":{"kind":"Name","value":"current"}}]}}]}}]} as unknown as DocumentNode<UpdateMagicUrlSessionMutation, UpdateMagicUrlSessionMutationVariables>;
 export const UpdateMfaDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateMFA"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"mfa"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"accountUpdateMFA"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"mfa"},"value":{"kind":"Variable","name":{"kind":"Name","value":"mfa"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"mfa"}}]}}]}}]} as unknown as DocumentNode<UpdateMfaMutation, UpdateMfaMutationVariables>;
 export const UpdateMfaAuthenticatorDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateMfaAuthenticator"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"type"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"otp"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"accountUpdateMfaAuthenticator"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"type"},"value":{"kind":"Variable","name":{"kind":"Name","value":"type"}}},{"kind":"Argument","name":{"kind":"Name","value":"otp"},"value":{"kind":"Variable","name":{"kind":"Name","value":"otp"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"mfa"}}]}}]}}]} as unknown as DocumentNode<UpdateMfaAuthenticatorMutation, UpdateMfaAuthenticatorMutationVariables>;
-export const UpdateMfaChallengeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateMfaChallenge"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"challengeId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"otp"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"accountUpdateMfaChallenge"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"challengeId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"challengeId"}}},{"kind":"Argument","name":{"kind":"Name","value":"otp"},"value":{"kind":"Variable","name":{"kind":"Name","value":"otp"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<UpdateMfaChallengeMutation, UpdateMfaChallengeMutationVariables>;
+export const UpdateMfaChallengeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateMfaChallenge"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"challengeId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"otp"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"accountUpdateMfaChallenge"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"challengeId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"challengeId"}}},{"kind":"Argument","name":{"kind":"Name","value":"otp"},"value":{"kind":"Variable","name":{"kind":"Name","value":"otp"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"expire"}},{"kind":"Field","name":{"kind":"Name","value":"current"}}]}}]}}]} as unknown as DocumentNode<UpdateMfaChallengeMutation, UpdateMfaChallengeMutationVariables>;
 export const UpdateMfaRecoveryCodesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateMfaRecoveryCodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"accountUpdateMfaRecoveryCodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"recoveryCodes"}}]}}]}}]} as unknown as DocumentNode<UpdateMfaRecoveryCodesMutation, UpdateMfaRecoveryCodesMutationVariables>;
 export const UpdateNameDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateName"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"name"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"accountUpdateName"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"name"},"value":{"kind":"Variable","name":{"kind":"Name","value":"name"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]} as unknown as DocumentNode<UpdateNameMutation, UpdateNameMutationVariables>;
 export const UpdatePasswordDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdatePassword"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"password"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"oldPassword"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"accountUpdatePassword"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"password"},"value":{"kind":"Variable","name":{"kind":"Name","value":"password"}}},{"kind":"Argument","name":{"kind":"Name","value":"oldPassword"},"value":{"kind":"Variable","name":{"kind":"Name","value":"oldPassword"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<UpdatePasswordMutation, UpdatePasswordMutationVariables>;
@@ -1800,8 +1762,7 @@ export const UpdateDocumentDocument = {"kind":"Document","definitions":[{"kind":
 export const UpdateDocumentsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateDocuments"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"databaseId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"collectionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"data"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Json"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"queries"}},"type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"databasesUpdateDocuments"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"databaseId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"databaseId"}}},{"kind":"Argument","name":{"kind":"Name","value":"collectionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"collectionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"data"},"value":{"kind":"Variable","name":{"kind":"Name","value":"data"}}},{"kind":"Argument","name":{"kind":"Name","value":"queries"},"value":{"kind":"Variable","name":{"kind":"Name","value":"queries"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"documents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}}]}}]}}]}}]} as unknown as DocumentNode<UpdateDocumentsMutation, UpdateDocumentsMutationVariables>;
 export const UpdateTransactionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateTransaction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"transactionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"commit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"rollback"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"databasesUpdateTransaction"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"transactionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"transactionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"commit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"commit"}}},{"kind":"Argument","name":{"kind":"Name","value":"rollback"},"value":{"kind":"Variable","name":{"kind":"Name","value":"rollback"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"operations"}}]}}]}}]} as unknown as DocumentNode<UpdateTransactionMutation, UpdateTransactionMutationVariables>;
 export const UpsertDocumentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpsertDocument"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"databaseId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"collectionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"documentId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"data"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Json"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"permissions"}},"type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"databasesUpsertDocument"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"databaseId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"databaseId"}}},{"kind":"Argument","name":{"kind":"Name","value":"collectionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"collectionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"documentId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"documentId"}}},{"kind":"Argument","name":{"kind":"Name","value":"data"},"value":{"kind":"Variable","name":{"kind":"Name","value":"data"}}},{"kind":"Argument","name":{"kind":"Name","value":"permissions"},"value":{"kind":"Variable","name":{"kind":"Name","value":"permissions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}}]}}]}}]} as unknown as DocumentNode<UpsertDocumentMutation, UpsertDocumentMutationVariables>;
-export const UpsertDocumentsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpsertDocuments"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"databaseId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"collectionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"documents"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Json"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"databasesUpsertDocuments"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"databaseId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"databaseId"}}},{"kind":"Argument","name":{"kind":"Name","value":"collectionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"collectionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"documents"},"value":{"kind":"Variable","name":{"kind":"Name","value":"documents"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"documents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}}]}}]}}]}}]} as unknown as DocumentNode<UpsertDocumentsMutation, UpsertDocumentsMutationVariables>;
-export const CreateExecutionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateExecution"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"functionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"body"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"async"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"path"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"method"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"functionsCreateExecution"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"functionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"functionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"body"},"value":{"kind":"Variable","name":{"kind":"Name","value":"body"}}},{"kind":"Argument","name":{"kind":"Name","value":"async"},"value":{"kind":"Variable","name":{"kind":"Name","value":"async"}}},{"kind":"Argument","name":{"kind":"Name","value":"path"},"value":{"kind":"Variable","name":{"kind":"Name","value":"path"}}},{"kind":"Argument","name":{"kind":"Name","value":"method"},"value":{"kind":"Variable","name":{"kind":"Name","value":"method"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"responseStatusCode"}},{"kind":"Field","name":{"kind":"Name","value":"responseBody"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}}]}}]}}]} as unknown as DocumentNode<CreateExecutionMutation, CreateExecutionMutationVariables>;
+export const CreateExecutionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateExecution"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"functionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"body"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"async"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"path"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"method"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"headers"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Json"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"scheduledAt"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"functionsCreateExecution"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"functionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"functionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"body"},"value":{"kind":"Variable","name":{"kind":"Name","value":"body"}}},{"kind":"Argument","name":{"kind":"Name","value":"async"},"value":{"kind":"Variable","name":{"kind":"Name","value":"async"}}},{"kind":"Argument","name":{"kind":"Name","value":"path"},"value":{"kind":"Variable","name":{"kind":"Name","value":"path"}}},{"kind":"Argument","name":{"kind":"Name","value":"method"},"value":{"kind":"Variable","name":{"kind":"Name","value":"method"}}},{"kind":"Argument","name":{"kind":"Name","value":"headers"},"value":{"kind":"Variable","name":{"kind":"Name","value":"headers"}}},{"kind":"Argument","name":{"kind":"Name","value":"scheduledAt"},"value":{"kind":"Variable","name":{"kind":"Name","value":"scheduledAt"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"responseStatusCode"}},{"kind":"Field","name":{"kind":"Name","value":"responseBody"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}}]}}]}}]} as unknown as DocumentNode<CreateExecutionMutation, CreateExecutionMutationVariables>;
 export const GetFunctionExecutionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFunctionExecution"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"functionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"executionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"functionsGetExecution"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"functionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"functionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"executionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"executionId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"responseBody"}},{"kind":"Field","name":{"kind":"Name","value":"requestPath"}}]}}]}}]} as unknown as DocumentNode<GetFunctionExecutionQuery, GetFunctionExecutionQueryVariables>;
 export const GetExecutionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetExecution"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"functionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"executionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"functionsGetExecution"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"functionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"functionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"executionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"executionId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"_createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"_updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"functionId"}},{"kind":"Field","name":{"kind":"Name","value":"trigger"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"requestMethod"}},{"kind":"Field","name":{"kind":"Name","value":"requestPath"}},{"kind":"Field","name":{"kind":"Name","value":"responseStatusCode"}},{"kind":"Field","name":{"kind":"Name","value":"responseBody"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}}]}}]}}]} as unknown as DocumentNode<GetExecutionQuery, GetExecutionQueryVariables>;
 export const ListExecutionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListExecutions"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"functionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"queries"}},"type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"functionsListExecutions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"functionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"functionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"queries"},"value":{"kind":"Variable","name":{"kind":"Name","value":"queries"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"executions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"_createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"_updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"functionId"}},{"kind":"Field","name":{"kind":"Name","value":"trigger"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"requestMethod"}},{"kind":"Field","name":{"kind":"Name","value":"requestPath"}},{"kind":"Field","name":{"kind":"Name","value":"responseStatusCode"}},{"kind":"Field","name":{"kind":"Name","value":"responseBody"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}}]}}]}}]}}]} as unknown as DocumentNode<ListExecutionsQuery, ListExecutionsQueryVariables>;
@@ -1813,7 +1774,6 @@ export const ListCountriesEuDocument = {"kind":"Document","definitions":[{"kind"
 export const ListCountriesPhonesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListCountriesPhones"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"localeListCountriesPhones"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"phones"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"countryCode"}},{"kind":"Field","name":{"kind":"Name","value":"countryName"}}]}}]}}]}}]} as unknown as DocumentNode<ListCountriesPhonesQuery, ListCountriesPhonesQueryVariables>;
 export const ListCurrenciesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListCurrencies"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"localeListCurrencies"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"currencies"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"symbol"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"symbolNative"}},{"kind":"Field","name":{"kind":"Name","value":"decimalDigits"}},{"kind":"Field","name":{"kind":"Name","value":"rounding"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"namePlural"}}]}}]}}]}}]} as unknown as DocumentNode<ListCurrenciesQuery, ListCurrenciesQueryVariables>;
 export const ListLanguagesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListLanguages"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"localeListLanguages"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"languages"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"nativeName"}}]}}]}}]}}]} as unknown as DocumentNode<ListLanguagesQuery, ListLanguagesQueryVariables>;
-export const CreateFileDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateFile"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"bucketId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"fileId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"file"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"permissions"}},"type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"storageCreateFile"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"bucketId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"bucketId"}}},{"kind":"Argument","name":{"kind":"Name","value":"fileId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"fileId"}}},{"kind":"Argument","name":{"kind":"Name","value":"file"},"value":{"kind":"Variable","name":{"kind":"Name","value":"file"}}},{"kind":"Argument","name":{"kind":"Name","value":"permissions"},"value":{"kind":"Variable","name":{"kind":"Name","value":"permissions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"bucketId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"mimeType"}},{"kind":"Field","name":{"kind":"Name","value":"sizeOriginal"}}]}}]}}]} as unknown as DocumentNode<CreateFileMutation, CreateFileMutationVariables>;
 export const DeleteFileDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteFile"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"bucketId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"fileId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"storageDeleteFile"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"bucketId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"bucketId"}}},{"kind":"Argument","name":{"kind":"Name","value":"fileId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"fileId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<DeleteFileMutation, DeleteFileMutationVariables>;
 export const GetFileDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFile"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"bucketId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"fileId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"storageGetFile"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"bucketId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"bucketId"}}},{"kind":"Argument","name":{"kind":"Name","value":"fileId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"fileId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"bucketId"}},{"kind":"Field","name":{"kind":"Name","value":"_createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"_updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"_permissions"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"signature"}},{"kind":"Field","name":{"kind":"Name","value":"mimeType"}},{"kind":"Field","name":{"kind":"Name","value":"sizeOriginal"}},{"kind":"Field","name":{"kind":"Name","value":"chunksTotal"}},{"kind":"Field","name":{"kind":"Name","value":"chunksUploaded"}}]}}]}}]} as unknown as DocumentNode<GetFileQuery, GetFileQueryVariables>;
 export const ListFilesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListFiles"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"bucketId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"queries"}},"type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"search"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"storageListFiles"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"bucketId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"bucketId"}}},{"kind":"Argument","name":{"kind":"Name","value":"queries"},"value":{"kind":"Variable","name":{"kind":"Name","value":"queries"}}},{"kind":"Argument","name":{"kind":"Name","value":"search"},"value":{"kind":"Variable","name":{"kind":"Name","value":"search"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"files"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"bucketId"}},{"kind":"Field","name":{"kind":"Name","value":"_createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"_updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"_permissions"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"signature"}},{"kind":"Field","name":{"kind":"Name","value":"mimeType"}},{"kind":"Field","name":{"kind":"Name","value":"sizeOriginal"}},{"kind":"Field","name":{"kind":"Name","value":"chunksTotal"}},{"kind":"Field","name":{"kind":"Name","value":"chunksUploaded"}}]}}]}}]}}]} as unknown as DocumentNode<ListFilesQuery, ListFilesQueryVariables>;

@@ -1,7 +1,6 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import { UpdateFileMutation, UpdateFileMutationVariables } from '../__generated__/graphql'
+import type { UpdateFileMutation, UpdateFileMutationVariables } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -49,7 +48,7 @@ export function useUpdateFile() {
       return data.storageUpdateFile
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: ['appwrite', 'storage', variables.bucketId, 'files'],
       })
     },

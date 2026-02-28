@@ -1,24 +1,36 @@
+import { within } from '@testing-library/dom'
 import { act, renderHook, waitFor } from '@testing-library/react'
-import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
+import { afterAll, afterEach, beforeAll, describe, expect, test } from 'bun:test'
+import { URLSearchParams } from 'happy-dom'
 import { Client as ServerClient, ID as ServerID, Teams as ServerTeams } from 'node-appwrite'
 
 import {
   useCreateMembership,
   useCreateTeam,
+  useDeleteMembership,
   useDeleteTeam,
-  useLogin,
   useTeam,
+  useTeamMembership,
   useTeamMemberships,
   useTeamPrefs,
   useTeams,
+  useUpdateMembership,
+  useUpdateMembershipStatus,
   useUpdateTeamName,
-  useUpdateTeamPrefs
+  useUpdateTeamPrefs,
 } from '../../src'
 import { ID } from '../../src/types'
-import { createTestUser, deleteTestUser, getTestConfig } from '../setup/helpers'
+import {
+  checkMail,
+  createTestUser,
+  deleteTestUser,
+  emptyMail,
+  getTestConfig,
+  loginUser,
+  logoutUser,
+  renderMessage,
+} from '../setup/helpers'
 import { createWrapper } from '../setup/wrapper'
-
-type Wrapper = ReturnType<typeof createWrapper>
 
 function createServerTeams() {
   const config = getTestConfig()
@@ -27,16 +39,6 @@ function createServerTeams() {
     .setProject(config.projectId)
     .setKey(config.apiKey)
   return new ServerTeams(client)
-}
-
-async function loginUser(email: string, password: string, wrapper: Wrapper) {
-  const { result } = renderHook(() => useLogin(), { wrapper })
-
-  await act(async () => {
-    result.current.login.mutateAsync({ email, password })
-  })
-
-  await waitFor(() => expect(result.current.login.isSuccess).toBe(true))
 }
 
 describe('Teams hooks', () => {
@@ -56,7 +58,7 @@ describe('Teams hooks', () => {
     const teams = createServerTeams()
     for (const teamId of createdTeamIds) {
       try {
-        await teams.delete(teamId)
+        await teams.delete({ teamId })
       } catch {
         // Team may already be deleted
       }
@@ -74,7 +76,7 @@ describe('Teams hooks', () => {
       const teamId = ID.unique()
 
       await act(async () => {
-        result.current.mutateAsync({ teamId, name: 'Test Team' })
+        await result.current.mutateAsync({ teamId, name: 'Test Team' })
       })
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -95,7 +97,7 @@ describe('Teams hooks', () => {
       const { result: createResult } = renderHook(() => useCreateTeam(), { wrapper })
       const teamId = ID.unique()
       await act(async () => {
-        createResult.current.mutateAsync({ teamId, name: 'List Test Team' })
+        await createResult.current.mutateAsync({ teamId, name: 'List Test Team' })
       })
       await waitFor(() => expect(createResult.current.isSuccess).toBe(true))
       createdTeamIds.push(teamId)
@@ -147,7 +149,7 @@ describe('Teams hooks', () => {
       const { result: createResult } = renderHook(() => useCreateTeam(), { wrapper })
       const teamId = ID.unique()
       await act(async () => {
-        createResult.current.mutateAsync({ teamId, name: 'Old Name' })
+        await createResult.current.mutateAsync({ teamId, name: 'Old Name' })
       })
       await waitFor(() => expect(createResult.current.isSuccess).toBe(true))
       createdTeamIds.push(teamId)
@@ -155,7 +157,7 @@ describe('Teams hooks', () => {
       const { result } = renderHook(() => useUpdateTeamName(), { wrapper })
 
       await act(async () => {
-        result.current.mutateAsync({ teamId, name: 'New Name' })
+        await result.current.mutateAsync({ teamId, name: 'New Name' })
       })
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -186,7 +188,7 @@ describe('Teams hooks', () => {
       const { result: updateResult } = renderHook(() => useUpdateTeamPrefs(), { wrapper })
 
       await act(async () => {
-        updateResult.current.mutateAsync({ teamId, prefs: { color: 'blue' } })
+        await updateResult.current.mutateAsync({ teamId, prefs: { color: 'blue' } })
       })
 
       await waitFor(() => expect(updateResult.current.isSuccess).toBe(true))
@@ -208,14 +210,14 @@ describe('Teams hooks', () => {
       const { result: createResult } = renderHook(() => useCreateTeam(), { wrapper })
       const teamId = ID.unique()
       await act(async () => {
-        createResult.current.mutateAsync({ teamId, name: 'Delete Me' })
+        await createResult.current.mutateAsync({ teamId, name: 'Delete Me' })
       })
       await waitFor(() => expect(createResult.current.isSuccess).toBe(true))
 
       const { result } = renderHook(() => useDeleteTeam(), { wrapper })
 
       await act(async () => {
-        result.current.mutateAsync({ teamId })
+        await result.current.mutateAsync({ teamId })
       })
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -235,6 +237,11 @@ describe('Teams hooks', () => {
 
       // Add the test user as owner
       await teams.createMembership({ teamId, roles: ['owner'], email: userEmail })
+    })
+
+    afterEach(async () => {
+      await emptyMail()
+      document.body.innerHTML = ''
     })
 
     test('lists team memberships', async () => {
@@ -268,14 +275,142 @@ describe('Teams hooks', () => {
         })
       })
 
-      // SMTP is not configured in test env, so this may fail with SMTP error
-      // We verify the hook executes and returns either success or a known SMTP error
       await waitFor(() => expect(result.current.isSuccess || result.current.isError).toBe(true))
 
       if (result.current.isSuccess) {
         expect(result.current.data).toBeDefined()
         expect(result.current.data?.teamId).toBe(teamId)
       }
+
+      await deleteTestUser(invited.userId)
+    })
+
+    test('updates team memberships after creating a membership', async () => {
+      const wrapper = createWrapper()
+      await loginUser(userEmail, userPassword, wrapper)
+
+      // Create another user to invite
+      const invited = await createTestUser({ name: 'Membership Update Test User' })
+
+      const { result } = renderHook(() => useCreateMembership(), { wrapper })
+
+      await act(async () => {
+        result.current.mutate({
+          teamId,
+          roles: ['member'],
+          userId: invited.userId,
+          url: 'http://localhost/accept',
+        })
+      })
+
+      await waitFor(() => expect(result.current.isSuccess || result.current.isError).toBe(true))
+
+      const { result: membershipsResult } = renderHook(() => useUpdateMembership(), { wrapper })
+
+      await act(async () => {
+        await membershipsResult.current.mutateAsync({
+          teamId,
+          membershipId: result.current.data?._id || '',
+          roles: ['admin'],
+        })
+      })
+
+      await waitFor(() => expect(membershipsResult.current.isSuccess).toBe(true))
+
+      expect(membershipsResult.current.data).toBeDefined()
+      expect(membershipsResult.current.data?.roles).toContain('admin')
+    })
+
+    test('acknowledges invite email', async () => {
+      const wrapper = createWrapper()
+      await loginUser(userEmail, userPassword, wrapper)
+
+      // Create another user to invite
+      const invited = await createTestUser({ name: 'Membership Update Test User' })
+
+      const { result } = renderHook(() => useCreateMembership(), { wrapper })
+
+      await act(async () => {
+        result.current.mutate({
+          teamId,
+          roles: ['member'],
+          userId: invited.userId,
+          url: 'http://localhost/accept',
+        })
+      })
+
+      await waitFor(() => expect(result.current.isSuccess || result.current.isError).toBe(true))
+
+      await logoutUser(wrapper)
+
+      const message = await waitFor(async () => {
+        const emails = await checkMail()
+        expect(emails.messages.length).toBeGreaterThan(0)
+        return emails.messages[0]
+      })
+
+      await renderMessage(message.ID)
+      const emailBody = within(document.body)
+
+      expect(emailBody.getByText(/Accept invite to Membership Team Test/)).toBeDefined()
+
+      const button = emailBody.getByText(/Accept invite to Membership Team Test/)
+
+      expect(button.getAttribute('href')).toBeDefined()
+
+      const url = new URL(button.getAttribute('href') || '')
+      expect(url.pathname).toBe('/accept')
+
+      const params = new URLSearchParams(url.search)
+
+      expect(params.get('teamId')).toBe(teamId)
+      expect(params.get('membershipId')).toBe(result.current.data?._id)
+      expect(params.get('userId')).toBe(invited.userId)
+      expect(params.get('secret')).toBeDefined()
+
+      const { result: updateMembershipStatusResult } = renderHook(
+        () => useUpdateMembershipStatus(),
+        { wrapper },
+      )
+
+      await act(async () => {
+        await updateMembershipStatusResult.current.mutateAsync({
+          teamId,
+          membershipId: result.current.data?._id || '',
+          userId: invited.userId,
+          secret: params.get('secret') || '',
+        })
+      })
+
+      await waitFor(() =>
+        expect(
+          updateMembershipStatusResult.current.isSuccess ||
+            updateMembershipStatusResult.current.isError,
+        ).toBe(true),
+      )
+
+      const { result: teamMembershipResult } = renderHook(
+        () => useTeamMembership({ teamId, membershipId: result.current.data?._id || '' }),
+        { wrapper },
+      )
+
+      await waitFor(() => expect(teamMembershipResult.current.isSuccess).toBe(true))
+
+      expect(teamMembershipResult.current.data).toBeDefined()
+      expect(teamMembershipResult.current.data?.teamName).toBe('Membership Team Test')
+
+      const { result: deleteMembershipResult } = renderHook(() => useDeleteMembership(), {
+        wrapper,
+      })
+
+      await act(async () => {
+        await deleteMembershipResult.current.mutateAsync({
+          teamId,
+          membershipId: result.current.data?._id || '',
+        })
+      })
+
+      await waitFor(() => expect(deleteMembershipResult.current.isSuccess).toBe(true))
 
       await deleteTestUser(invited.userId)
     })

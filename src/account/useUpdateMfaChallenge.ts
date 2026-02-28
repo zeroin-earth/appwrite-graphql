@@ -1,17 +1,19 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import {
+import type {
   UpdateMfaChallengeMutation,
   UpdateMfaChallengeMutationVariables,
 } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 
 const accountUpdateMfaChallenge = gql(/* GraphQL */ `
   mutation UpdateMfaChallenge($challengeId: String!, $otp: String!) {
     accountUpdateMfaChallenge(challengeId: $challengeId, otp: $otp) {
-      status
+      _id
+      userId
+      expire
+      current
     }
   }
 `)
@@ -37,7 +39,7 @@ export function useUpdateMfaChallenge() {
         throw errors
       }
 
-      return data?.accountUpdateMfaChallenge ?? { status: false }
+      return data?.accountUpdateMfaChallenge ?? null
     },
   })
 

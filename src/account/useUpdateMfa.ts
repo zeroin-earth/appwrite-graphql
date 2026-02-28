@@ -1,7 +1,6 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import { UpdateMfaMutation, UpdateMfaMutationVariables } from '../__generated__/graphql'
+import type { UpdateMfaMutation, UpdateMfaMutationVariables } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -38,8 +37,8 @@ export function useUpdateMfa() {
       return data.accountUpdateMFA
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'mfa'] })
+      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'mfa'] })
     },
   })
 

@@ -1,9 +1,9 @@
 import { gql } from '../__generated__'
-import {
+import type {
   CreateMagicUrlTokenMutation,
   CreateMagicUrlTokenMutationVariables,
 } from '../__generated__/graphql'
-import { AppwriteException } from '../types'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 

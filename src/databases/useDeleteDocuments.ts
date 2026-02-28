@@ -1,20 +1,15 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import {
+import type {
   DeleteDocumentsMutation,
   DeleteDocumentsMutationVariables,
 } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
 const deleteDocuments = gql(/* GraphQL */ `
-  mutation DeleteDocuments(
-    $databaseId: String!
-    $collectionId: String!
-    $queries: [String!]
-  ) {
+  mutation DeleteDocuments($databaseId: String!, $collectionId: String!, $queries: [String!]) {
     databasesDeleteDocuments(
       databaseId: $databaseId
       collectionId: $collectionId
@@ -54,7 +49,7 @@ export function useDeleteDocuments() {
       return mutationData?.databasesDeleteDocuments ?? { total: 0, documents: [] }
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: ['appwrite', 'databases', variables.databaseId, variables.collectionId],
       })
     },

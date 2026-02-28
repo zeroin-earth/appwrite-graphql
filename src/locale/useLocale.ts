@@ -1,7 +1,6 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import { GetLocaleQuery } from '../__generated__/graphql'
+import type { GetLocaleQuery } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 

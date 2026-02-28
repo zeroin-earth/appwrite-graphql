@@ -1,4 +1,4 @@
-import { QueryClient } from '@tanstack/react-query'
+import type { QueryClient } from '@tanstack/react-query'
 import { useHydrateAtoms } from 'jotai/utils'
 
 import { appwriteAtom } from './states/appwrite'

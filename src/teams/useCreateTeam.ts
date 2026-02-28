@@ -1,7 +1,6 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import { CreateTeamMutation, CreateTeamMutationVariables } from '../__generated__/graphql'
+import type { CreateTeamMutation, CreateTeamMutationVariables } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -38,7 +37,7 @@ export function useCreateTeam() {
       return data.teamsCreate
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'teams'] })
+      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'teams'] })
     },
   })
 

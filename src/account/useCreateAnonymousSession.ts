@@ -1,6 +1,6 @@
 import { gql } from '../__generated__'
-import { CreateAnonymousSessionMutation } from '../__generated__/graphql'
-import { AppwriteException } from '../types'
+import type { CreateAnonymousSessionMutation } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -35,8 +35,8 @@ export function useCreateAnonymousSession() {
       return data.accountCreateAnonymousSession
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'sessions'] })
+      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'sessions'] })
     },
   })
 

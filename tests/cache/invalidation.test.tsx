@@ -8,26 +8,19 @@ import {
   useCollection,
   useCreateDocument,
   useDeleteDocument,
-  useLogin,
   useLogout,
   useUpdateName,
   useUpdatePrefs,
 } from '../../src'
 import { ID } from '../../src/types'
-import { createTestDocument, createTestUser, deleteTestUser, getTestConfig } from '../setup/helpers'
+import {
+  createTestDocument,
+  createTestUser,
+  deleteTestUser,
+  getTestConfig,
+  loginUser,
+} from '../setup/helpers'
 import { createQueryClient, createWrapper } from '../setup/wrapper'
-
-async function loginUser(
-  email: string,
-  password: string,
-  wrapper: ReturnType<typeof createWrapper>,
-) {
-  const { result } = renderHook(() => useLogin(), { wrapper })
-  await act(async () => {
-    result.current.login.mutateAsync({ email, password })
-  })
-  await waitFor(() => expect(result.current.login.isSuccess).toBe(true))
-}
 
 describe('Cache invalidation', () => {
   let user: Awaited<ReturnType<typeof createTestUser>>

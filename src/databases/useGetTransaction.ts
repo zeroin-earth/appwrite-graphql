@@ -1,7 +1,6 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import { GetTransactionQuery, GetTransactionQueryVariables } from '../__generated__/graphql'
+import type { GetTransactionQuery, GetTransactionQueryVariables } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 

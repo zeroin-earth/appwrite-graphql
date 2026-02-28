@@ -11,19 +11,31 @@ const ADMIN_PASSWORD = 'password123456'
 const PROJECT_ID = 'test-project'
 const DATABASE_ID = 'test-db'
 const COLLECTION_ID = 'test-collection'
+const BUCKET_ID = 'test-bucket'
 
 const ALL_SCOPES = [
-  'users.read', 'users.write',
-  'teams.read', 'teams.write',
-  'databases.read', 'databases.write',
-  'collections.read', 'collections.write',
-  'attributes.read', 'attributes.write',
-  'indexes.read', 'indexes.write',
-  'documents.read', 'documents.write',
-  'files.read', 'files.write',
-  'buckets.read', 'buckets.write',
-  'functions.read', 'functions.write',
-  'execution.read', 'execution.write',
+  'users.read',
+  'users.write',
+  'teams.read',
+  'teams.write',
+  'databases.read',
+  'databases.write',
+  'collections.read',
+  'collections.write',
+  'attributes.read',
+  'attributes.write',
+  'indexes.read',
+  'indexes.write',
+  'documents.read',
+  'documents.write',
+  'files.read',
+  'files.write',
+  'buckets.read',
+  'buckets.write',
+  'functions.read',
+  'functions.write',
+  'execution.read',
+  'execution.write',
   'locale.read',
   'avatars.read',
   'health.read',
@@ -66,7 +78,11 @@ async function createAdminAccount(): Promise<string> {
 
   if (!resp.ok) {
     const body = await resp.text()
-    if (body.includes('already exists') || body.includes('user_already_exists') || body.includes('user_console_count_exceeded')) {
+    if (
+      body.includes('already exists') ||
+      body.includes('user_already_exists') ||
+      body.includes('user_console_count_exceeded')
+    ) {
       console.log('Admin account already exists, logging in...')
       return loginAdmin()
     }
@@ -282,6 +298,41 @@ async function setupDatabase(apiKey: string) {
   console.log('Database setup complete!')
 }
 
+async function setupBucket(apiKey: string) {
+  console.log('Setting up storage bucket...')
+
+  const resp = await fetch(`${ENDPOINT}/storage/buckets`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Appwrite-Project': PROJECT_ID,
+      'X-Appwrite-Key': apiKey,
+    },
+    body: JSON.stringify({
+      bucketId: BUCKET_ID,
+      name: 'Test Bucket',
+      fileSecurity: true,
+      permissions: [
+        Permission.read(Role.any()),
+        Permission.create(Role.users()),
+        Permission.update(Role.users()),
+        Permission.delete(Role.users()),
+      ],
+    }),
+  })
+
+  if (!resp.ok) {
+    const body = await resp.text()
+    if (body.includes('already exists') || body.includes('storage_bucket_already_exists')) {
+      console.log('Bucket already exists')
+      return
+    }
+    throw new Error(`Failed to create bucket: ${body}`)
+  }
+
+  console.log(`Bucket "${BUCKET_ID}" created!`)
+}
+
 async function main() {
   await waitForAppwrite()
 
@@ -290,6 +341,7 @@ async function main() {
   await createProject(cookies, teamId)
   const apiKey = await createApiKey(cookies)
   await setupDatabase(apiKey)
+  await setupBucket(apiKey)
 
   // Output env vars for tests
   console.log('\n=== Test Configuration ===')
@@ -308,6 +360,7 @@ async function main() {
     apiKey,
     databaseId: DATABASE_ID,
     collectionId: COLLECTION_ID,
+    bucketId: BUCKET_ID,
   }
 
   await Bun.write('tests/.test-config.json', JSON.stringify(config, null, 2))

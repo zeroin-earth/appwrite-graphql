@@ -1,12 +1,11 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import {
+import type {
   CreateDocumentMutation,
   InputMaybe,
   Scalars,
   UpdateDocumentMutationVariables,
 } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -31,7 +30,7 @@ const updateDocument = gql(/* GraphQL */ `
   }
 `)
 
-export function useUpdateDocument<TDocument>() {
+export function useUpdateDocument() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
@@ -57,10 +56,11 @@ export function useUpdateDocument<TDocument>() {
       if (errors) {
         throw errors
       }
+
       return mutationData.databasesUpdateDocument
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: ['appwrite', 'databases', variables.databaseId, variables.collectionId],
       })
     },

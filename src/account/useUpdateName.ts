@@ -1,9 +1,9 @@
 import { gql } from '../__generated__'
-import { UpdateNameMutation, UpdateNameMutationVariables, User } from '../__generated__/graphql'
+import type { UpdateNameMutation, UpdateNameMutationVariables } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
-import { AppwriteException } from '../types'
 
 const accountUpdateName = gql(/* GraphQL */ `
   mutation UpdateName($name: String!) {
@@ -37,7 +37,7 @@ export function useUpdateName() {
       return mutationData.accountUpdateName
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
     },
   })
 

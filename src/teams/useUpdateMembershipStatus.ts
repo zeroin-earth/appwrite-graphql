@@ -1,10 +1,9 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import {
+import type {
   UpdateMembershipStatusMutation,
   UpdateMembershipStatusMutationVariables,
 } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -50,7 +49,7 @@ export function useUpdateMembershipStatus() {
       return data.teamsUpdateMembershipStatus
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: ['appwrite', 'teams', variables.teamId, 'memberships'],
       })
     },

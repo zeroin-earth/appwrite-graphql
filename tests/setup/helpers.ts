@@ -1,5 +1,18 @@
+import { act, renderHook, waitFor as waitForTest } from '@testing-library/react'
+import { expect } from 'bun:test'
+import { MailpitClient } from 'mailpit-api'
 import { existsSync, readFileSync } from 'node:fs'
-import { Client, Account, Databases, Users, ID } from 'node-appwrite'
+import { Account, Client, Databases, ID, TablesDB, Users } from 'node-appwrite'
+import { TOTP } from 'otpauth'
+
+import type { createWrapper } from './wrapper'
+import {
+  useCreateMfaAuthenticator,
+  useLogin,
+  useLogout,
+  useUpdateMfa,
+  useUpdateMfaAuthenticator,
+} from '../../src'
 
 type TestConfig = {
   endpoint: string
@@ -10,6 +23,8 @@ type TestConfig = {
 }
 
 let _config: TestConfig | null = null
+
+const mailpit = new MailpitClient('http://localhost:8025')
 
 export function getTestConfig(): TestConfig {
   if (_config) return _config
@@ -35,13 +50,17 @@ export function getTestConfig(): TestConfig {
 /** Create a server-side Appwrite client with API key */
 export function createServerClient() {
   const config = getTestConfig()
-  const client = new Client().setEndpoint(config.endpoint).setProject(config.projectId).setKey(config.apiKey)
+  const client = new Client()
+    .setEndpoint(config.endpoint)
+    .setProject(config.projectId)
+    .setKey(config.apiKey)
 
   return {
     client,
     databases: new Databases(client),
     users: new Users(client),
     account: new Account(client),
+    tablesDB: new TablesDB(client),
   }
 }
 
@@ -56,7 +75,7 @@ export async function createTestUser(opts?: { name?: string }) {
   const name = opts?.name || `Test User ${_userCounter}`
 
   const { users } = createServerClient()
-  const user = await users.create(ID.unique(), email, undefined, password, name)
+  const user = await users.create({ userId: ID.unique(), email, password, name })
 
   return { userId: user.$id, email, password, name }
 }
@@ -65,7 +84,7 @@ export async function createTestUser(opts?: { name?: string }) {
 export async function deleteTestUser(userId: string) {
   const { users } = createServerClient()
   try {
-    await users.delete(userId)
+    await users.delete({ userId })
   } catch {
     // User may already be deleted
   }
@@ -74,28 +93,116 @@ export async function deleteTestUser(userId: string) {
 /** Create a test document via server SDK */
 export async function createTestDocument(data: Record<string, unknown>, documentId?: string) {
   const config = getTestConfig()
-  const { databases } = createServerClient()
+  const { tablesDB } = createServerClient()
 
-  return databases.createDocument(config.databaseId, config.collectionId, documentId || ID.unique(), data)
+  return tablesDB.createRow({
+    databaseId: config.databaseId,
+    tableId: config.collectionId,
+    rowId: documentId || ID.unique(),
+    data,
+  })
 }
 
 /** Delete a test document via server SDK */
 export async function deleteTestDocument(documentId: string) {
   const config = getTestConfig()
-  const { databases } = createServerClient()
+  const { tablesDB } = createServerClient()
   try {
-    await databases.deleteDocument(config.databaseId, config.collectionId, documentId)
+    await tablesDB.deleteRow({
+      databaseId: config.databaseId,
+      tableId: config.collectionId,
+      rowId: documentId,
+    })
   } catch {
     // Document may already be deleted
   }
 }
 
 /** Wait for a condition to be true, with timeout */
-export async function waitFor(fn: () => boolean | Promise<boolean>, timeoutMs = 10000, intervalMs = 100) {
+export async function waitFor(
+  fn: () => boolean | Promise<boolean>,
+  timeoutMs = 10000,
+  intervalMs = 100,
+) {
   const start = Date.now()
   while (Date.now() - start < timeoutMs) {
     if (await fn()) return
     await new Promise((r) => setTimeout(r, intervalMs))
   }
   throw new Error(`waitFor timed out after ${timeoutMs}ms`)
+}
+
+export function generateTOTP(secret: string): string {
+  const totp = new TOTP({ secret, algorithm: 'SHA1', digits: 6, period: 30 })
+  return totp.generate()
+}
+
+export async function setupOTP(wrapper: ReturnType<typeof createWrapper>) {
+  const { result } = renderHook(() => useUpdateMfa(), { wrapper })
+
+  await act(async () => {
+    await result.current.mutateAsync({ mfa: true })
+  })
+
+  await waitForTest(() => expect(result.current.isSuccess).toBe(true))
+
+  const { result: createMfaAuthenticatorResult } = renderHook(() => useCreateMfaAuthenticator(), {
+    wrapper,
+  })
+  await act(async () => {
+    await createMfaAuthenticatorResult.current.mutateAsync({ type: 'totp' })
+  })
+  await waitForTest(() => expect(createMfaAuthenticatorResult.current.isSuccess).toBe(true))
+
+  const totpSecret = createMfaAuthenticatorResult.current.data?.secret || ''
+  const otp = generateTOTP(totpSecret)
+
+  const { result: updateMfaAuthenticatorResult } = renderHook(() => useUpdateMfaAuthenticator(), {
+    wrapper,
+  })
+
+  await act(async () => {
+    await updateMfaAuthenticatorResult.current.mutateAsync({ type: 'totp', otp })
+  })
+
+  await waitForTest(() => expect(updateMfaAuthenticatorResult.current.isSuccess).toBe(true))
+
+  return { totpSecret }
+}
+
+export async function loginUser(
+  email: string,
+  password: string,
+  wrapper: ReturnType<typeof createWrapper>,
+): Promise<void> {
+  const { result } = renderHook(() => useLogin(), { wrapper })
+
+  await act(async () => {
+    await result.current.login.mutateAsync({ email, password })
+  })
+
+  await waitForTest(() => expect(result.current.login.isSuccess).toBe(true))
+}
+
+export async function logoutUser(wrapper: ReturnType<typeof createWrapper>): Promise<void> {
+  const { result } = renderHook(() => useLogout(), { wrapper })
+  await act(async () => {
+    await result.current.mutateAsync({ sessionId: 'current' })
+  })
+  await waitForTest(() => expect(result.current.isSuccess).toBe(true))
+}
+
+export async function checkMail() {
+  const emails = await mailpit.listMessages()
+  return emails
+}
+
+export async function renderMessage(messageId: string) {
+  const content = await mailpit.renderMessageHTML(messageId)
+  document.body.innerHTML = content
+  return content
+}
+
+export async function emptyMail() {
+  await mailpit.deleteMessages()
 }

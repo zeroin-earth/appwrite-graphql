@@ -1,10 +1,9 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import {
+import type {
   CreateEmailVerificationMutation,
   CreateEmailVerificationMutationVariables,
 } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 

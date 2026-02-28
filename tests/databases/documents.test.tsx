@@ -5,7 +5,6 @@ import {
   useCreateDocument,
   useDeleteDocument,
   useDocument,
-  useLogin,
   useUpdateDocument,
   useUpsertDocument,
 } from '../../src'
@@ -16,6 +15,7 @@ import {
   deleteTestDocument,
   deleteTestUser,
   getTestConfig,
+  loginUser,
 } from '../setup/helpers'
 import { createWrapper } from '../setup/wrapper'
 
@@ -23,20 +23,6 @@ interface TestDocumentData {
   name: string
   age?: number
   active?: boolean
-}
-
-async function loginUser(
-  email: string,
-  password: string,
-  wrapper: ReturnType<typeof createWrapper>,
-): Promise<void> {
-  const { result } = renderHook(() => useLogin(), { wrapper })
-
-  await act(async () => {
-    result.current.login.mutateAsync({ email, password })
-  })
-
-  await waitFor(() => expect(result.current.login.isSuccess).toBe(true))
 }
 
 describe('Document CRUD hooks', () => {
@@ -71,7 +57,7 @@ describe('Document CRUD hooks', () => {
       const documentId = ID.unique()
 
       await act(async () => {
-        result.current.mutateAsync({
+        await result.current.mutateAsync({
           databaseId,
           collectionId,
           documentId,
@@ -96,7 +82,7 @@ describe('Document CRUD hooks', () => {
       const documentId = ID.unique()
 
       await act(async () => {
-        result.current.mutateAsync({
+        await result.current.mutateAsync({
           databaseId,
           collectionId,
           documentId,
@@ -196,10 +182,10 @@ describe('Document CRUD hooks', () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
 
-      const { result } = renderHook(() => useUpdateDocument<TestDocumentData>(), { wrapper })
+      const { result } = renderHook(() => useUpdateDocument(), { wrapper })
 
       await act(async () => {
-        result.current.mutateAsync({
+        await result.current.mutateAsync({
           databaseId,
           collectionId,
           documentId,
@@ -216,12 +202,12 @@ describe('Document CRUD hooks', () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
 
-      const { result: updateResult } = renderHook(() => useUpdateDocument<TestDocumentData>(), {
+      const { result: updateResult } = renderHook(() => useUpdateDocument(), {
         wrapper,
       })
 
       await act(async () => {
-        updateResult.current.mutateAsync({
+        await updateResult.current.mutateAsync({
           databaseId,
           collectionId,
           documentId,
@@ -259,7 +245,7 @@ describe('Document CRUD hooks', () => {
       const documentId = ID.unique()
 
       await act(async () => {
-        result.current.mutateAsync({
+        await result.current.mutateAsync({
           databaseId,
           collectionId,
           documentId,
@@ -287,7 +273,7 @@ describe('Document CRUD hooks', () => {
       const { result } = renderHook(() => useUpsertDocument(), { wrapper })
 
       await act(async () => {
-        result.current.mutateAsync({
+        await result.current.mutateAsync({
           databaseId,
           collectionId,
           documentId: existingDocId,
@@ -313,7 +299,7 @@ describe('Document CRUD hooks', () => {
       const { result } = renderHook(() => useDeleteDocument(), { wrapper })
 
       await act(async () => {
-        result.current.mutateAsync({
+        await result.current.mutateAsync({
           databaseId,
           collectionId,
           documentId: doc.$id,

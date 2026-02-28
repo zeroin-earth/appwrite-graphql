@@ -1,7 +1,6 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import { CreateMfaRecoveryCodesMutation } from '../__generated__/graphql'
+import type { CreateMfaRecoveryCodesMutation } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -34,7 +33,9 @@ export function useCreateMfaRecoveryCodes() {
       return data.accountCreateMfaRecoveryCodes
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'mfa', 'recovery-codes'] })
+      void queryClient.invalidateQueries({
+        queryKey: ['appwrite', 'account', 'mfa', 'recovery-codes'],
+      })
     },
   })
 

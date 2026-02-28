@@ -1,4 +1,4 @@
-import { ResultOf, TypedDocumentNode } from '@graphql-typed-document-node/core'
+import type { ResultOf, TypedDocumentNode } from '@graphql-typed-document-node/core'
 import { print } from 'graphql'
 import { atom } from 'jotai'
 

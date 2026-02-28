@@ -1,4 +1,4 @@
-import { AppwriteException, OAuthProvider } from '../types'
+import type { AppwriteException, OAuthProvider } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 

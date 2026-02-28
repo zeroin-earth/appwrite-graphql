@@ -1,7 +1,6 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import { UpdatePrefsMutation, UpdatePrefsMutationVariables } from '../__generated__/graphql'
+import type { UpdatePrefsMutation, UpdatePrefsMutationVariables } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -38,7 +37,7 @@ export function useUpdatePrefs() {
       return data?.accountUpdatePrefs
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
     },
   })
 

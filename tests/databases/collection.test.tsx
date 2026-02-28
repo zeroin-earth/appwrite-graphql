@@ -1,13 +1,14 @@
-import { act, renderHook, waitFor } from '@testing-library/react'
+import { renderHook, waitFor } from '@testing-library/react'
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 
-import { useCollection, useLogin, useSuspenseCollection } from '../../src'
+import { useCollection, useSuspenseCollection } from '../../src'
 import {
   createTestDocument,
   createTestUser,
   deleteTestDocument,
   deleteTestUser,
   getTestConfig,
+  loginUser,
 } from '../setup/helpers'
 import { createWrapper } from '../setup/wrapper'
 
@@ -15,20 +16,6 @@ interface TestDocumentData {
   name: string
   age?: number
   active?: boolean
-}
-
-async function loginUser(
-  email: string,
-  password: string,
-  wrapper: ReturnType<typeof createWrapper>,
-): Promise<void> {
-  const { result } = renderHook(() => useLogin(), { wrapper })
-
-  await act(async () => {
-    result.current.login.mutateAsync({ email, password })
-  })
-
-  await waitFor(() => expect(result.current.login.isSuccess).toBe(true))
 }
 
 describe('Collection query hooks', () => {

@@ -1,6 +1,9 @@
 import { gql } from '../__generated__'
-import { DeleteDocumentMutation, DeleteDocumentMutationVariables } from '../__generated__/graphql'
-import { AppwriteException } from '../types'
+import type {
+  DeleteDocumentMutation,
+  DeleteDocumentMutationVariables,
+} from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -40,7 +43,7 @@ export function useDeleteDocument() {
         throw errors
       }
 
-      return mutationData?.databasesDeleteDocument ?? { status: true }
+      return mutationData?.databasesDeleteDocument ?? { status: '' }
     },
     onSuccess: async (_, variables) => {
       queryClient.removeQueries({
@@ -53,7 +56,7 @@ export function useDeleteDocument() {
           variables.documentId,
         ],
       })
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: ['appwrite', 'databases', variables.databaseId, variables.collectionId],
       })
     },

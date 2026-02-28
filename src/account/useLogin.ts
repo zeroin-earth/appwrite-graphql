@@ -1,9 +1,9 @@
 import { gql } from '../__generated__/gql'
-import {
+import type {
   CreateEmailPasswordSessionMutation,
   CreateEmailPasswordSessionMutationVariables,
 } from '../__generated__/graphql'
-import { AppwriteException, OAuthProvider } from '../types'
+import type { AppwriteException, OAuthProvider } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -49,8 +49,8 @@ export function useLogin() {
       return data.accountCreateEmailPasswordSession
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'sessions'] })
+      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'sessions'] })
     },
   })
 

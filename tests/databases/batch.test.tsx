@@ -1,21 +1,9 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 
-import { useDecrementAttribute, useIncrementAttribute, useLogin } from '../../src'
-import { createTestUser, deleteTestUser, getTestConfig } from '../setup/helpers'
+import { useDecrementAttribute, useIncrementAttribute } from '../../src'
+import { createTestUser, deleteTestUser, getTestConfig, loginUser } from '../setup/helpers'
 import { createWrapper } from '../setup/wrapper'
-
-type Wrapper = ReturnType<typeof createWrapper>
-
-async function loginUser(email: string, password: string, wrapper: Wrapper) {
-  const { result } = renderHook(() => useLogin(), { wrapper })
-
-  await act(async () => {
-    result.current.login.mutateAsync({ email, password })
-  })
-
-  await waitFor(() => expect(result.current.login.isSuccess).toBe(true))
-}
 
 describe('Database batch & atomic hooks', () => {
   const config = getTestConfig()
@@ -47,7 +35,7 @@ describe('Database batch & atomic hooks', () => {
       const { result } = renderHook(() => useIncrementAttribute(), { wrapper })
 
       await act(async () => {
-        result.current.mutateAsync({
+        await result.current.mutateAsync({
           databaseId,
           collectionId,
           documentId: doc.$id,
@@ -76,7 +64,7 @@ describe('Database batch & atomic hooks', () => {
       const { result } = renderHook(() => useDecrementAttribute(), { wrapper })
 
       await act(async () => {
-        result.current.mutateAsync({
+        await result.current.mutateAsync({
           databaseId,
           collectionId,
           documentId: doc.$id,

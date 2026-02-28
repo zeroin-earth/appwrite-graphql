@@ -1,20 +1,15 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import {
+import type {
   CreateDocumentsMutation,
   CreateDocumentsMutationVariables,
 } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
 const createDocuments = gql(/* GraphQL */ `
-  mutation CreateDocuments(
-    $databaseId: String!
-    $collectionId: String!
-    $documents: [Json!]!
-  ) {
+  mutation CreateDocuments($databaseId: String!, $collectionId: String!, $documents: [Json!]!) {
     databasesCreateDocuments(
       databaseId: $databaseId
       collectionId: $collectionId
@@ -54,7 +49,7 @@ export function useCreateDocuments() {
       return mutationData.databasesCreateDocuments
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: ['appwrite', 'databases', variables.databaseId, variables.collectionId],
       })
     },

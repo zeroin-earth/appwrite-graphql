@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
-
 import { castDraft, produce } from 'immer'
 
 import { gql } from '../__generated__/gql'
-import { AccountGetQuery } from '../__generated__/graphql'
+import type { AccountGetQuery } from '../__generated__/graphql'
 import type { AppwriteException, Models, Realtime } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useLazyQuery } from '../useLazyQuery'
@@ -34,7 +33,7 @@ export function useLazyAccount() {
 
     const subscriptionPromise = subscribe(realtime, queryClient)
     return () => {
-      subscriptionPromise.then((sub) => sub.close())
+      void subscriptionPromise.then((sub) => sub.close())
     }
   }, [isActive, realtime, queryClient])
 
@@ -60,7 +59,7 @@ export function useAccount() {
   useEffect(() => {
     const subscriptionPromise = subscribe(realtime, queryClient)
     return () => {
-      subscriptionPromise.then((sub) => sub.close())
+      void subscriptionPromise.then((sub) => sub.close())
     }
   }, [realtime, queryClient])
 

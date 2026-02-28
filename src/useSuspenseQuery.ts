@@ -1,6 +1,7 @@
-import {
+import type {
   QueryKey,
-  UseSuspenseQueryOptions,
+  UseSuspenseQueryOptions} from '@tanstack/react-query';
+import {
   useSuspenseQuery as useSuspenseReactQuery,
 } from '@tanstack/react-query'
 

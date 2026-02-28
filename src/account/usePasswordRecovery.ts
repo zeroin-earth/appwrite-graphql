@@ -1,7 +1,9 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import { CreateRecoveryMutation, CreateRecoveryMutationVariables } from '../__generated__/graphql'
+import type {
+  CreateRecoveryMutation,
+  CreateRecoveryMutationVariables,
+} from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 
@@ -42,9 +44,10 @@ export function usePasswordRecovery() {
     onSuccess: async (_, variables) => {
       try {
         localStorage?.setItem('email', variables.email)
-      } catch (e) {
+      } catch (e: any) {
         console.error(
           'Could not save email to local storage. If you are using react-native, this is expected.',
+          e,
         )
       }
     },

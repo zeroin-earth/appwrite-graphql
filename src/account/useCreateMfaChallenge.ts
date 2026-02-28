@@ -1,13 +1,13 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import { CreateMfaChallengeMutation } from '../__generated__/graphql'
+import type { CreateMfaChallengeMutation } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 
 const accountCreateMfaChallenge = gql(/* GraphQL */ `
   mutation CreateMfaChallenge($factor: String!) {
     accountCreateMfaChallenge(factor: $factor) {
+      _id
       userId
       expire
     }

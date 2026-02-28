@@ -1,7 +1,9 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import { DeleteIdentityMutation, DeleteIdentityMutationVariables } from '../__generated__/graphql'
+import type {
+  DeleteIdentityMutation,
+  DeleteIdentityMutationVariables,
+} from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -35,10 +37,10 @@ export function useDeleteIdentity() {
         throw errors
       }
 
-      return data?.accountDeleteIdentity ?? { status: true }
+      return data?.accountDeleteIdentity ?? { status: '' }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
     },
   })
 

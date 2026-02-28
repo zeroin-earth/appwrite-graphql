@@ -1,10 +1,9 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import {
+import type {
   DeleteMfaAuthenticatorMutation,
   DeleteMfaAuthenticatorMutationVariables,
 } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -38,11 +37,13 @@ export function useDeleteMfaAuthenticator() {
         throw errors
       }
 
-      return data?.accountDeleteMfaAuthenticator ?? { status: true }
+      return data?.accountDeleteMfaAuthenticator ?? { status: '' }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'mfa', 'factors'] })
+      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      void queryClient.invalidateQueries({
+        queryKey: ['appwrite', 'account', 'mfa', 'factors'],
+      })
     },
   })
 

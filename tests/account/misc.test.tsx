@@ -1,21 +1,9 @@
-import { act, renderHook, waitFor } from '@testing-library/react'
+import { renderHook, waitFor } from '@testing-library/react'
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 
-import { useListIdentities, useLogin, useLogs } from '../../src'
-import { createTestUser, deleteTestUser } from '../setup/helpers'
+import { useListIdentities, useLogs } from '../../src'
+import { createTestUser, deleteTestUser, loginUser } from '../setup/helpers'
 import { createQueryClient, createWrapper } from '../setup/wrapper'
-
-async function loginUser(
-  email: string,
-  password: string,
-  wrapper: ReturnType<typeof createWrapper>,
-) {
-  const { result } = renderHook(() => useLogin(), { wrapper })
-  await act(async () => {
-    result.current.login.mutateAsync({ email, password })
-  })
-  await waitFor(() => expect(result.current.login.isSuccess).toBe(true))
-}
 
 describe('Account misc hooks', () => {
   let user: Awaited<ReturnType<typeof createTestUser>>

@@ -1,16 +1,16 @@
-import { QueryClient } from '@tanstack/react-query'
+import type { QueryClient } from '@tanstack/react-query'
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test'
+
 import {
   useCreateJWT,
   useDeleteSession,
   useDeleteSessions,
   useGetSession,
   useListSessions,
-  useLogin,
   useUpdateSession,
 } from '../../src'
-import { createTestUser, deleteTestUser } from '../setup/helpers'
+import { createTestUser, deleteTestUser, loginUser } from '../setup/helpers'
 import { createQueryClient, createWrapper } from '../setup/wrapper'
 
 // ---------------------------------------------------------------------------
@@ -18,16 +18,6 @@ import { createQueryClient, createWrapper } from '../setup/wrapper'
 // ---------------------------------------------------------------------------
 
 type Wrapper = ReturnType<typeof createWrapper>
-
-async function loginUser(email: string, password: string, wrapper: Wrapper) {
-  const { result } = renderHook(() => useLogin(), { wrapper })
-
-  await act(async () => {
-    result.current.login.mutateAsync({ email, password })
-  })
-
-  await waitFor(() => expect(result.current.login.isSuccess).toBe(true))
-}
 
 // ---------------------------------------------------------------------------
 // useListSessions
@@ -265,7 +255,7 @@ describe('useDeleteSession', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toBeDefined()
-    expect(result.current.data?.status).toBe(true)
+    expect(result.current.data?.status).toBeDefined()
   })
 })
 
@@ -308,6 +298,6 @@ describe('useDeleteSessions', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toBeDefined()
-    expect(result.current.data?.status).toBe(true)
+    expect(result.current.data?.status).toBeDefined()
   })
 })

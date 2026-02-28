@@ -1,7 +1,6 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import { DeleteFileMutation, DeleteFileMutationVariables } from '../__generated__/graphql'
+import type { DeleteFileMutation, DeleteFileMutationVariables } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -33,13 +32,13 @@ export function useDeleteFile() {
         throw errors
       }
 
-      return data?.storageDeleteFile ?? { status: true }
+      return data?.storageDeleteFile ?? { status: '' }
     },
     onSuccess: (_, variables) => {
       queryClient.removeQueries({
         queryKey: ['appwrite', 'storage', variables.bucketId, 'files', variables.fileId],
       })
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: ['appwrite', 'storage', variables.bucketId, 'files'],
       })
     },

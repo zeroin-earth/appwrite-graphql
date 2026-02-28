@@ -1,9 +1,9 @@
 import { gql } from '../__generated__'
-import {
+import type {
   CreateMfaAuthenticatorMutation,
   CreateMfaAuthenticatorMutationVariables,
 } from '../__generated__/graphql'
-import { AppwriteException } from '../types'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -41,7 +41,7 @@ export function useCreateMfaAuthenticator() {
       return data.accountCreateMfaAuthenticator
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'mfa', 'factors'] })
+      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'mfa', 'factors'] })
     },
   })
 

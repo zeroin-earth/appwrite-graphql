@@ -1,6 +1,7 @@
-import {
+import type {
   DefaultError,
-  UseMutationOptions,
+  UseMutationOptions} from '@tanstack/react-query';
+import {
   useMutation as useReactMutation,
 } from '@tanstack/react-query'
 

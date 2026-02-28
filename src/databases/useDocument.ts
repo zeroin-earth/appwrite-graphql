@@ -1,13 +1,12 @@
 import { useEffect } from 'react'
 
-import { AppwriteException } from '../types'
-
+import type { Document } from './types'
 import { gql } from '../__generated__'
+import type { GetDocumentQueryVariables } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 import { useQueryClient } from '../useQueryClient'
-import type { Document } from './types'
-import { GetDocumentQueryVariables } from '../__generated__/graphql'
 
 const getDocument = gql(/* GraphQL */ `
   query GetDocument($databaseId: String!, $collectionId: String!, $documentId: String!) {
@@ -69,7 +68,7 @@ export function useDocument<TDocument>({
     )
 
     return () => {
-      subscriptionPromise.then((sub) => sub.close())
+      void subscriptionPromise.then((sub) => sub.close())
     }
   }, [databaseId, collectionId, documentId, realtime, queryClient])
 

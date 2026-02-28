@@ -343,7 +343,7 @@ describe('useLazyAccount', () => {
     const { result } = renderHook(() => useLazyAccount(), { wrapper })
 
     await act(async () => {
-      result.current.run()
+      await result.current.run()
     })
 
     await waitFor(() => {

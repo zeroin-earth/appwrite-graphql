@@ -1,10 +1,9 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import {
+import type {
   DeleteMembershipMutation,
   DeleteMembershipMutationVariables,
 } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -36,16 +35,16 @@ export function useDeleteMembership() {
         throw errors
       }
 
-      return data?.teamsDeleteMembership ?? { status: true }
+      return data?.teamsDeleteMembership ?? { status: '' }
     },
     onSuccess: (_, variables) => {
       queryClient.removeQueries({
         queryKey: ['appwrite', 'teams', variables.teamId, 'memberships', variables.membershipId],
       })
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: ['appwrite', 'teams', variables.teamId, 'memberships'],
       })
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'teams', variables.teamId] })
+      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'teams', variables.teamId] })
     },
   })
 

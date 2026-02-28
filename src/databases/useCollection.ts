@@ -1,12 +1,12 @@
 import { useEffect } from 'react'
 
+import type { Collection, Document } from './types'
 import { gql } from '../__generated__'
-import { AppwriteException } from '../types'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 import { useQueryClient } from '../useQueryClient'
 import { useSuspenseQuery } from '../useSuspenseQuery'
-import type { Collection, Document } from './types'
 
 type DocumentOperation = 'create' | 'update' | 'delete'
 
@@ -90,7 +90,7 @@ export function useCollection<TDocument>({
               document,
             )
 
-            queryClient.invalidateQueries({
+            void queryClient.invalidateQueries({
               queryKey: ['appwrite', 'databases', databaseId, collectionId, { queries }],
               exact: true,
             })
@@ -101,7 +101,7 @@ export function useCollection<TDocument>({
     )
 
     return () => {
-      subscriptionPromise.then((sub) => sub.close())
+      void subscriptionPromise.then((sub) => sub.close())
     }
   }, [databaseId, collectionId, realtime, queryClient, queriesKey, subscribe])
 
@@ -180,7 +180,7 @@ export function useSuspenseCollection<TDocument>({
               document,
             )
 
-            queryClient.invalidateQueries({
+            void queryClient.invalidateQueries({
               queryKey: ['appwrite', 'databases', databaseId, collectionId, { queries }],
               exact: true,
             })
@@ -191,7 +191,7 @@ export function useSuspenseCollection<TDocument>({
     )
 
     return () => {
-      subscriptionPromise.then((sub) => sub.close())
+      void subscriptionPromise.then((sub) => sub.close())
     }
   }, [databaseId, collectionId, realtime, queryClient, queriesKey])
 

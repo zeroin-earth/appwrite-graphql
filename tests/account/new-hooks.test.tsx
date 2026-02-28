@@ -1,21 +1,9 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 
-import { useAccount, useCreateEmailVerification, useDeleteAccount, useLogin } from '../../src'
-import { createTestUser, deleteTestUser } from '../setup/helpers'
+import { useAccount, useCreateEmailVerification, useDeleteAccount } from '../../src'
+import { createTestUser, deleteTestUser, loginUser } from '../setup/helpers'
 import { createWrapper } from '../setup/wrapper'
-
-type Wrapper = ReturnType<typeof createWrapper>
-
-async function loginUser(email: string, password: string, wrapper: Wrapper) {
-  const { result } = renderHook(() => useLogin(), { wrapper })
-
-  await act(async () => {
-    result.current.login.mutateAsync({ email, password })
-  })
-
-  await waitFor(() => expect(result.current.login.isSuccess).toBe(true))
-}
 
 describe('New account hooks', () => {
   describe('useDeleteAccount', () => {
@@ -28,7 +16,7 @@ describe('New account hooks', () => {
       const { result } = renderHook(() => useDeleteAccount(), { wrapper })
 
       await act(async () => {
-        result.current.mutateAsync()
+        await result.current.mutateAsync()
       })
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true))

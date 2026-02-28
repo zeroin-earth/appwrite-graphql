@@ -1,9 +1,8 @@
 import { useState } from 'react'
 
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import { GetFunctionExecutionQuery } from '../__generated__/graphql'
+import type { GetFunctionExecutionQuery } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useLazyQuery } from '../useLazyQuery'
 import { useMutation } from '../useMutation'
@@ -11,11 +10,12 @@ import { useQuery } from '../useQuery'
 
 type Props = {
   functionId: string
-  body?: Record<string, any>
+  body?: Record<string, string | number | boolean | null>
   async?: boolean
   path?: string
   method?: string
-  // headers?: Record<string, any>
+  headers?: Record<string, string | number | boolean | null>
+  scheduledAt?: string
 }
 
 const createExecution = gql(/* GraphQL */ `
@@ -24,14 +24,18 @@ const createExecution = gql(/* GraphQL */ `
     $body: String
     $async: Boolean
     $path: String
-    $method: String # $headers: Json
+    $method: String
+    $headers: Json
+    $scheduledAt: String
   ) {
     functionsCreateExecution(
       functionId: $functionId
       body: $body
       async: $async
       path: $path
-      method: $method # headers: $headers
+      method: $method
+      headers: $headers
+      scheduledAt: $scheduledAt
     ) {
       _id
       status
@@ -103,7 +107,8 @@ export function useFunction() {
         async = false,
         path = '/',
         method = 'POST',
-        // headers = {},
+        headers = {},
+        scheduledAt,
       }) => {
         setCurrentFunction(functionId)
 
@@ -115,7 +120,8 @@ export function useFunction() {
             async,
             path,
             method,
-            // headers: JSON.stringify(headers),
+            headers: JSON.stringify(headers),
+            scheduledAt,
           },
         })
 
@@ -130,7 +136,9 @@ export function useFunction() {
         let parsedResponseBody = {}
         try {
           parsedResponseBody = JSON.parse(responseBody ?? '{}')
-        } catch (error) {}
+        } catch (error) {
+          console.error('Failed to parse response body:', error)
+        }
 
         return parsedResponseBody
       },
@@ -149,8 +157,9 @@ export function useSuspenseFunction({
   async = false,
   path = '/',
   method = 'POST',
-}: // headers = {},
-Props) {
+  headers = {},
+  scheduledAt,
+}: Props) {
   const { graphql } = useAppwrite()
 
   const executeFunction = useQuery<
@@ -168,7 +177,8 @@ Props) {
           async,
           path,
           method,
-          // headers,
+          headers: JSON.stringify(headers),
+          scheduledAt,
         },
       })
 
@@ -181,7 +191,9 @@ Props) {
       let parsedResponseBody = {}
       try {
         parsedResponseBody = JSON.parse(responseBody ?? '{}')
-      } catch (error) {}
+      } catch (error) {
+        console.error('Failed to parse response body:', error)
+      }
 
       return parsedResponseBody
     },

@@ -1,7 +1,9 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import { UpdateSessionMutation, UpdateSessionMutationVariables } from '../__generated__/graphql'
+import type {
+  UpdateSessionMutation,
+  UpdateSessionMutationVariables,
+} from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -40,7 +42,7 @@ export function useUpdateSession() {
       return data.accountUpdateSession
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'sessions'] })
+      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'sessions'] })
     },
   })
 

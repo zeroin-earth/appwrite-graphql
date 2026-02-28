@@ -1,7 +1,9 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import { UpdatePasswordMutation, UpdatePasswordMutationVariables } from '../__generated__/graphql'
+import type {
+  UpdatePasswordMutation,
+  UpdatePasswordMutationVariables,
+} from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -39,7 +41,7 @@ export function useUpdatePassword() {
       return data?.accountUpdatePassword
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
     },
   })
 

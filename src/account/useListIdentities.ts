@@ -1,9 +1,8 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
+import type { ListIdentitiesQuery } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
-import { ListIdentitiesQuery } from '../__generated__/graphql'
 
 const accountListIdentities = gql(/* GraphQL */ `
   query ListIdentities {

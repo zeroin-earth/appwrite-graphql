@@ -1,4 +1,3 @@
-// @ts-ignore - happy-dom may not ship type declarations
 import { GlobalRegistrator } from '@happy-dom/global-registrator'
 import { configure } from '@testing-library/react'
 

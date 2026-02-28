@@ -1,36 +1,18 @@
-import { QueryClient } from '@tanstack/react-query'
+import type { QueryClient } from '@tanstack/react-query'
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test'
+
 import {
   useGetPrefs,
-  useLogin,
   useUpdateEmail,
   useUpdateName,
   useUpdatePassword,
   useUpdatePrefs,
 } from '../../src'
-import { createTestUser, deleteTestUser } from '../setup/helpers'
+import { createTestUser, deleteTestUser, loginUser } from '../setup/helpers'
 import { createQueryClient, createWrapper } from '../setup/wrapper'
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 type Wrapper = ReturnType<typeof createWrapper>
-
-async function loginUser(email: string, password: string, wrapper: Wrapper) {
-  const { result } = renderHook(() => useLogin(), { wrapper })
-
-  await act(async () => {
-    result.current.login.mutateAsync({ email, password })
-  })
-
-  await waitFor(() => expect(result.current.login.isSuccess).toBe(true))
-}
-
-// ---------------------------------------------------------------------------
-// useUpdateName
-// ---------------------------------------------------------------------------
 
 describe('useUpdateName', () => {
   let userId: string
@@ -70,10 +52,6 @@ describe('useUpdateName', () => {
     expect(result.current.data?.name).toBe('Updated Name')
   })
 })
-
-// ---------------------------------------------------------------------------
-// useUpdateEmail
-// ---------------------------------------------------------------------------
 
 describe('useUpdateEmail', () => {
   let userId: string
@@ -116,10 +94,6 @@ describe('useUpdateEmail', () => {
   })
 })
 
-// ---------------------------------------------------------------------------
-// useUpdatePassword
-// ---------------------------------------------------------------------------
-
 describe('useUpdatePassword', () => {
   let userId: string
   let email: string
@@ -160,10 +134,6 @@ describe('useUpdatePassword', () => {
     expect(result.current.data?.status).toBeTruthy()
   })
 })
-
-// ---------------------------------------------------------------------------
-// useUpdatePrefs & useGetPrefs
-// ---------------------------------------------------------------------------
 
 describe('useUpdatePrefs', () => {
   let userId: string

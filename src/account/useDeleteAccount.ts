@@ -1,7 +1,6 @@
-import { AppwriteException } from '../types'
-
 import { gql } from '../__generated__'
-import { DeleteAccountMutation } from '../__generated__/graphql'
+import type { DeleteAccountMutation } from '../__generated__/graphql'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -32,7 +31,7 @@ export function useDeleteAccount() {
         throw errors
       }
 
-      return data?.accountDelete ?? { status: true }
+      return data?.accountDelete ?? { status: '' }
     },
     onSuccess: () => {
       queryClient.clear()

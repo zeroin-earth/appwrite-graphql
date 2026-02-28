@@ -1,8 +1,9 @@
-import {
+import type {
   DefinedInitialDataOptions,
   QueryKey,
   UndefinedInitialDataOptions,
-  UseQueryOptions,
+  UseQueryOptions} from '@tanstack/react-query';
+import {
   useQuery as useReactQuery,
 } from '@tanstack/react-query'
 
