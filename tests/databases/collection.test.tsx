@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react'
-import { Channel } from 'appwrite'
+import { Channel, Query } from 'appwrite'
 import { afterAll, beforeAll, describe, expect, spyOn, test } from 'bun:test'
 
 import { useCollection, useQueryClient, useSuspenseCollection } from '../../src'
@@ -80,12 +80,14 @@ describe('Collection query hooks', () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
 
+      const knownNames = testDocuments.map((d) => d.name)
+
       const { result } = renderHook(
         () =>
           useCollection<TestDocumentData>({
             databaseId,
             collectionId,
-            queries: [],
+            queries: [Query.equal('name', knownNames)],
           }),
         { wrapper },
       )
@@ -93,10 +95,9 @@ describe('Collection query hooks', () => {
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
       const documents = result.current.documents ?? []
-      expect(documents.length).toBeGreaterThanOrEqual(testDocuments.length)
+      expect(documents.length).toBe(testDocuments.length)
 
       // Verify that the returned documents have parsed fields (not raw JSON strings)
-      const knownNames = testDocuments.map((d) => d.name)
       const matchedDocuments = documents.filter((doc) => knownNames.includes(doc.name))
       expect(matchedDocuments.length).toBe(testDocuments.length)
 
@@ -115,7 +116,7 @@ describe('Collection query hooks', () => {
           useCollection<TestDocumentData>({
             databaseId,
             collectionId,
-            queries: [],
+            queries: [Query.equal('name', ['Alice'])],
           }),
         { wrapper },
       )
@@ -273,7 +274,7 @@ describe('Collection query hooks', () => {
           useSuspenseCollection<TestDocumentData>({
             databaseId,
             collectionId,
-            queries: [],
+            queries: [Query.equal('name', ['Bob'])],
           }),
         { wrapper },
       )

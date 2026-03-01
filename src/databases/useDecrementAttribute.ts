@@ -16,6 +16,7 @@ const decrementDocumentAttribute = gql(/* GraphQL */ `
     $attribute: String!
     $value: Int
     $min: Int
+    $transactionId: String
   ) {
     databasesDecrementDocumentAttribute(
       databaseId: $databaseId
@@ -24,6 +25,7 @@ const decrementDocumentAttribute = gql(/* GraphQL */ `
       attribute: $attribute
       value: $value
       min: $min
+      transactionId: $transactionId
     ) {
       _id
       data
@@ -38,12 +40,13 @@ export function useDecrementAttribute() {
   const mutationResult = useMutation<
     DecrementDocumentAttributeMutation['databasesDecrementDocumentAttribute'],
     AppwriteException[],
-    DecrementDocumentAttributeMutationVariables
+    DecrementDocumentAttributeMutationVariables,
+    { previousEntries: [queryKey: readonly unknown[], data: unknown][]; documentKeyPrefix: readonly unknown[] }
   >({
-    mutationFn: async ({ databaseId, collectionId, documentId, attribute, value, min }) => {
+    mutationFn: async ({ databaseId, collectionId, documentId, attribute, value, min, transactionId }) => {
       const { data: mutationData, errors } = await graphql.mutation({
         query: decrementDocumentAttribute,
-        variables: { databaseId, collectionId, documentId, attribute, value, min },
+        variables: { databaseId, collectionId, documentId, attribute, value, min, transactionId },
       })
 
       if (errors) {
@@ -52,7 +55,43 @@ export function useDecrementAttribute() {
 
       return mutationData.databasesDecrementDocumentAttribute
     },
-    onSuccess: (_, variables) => {
+    onMutate: async (variables) => {
+      const documentKeyPrefix = [
+        'appwrite',
+        'databases',
+        variables.databaseId,
+        variables.collectionId,
+        'documents',
+        variables.documentId,
+      ]
+
+      await queryClient.cancelQueries({ queryKey: documentKeyPrefix })
+
+      const previousEntries = queryClient.getQueriesData({ queryKey: documentKeyPrefix })
+
+      queryClient.setQueriesData(
+        { queryKey: documentKeyPrefix },
+        (old: Record<string, unknown> | undefined) => {
+          if (!old) return old
+          const current = (old[variables.attribute] as number) ?? 0
+          const decrement = variables.value ?? 1
+          const newValue =
+            variables.min != null ? Math.max(current - decrement, variables.min) : current - decrement
+
+          return { ...old, [variables.attribute]: newValue }
+        },
+      )
+
+      return { previousEntries, documentKeyPrefix }
+    },
+    onError: (_, __, context) => {
+      if (context?.previousEntries) {
+        for (const [key, data] of context.previousEntries) {
+          queryClient.setQueryData(key, data)
+        }
+      }
+    },
+    onSettled: (_, __, variables) => {
       void queryClient.invalidateQueries({
         queryKey: ['appwrite', 'databases', variables.databaseId, variables.collectionId],
       })

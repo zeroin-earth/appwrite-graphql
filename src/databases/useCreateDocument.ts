@@ -17,6 +17,7 @@ const createDocument = gql(/* GraphQL */ `
     $documentId: String!
     $data: Json!
     $permissions: [String!]
+    $transactionId: String
   ) {
     databasesCreateDocument(
       databaseId: $databaseId
@@ -24,6 +25,7 @@ const createDocument = gql(/* GraphQL */ `
       documentId: $documentId
       data: $data
       permissions: $permissions
+      transactionId: $transactionId
     ) {
       _id
     }
@@ -41,7 +43,7 @@ export function useCreateDocument() {
       permissions?: InputMaybe<Array<Scalars['String']['input']>>
     }
   >({
-    mutationFn: async ({ databaseId, collectionId, documentId, data, permissions }) => {
+    mutationFn: async ({ databaseId, collectionId, documentId, data, permissions, transactionId }) => {
       const { data: mutationData, errors } = await graphql.mutation({
         query: createDocument,
         variables: {
@@ -50,6 +52,7 @@ export function useCreateDocument() {
           documentId,
           data: JSON.stringify(data),
           permissions,
+          transactionId,
         },
       })
 

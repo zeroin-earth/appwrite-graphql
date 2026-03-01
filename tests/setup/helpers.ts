@@ -14,12 +14,16 @@ import {
   useUpdateMfaAuthenticator,
 } from '../../src'
 
-type TestConfig = {
+export type TestConfig = {
   endpoint: string
   projectId: string
   apiKey: string
   databaseId: string
   collectionId: string
+  bucketId: string
+  smtpProviderId: string
+  smsProviderId: string
+  topicId: string
 }
 
 let _config: TestConfig | null = null
@@ -43,6 +47,10 @@ export function getTestConfig(): TestConfig {
     apiKey: process.env.APPWRITE_API_KEY || '',
     databaseId: process.env.APPWRITE_DATABASE_ID || 'test-db',
     collectionId: process.env.APPWRITE_COLLECTION_ID || 'test-collection',
+    bucketId: 'test-bucket',
+    smtpProviderId: 'test-smtp',
+    smsProviderId: 'test-sms',
+    topicId: 'test-topic',
   }
   return _config
 }
@@ -241,4 +249,13 @@ export async function renderMessage(messageId: string) {
 
 export async function emptyMail() {
   await mailpit.deleteMessages()
+}
+
+export async function getSMSMessages() {
+  const messages = await fetch('http://localhost:8888/messages').then((res) => res.json())
+  return messages
+}
+
+export async function clearSMSMessages() {
+  await fetch('http://localhost:8888/messages', { method: 'DELETE' })
 }

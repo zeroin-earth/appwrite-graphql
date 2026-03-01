@@ -214,16 +214,6 @@ describe('Account misc hooks', () => {
     await users.updatePassword({ userId: user.userId, password: user.password })
   })
 
-  test.skip('useVerification requires email delivery', () => {})
-
   test.skip('useCreateOAuth2Token requires OAuth provider configuration', () => {})
-  test.skip('useCreatePhoneToken requires SMS provider', () => {})
-  test.skip('useCreatePhoneVerification requires SMS provider', () => {})
-  test.skip('useUpdatePhoneVerification requires SMS provider', () => {})
-  test.skip('useUpdatePhoneSession requires SMS provider', () => {})
-  test.skip('useCreatePushTarget requires messaging provider', () => {})
-  test.skip('useUpdatePushTarget requires messaging provider', () => {})
-  test.skip('useDeletePushTarget requires messaging provider', () => {})
   test.skip('useDeleteIdentity requires identity from OAuth provider', () => {})
-  test.skip('useUpdateStatus destructive: disables account', () => {})
 })

@@ -8,13 +8,22 @@ import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 import { useQueryClient } from '../useQueryClient'
+import { useSuspenseQuery } from '../useSuspenseQuery'
 
 const getDocument = gql(/* GraphQL */ `
-  query GetDocument($databaseId: String!, $collectionId: String!, $documentId: String!) {
+  query GetDocument(
+    $databaseId: String!
+    $collectionId: String!
+    $documentId: String!
+    $queries: [String!]
+    $transactionId: String
+  ) {
     databasesGetDocument(
       databaseId: $databaseId
       collectionId: $collectionId
       documentId: $documentId
+      queries: $queries
+      transactionId: $transactionId
     ) {
       _id
       data
@@ -22,16 +31,20 @@ const getDocument = gql(/* GraphQL */ `
   }
 `)
 
-export function useDocument<TDocument>({
-  databaseId,
-  collectionId,
-  documentId,
-}: GetDocumentQueryVariables) {
-  const { graphql, realtime } = useAppwrite()
-  const queryClient = useQueryClient()
+function useDocumentQueryConfig<TDocument>(variables: GetDocumentQueryVariables) {
+  const { graphql } = useAppwrite()
+  const { databaseId, collectionId, documentId, queries, transactionId } = variables
 
-  const queryResult = useQuery<Document<TDocument>, AppwriteException[], Document<TDocument>>({
-    queryKey: ['appwrite', 'databases', databaseId, collectionId, 'documents', documentId],
+  return {
+    queryKey: [
+      'appwrite',
+      'databases',
+      databaseId,
+      collectionId,
+      'documents',
+      documentId,
+      { queries },
+    ] as const,
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: getDocument,
@@ -39,6 +52,8 @@ export function useDocument<TDocument>({
           databaseId,
           collectionId,
           documentId,
+          queries,
+          transactionId,
         },
       })
 
@@ -55,7 +70,17 @@ export function useDocument<TDocument>({
 
       return document
     },
-  })
+  }
+}
+
+function useDocumentRealtime(
+  databaseId: string,
+  collectionId: string,
+  documentId: string,
+  queriesKey: string,
+) {
+  const { realtime } = useAppwrite()
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     const subscriptionPromise = realtime.subscribe(
@@ -71,7 +96,33 @@ export function useDocument<TDocument>({
     return () => {
       void subscriptionPromise.then((sub) => sub.close())
     }
-  }, [databaseId, collectionId, documentId, realtime, queryClient])
+  }, [databaseId, collectionId, documentId, realtime, queryClient, queriesKey])
+}
+
+export function useDocument<TDocument>(variables: GetDocumentQueryVariables) {
+  const config = useDocumentQueryConfig<TDocument>(variables)
+  const queriesKey = JSON.stringify(variables.queries)
+
+  const queryResult = useQuery<Document<TDocument>, AppwriteException[], Document<TDocument>>(
+    config,
+  )
+
+  useDocumentRealtime(variables.databaseId, variables.collectionId, variables.documentId, queriesKey)
+
+  return { ...queryResult }
+}
+
+export function useSuspenseDocument<TDocument>(variables: GetDocumentQueryVariables) {
+  const config = useDocumentQueryConfig<TDocument>(variables)
+  const queriesKey = JSON.stringify(variables.queries)
+
+  const queryResult = useSuspenseQuery<
+    Document<TDocument>,
+    AppwriteException[],
+    Document<TDocument>
+  >(config)
+
+  useDocumentRealtime(variables.databaseId, variables.collectionId, variables.documentId, queriesKey)
 
   return { ...queryResult }
 }

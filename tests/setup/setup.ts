@@ -5,6 +5,8 @@
  */
 import { Client, Databases, ID, Permission, Role, TablesDB } from 'node-appwrite'
 
+import type { TestConfig } from './helpers'
+
 const ENDPOINT = process.env.APPWRITE_ENDPOINT || 'http://localhost/v1'
 const ADMIN_EMAIL = 'admin@test.local'
 const ADMIN_PASSWORD = 'password123456'
@@ -12,8 +14,9 @@ const PROJECT_ID = 'test-project'
 const DATABASE_ID = 'test-db'
 const COLLECTION_ID = 'test-collection'
 const BUCKET_ID = 'test-bucket'
-const PROVIDER_ID = 'test-smtp'
+const SMTP_PROVIDER_ID = 'test-smtp'
 const TOPIC_ID = 'test-topic'
+const SMS_PROVIDER_ID = 'test-sms'
 
 const ALL_SCOPES = [
   'users.read',
@@ -379,7 +382,7 @@ async function setupMessaging(apiKey: string) {
       'X-Appwrite-Key': apiKey,
     },
     body: JSON.stringify({
-      providerId: PROVIDER_ID,
+      providerId: SMTP_PROVIDER_ID,
       name: 'Test SMTP Provider',
       host: 'host.docker.internal',
       port: 1025,
@@ -394,7 +397,7 @@ async function setupMessaging(apiKey: string) {
     const body = await resp.text()
     if (body.includes('already exists') || body.includes('messaging_provider_already_exists')) {
       console.log('Messaging provider already exists, updating...')
-      const updateResp = await fetch(`${ENDPOINT}/messaging/providers/smtp/${PROVIDER_ID}`, {
+      const updateResp = await fetch(`${ENDPOINT}/messaging/providers/smtp/${SMTP_PROVIDER_ID}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -417,7 +420,48 @@ async function setupMessaging(apiKey: string) {
     }
   }
 
-  console.log('Messaging provider created!')
+  console.log('SMTP provider created!')
+
+  const smsResp = await fetch(`${ENDPOINT}/messaging/providers/twilio`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Appwrite-Project': PROJECT_ID,
+      'X-Appwrite-Key': apiKey,
+    },
+    body: JSON.stringify({
+      providerId: SMS_PROVIDER_ID,
+      name: 'Test Twilio SMS Provider',
+      accountSid: 'test',
+      enabled: true,
+    }),
+  })
+
+  if (!smsResp.ok) {
+    const body = await smsResp.text()
+    if (body.includes('already exists') || body.includes('messaging_provider_already_exists')) {
+      console.log('SMS provider already exists, updating...')
+      const updateResp = await fetch(`${ENDPOINT}/messaging/providers/twilio/${SMS_PROVIDER_ID}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Appwrite-Project': PROJECT_ID,
+          'X-Appwrite-Key': apiKey,
+        },
+        body: JSON.stringify({
+          enabled: true,
+          accountSid: 'test',
+        }),
+      })
+      if (!updateResp.ok) {
+        console.warn(`Warning: Failed to update SMS provider: ${await updateResp.text()}`)
+      }
+    } else {
+      throw new Error(`Failed to create SMS provider: ${body}`)
+    }
+  }
+
+  console.log('SMS provider created!')
 
   // Create a topic
   console.log('Creating messaging topic...')
@@ -469,14 +513,15 @@ async function main() {
   )
 
   // Write config to a file for test consumption
-  const config = {
+  const config: TestConfig = {
     endpoint: ENDPOINT,
     projectId: PROJECT_ID,
     apiKey,
     databaseId: DATABASE_ID,
     collectionId: COLLECTION_ID,
     bucketId: BUCKET_ID,
-    providerId: PROVIDER_ID,
+    smtpProviderId: SMTP_PROVIDER_ID,
+    smsProviderId: SMS_PROVIDER_ID,
     topicId: TOPIC_ID,
   }
 

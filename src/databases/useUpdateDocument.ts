@@ -17,6 +17,7 @@ const updateDocument = gql(/* GraphQL */ `
     $documentId: String!
     $data: Json
     $permissions: [String!]
+    $transactionId: String
   ) {
     databasesUpdateDocument(
       databaseId: $databaseId
@@ -24,11 +25,16 @@ const updateDocument = gql(/* GraphQL */ `
       documentId: $documentId
       data: $data
       permissions: $permissions
+      transactionId: $transactionId
     ) {
       _id
     }
   }
 `)
+
+type UpdateDocumentVariables = Omit<UpdateDocumentMutationVariables, 'permissions'> & {
+  permissions?: InputMaybe<Array<Scalars['String']['input']>>
+}
 
 export function useUpdateDocument() {
   const { graphql } = useAppwrite()
@@ -37,11 +43,10 @@ export function useUpdateDocument() {
   const mutationResult = useMutation<
     CreateDocumentMutation['databasesCreateDocument'],
     AppwriteException[],
-    Omit<UpdateDocumentMutationVariables, 'permissions'> & {
-      permissions?: InputMaybe<Array<Scalars['String']['input']>>
-    }
+    UpdateDocumentVariables,
+    { previousEntries: [queryKey: readonly unknown[], data: unknown][]; documentKeyPrefix: readonly unknown[] }
   >({
-    mutationFn: async ({ databaseId, collectionId, documentId, data, permissions }) => {
+    mutationFn: async ({ databaseId, collectionId, documentId, data, permissions, transactionId }) => {
       const { data: mutationData, errors } = await graphql.mutation({
         query: updateDocument,
         variables: {
@@ -50,6 +55,7 @@ export function useUpdateDocument() {
           documentId,
           data: JSON.stringify(data),
           permissions,
+          transactionId,
         },
       })
 
@@ -59,7 +65,36 @@ export function useUpdateDocument() {
 
       return mutationData.databasesUpdateDocument
     },
-    onSuccess: (_, variables) => {
+    onMutate: async (variables) => {
+      const documentKeyPrefix = [
+        'appwrite',
+        'databases',
+        variables.databaseId,
+        variables.collectionId,
+        'documents',
+        variables.documentId,
+      ]
+
+      await queryClient.cancelQueries({ queryKey: documentKeyPrefix })
+
+      const previousEntries = queryClient.getQueriesData({ queryKey: documentKeyPrefix })
+
+      queryClient.setQueriesData(
+        { queryKey: documentKeyPrefix },
+        (old: Record<string, unknown> | undefined) =>
+          old ? { ...old, ...(variables.data as Record<string, unknown>) } : old,
+      )
+
+      return { previousEntries, documentKeyPrefix }
+    },
+    onError: (_, __, context) => {
+      if (context?.previousEntries) {
+        for (const [key, data] of context.previousEntries) {
+          queryClient.setQueryData(key, data)
+        }
+      }
+    },
+    onSettled: (_, __, variables) => {
       void queryClient.invalidateQueries({
         queryKey: ['appwrite', 'databases', variables.databaseId, variables.collectionId],
       })

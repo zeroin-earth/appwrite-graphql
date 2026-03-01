@@ -9,11 +9,12 @@ import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
 const deleteDocument = gql(/* GraphQL */ `
-  mutation DeleteDocument($databaseId: String!, $collectionId: String!, $documentId: String!) {
+  mutation DeleteDocument($databaseId: String!, $collectionId: String!, $documentId: String!, $transactionId: String) {
     databasesDeleteDocument(
       databaseId: $databaseId
       collectionId: $collectionId
       documentId: $documentId
+      transactionId: $transactionId
     ) {
       status
     }
@@ -27,15 +28,17 @@ export function useDeleteDocument() {
   const mutationResult = useMutation<
     DeleteDocumentMutation['databasesDeleteDocument'],
     AppwriteException[],
-    DeleteDocumentMutationVariables
+    DeleteDocumentMutationVariables,
+    { previousEntries: [queryKey: readonly unknown[], data: unknown][]; documentKeyPrefix: readonly unknown[] }
   >({
-    mutationFn: async ({ databaseId, collectionId, documentId }) => {
+    mutationFn: async ({ databaseId, collectionId, documentId, transactionId }) => {
       const { data: mutationData, errors } = await graphql.mutation({
         query: deleteDocument,
         variables: {
           databaseId,
           collectionId,
           documentId,
+          transactionId,
         },
       })
 
@@ -45,7 +48,32 @@ export function useDeleteDocument() {
 
       return mutationData?.databasesDeleteDocument ?? { status: '' }
     },
-    onSuccess: async (_, variables) => {
+    onMutate: async (variables) => {
+      const documentKeyPrefix = [
+        'appwrite',
+        'databases',
+        variables.databaseId,
+        variables.collectionId,
+        'documents',
+        variables.documentId,
+      ]
+
+      await queryClient.cancelQueries({ queryKey: documentKeyPrefix })
+
+      const previousEntries = queryClient.getQueriesData({ queryKey: documentKeyPrefix })
+
+      queryClient.removeQueries({ queryKey: documentKeyPrefix })
+
+      return { previousEntries, documentKeyPrefix }
+    },
+    onError: (_, __, context) => {
+      if (context?.previousEntries) {
+        for (const [key, data] of context.previousEntries) {
+          queryClient.setQueryData(key, data)
+        }
+      }
+    },
+    onSettled: (_, __, variables) => {
       queryClient.removeQueries({
         queryKey: [
           'appwrite',

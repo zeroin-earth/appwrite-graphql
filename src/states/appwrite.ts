@@ -2,13 +2,32 @@ import type { ResultOf, TypedDocumentNode } from '@graphql-typed-document-node/c
 import { print } from 'graphql'
 import { atom } from 'jotai'
 
-import { Account, Avatars, Client, Graphql, Realtime, Storage } from '../types'
+import {
+  Account,
+  Avatars,
+  Client,
+  Databases,
+  Functions,
+  Graphql,
+  Locale,
+  Messaging,
+  Realtime,
+  Storage,
+  TablesDB,
+  Teams,
+} from '../types'
 
 type Variables = Record<string, unknown>
 
 type AtomProps = {
   account: Account | null
   avatars: Avatars | null
+  databases: Databases | null
+  functions: Functions | null
+  locale: Locale | null
+  messaging: Messaging | null
+  tablesDB: TablesDB | null
+  teams: Teams | null
   realtime: Realtime
   storage: Storage | null
   graphql: {
@@ -79,6 +98,12 @@ const appwriteModelsAtom = atom<AtomProps>({
   realtime: new Realtime(defaultAppwriteClient),
   storage: new Storage(defaultAppwriteClient),
   graphql: graphqlObject(new Graphql(defaultAppwriteClient)),
+  databases: new Databases(defaultAppwriteClient),
+  functions: new Functions(defaultAppwriteClient),
+  locale: new Locale(defaultAppwriteClient),
+  messaging: new Messaging(defaultAppwriteClient),
+  tablesDB: new TablesDB(defaultAppwriteClient),
+  teams: new Teams(defaultAppwriteClient),
 })
 
 export const appwriteAtom = atom(
@@ -92,6 +117,12 @@ export const appwriteAtom = atom(
     const realtime = new Realtime(client)
     const storage = new Storage(client)
     const graphqlAppwrite = new Graphql(client)
+    const databases = new Databases(client)
+    const functions = new Functions(client)
+    const locale = new Locale(client)
+    const messaging = new Messaging(client)
+    const tablesDB = new TablesDB(client)
+    const teams = new Teams(client)
 
     set(appwriteModelsAtom, {
       account,
@@ -99,6 +130,12 @@ export const appwriteAtom = atom(
       realtime,
       storage,
       graphql: graphqlObject(graphqlAppwrite),
+      databases,
+      functions,
+      locale,
+      messaging,
+      tablesDB,
+      teams,
     })
   },
 )

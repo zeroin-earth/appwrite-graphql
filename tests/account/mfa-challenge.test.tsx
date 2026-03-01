@@ -116,25 +116,44 @@ describe('MFA (Multi-Factor Authentication) Challenge', () => {
     expect(result.current.data!.recoveryCodes.length).toBe(codes.current.data!.recoveryCodes.length)
   })
 
-  test.skip('useCreateMfaChallenge, useUpdateMfaChallenge with valid Recovery Code (Appwrite server does not support recovery code challenge verification as of 1.8.1)', async () => {
-    const { result: createResult } = renderHook(() => useCreateMfaChallenge(), { wrapper })
+  test.skip('useCreateMfaChallenge, useUpdateMfaChallenge with valid Recovery Code — Appwrite 1.8.1 returns user_invalid_token on both REST and GraphQL endpoints (server bug, not GraphQL-specific)', async () => {
+    const { result } = renderHook(() => useGetMfaRecoveryCodes(), { wrapper })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(result.current.data).toBeDefined()
+    expect(result.current.data?.recoveryCodes).toBeDefined()
+
+    // Store the codes from CREATE – these are the actual usable codes
+    const rCodes = result.current.data!.recoveryCodes
+
+    const { result: createResult, unmount: unmountCreate } = renderHook(
+      () => useCreateMfaChallenge(),
+      { wrapper },
+    )
 
     await act(async () => {
       await createResult.current.mutateAsync({ factor: 'recoveryCode' })
     })
 
     await waitFor(() => expect(createResult.current.isSuccess).toBe(true))
+    const challengeId = createResult.current.data?._id || ''
+    unmountCreate()
 
-    const { result: updateResult } = renderHook(() => useUpdateMfaChallenge(), { wrapper })
+    const { result: updateResult, unmount: unmountUpdate } = renderHook(
+      () => useUpdateMfaChallenge(),
+      { wrapper },
+    )
 
     await act(async () =>
       updateResult.current.mutateAsync({
-        challengeId: createResult.current.data?._id || '',
-        otp: recoveryCodes[0],
+        challengeId,
+        otp: rCodes[0],
       }),
     )
 
     await waitFor(() => expect(updateResult.current.isSuccess).toBe(true))
+    unmountUpdate()
   })
 
   test('useUpdateMfaRecoveryCodes', async () => {

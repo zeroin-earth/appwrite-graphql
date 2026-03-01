@@ -346,6 +346,8 @@ services:
       - _APP_SMTP_USERNAME
       - _APP_SMTP_PASSWORD
       - _APP_LOGGING_CONFIG
+      - _APP_SMS_PROVIDER
+      - _APP_SMS_FROM
 
   mariadb:
     image: mariadb:10.11
@@ -393,6 +395,18 @@ services:
       MP_DATABASE: /data/mailpit.db
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    networks:
+      - appwrite
+
+  sms-mock:
+    image: "node:22-alpine"
+    container_name: request-catcher-sms
+    working_dir: /app
+    volumes:
+      - ./sms-mock:/app:ro
+    ports:
+      - "8888:5000"
+    command: "node server.js"
     networks:
       - appwrite
 

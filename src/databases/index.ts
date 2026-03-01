@@ -1,13 +1,18 @@
 export { useCollection, useSuspenseCollection } from './useCollection'
+export {
+  useCollectionWithPagination,
+  useSuspenseCollectionWithPagination,
+} from './useCollectionWithPagination'
 export { useCreateDocument } from './useCreateDocument'
 export { useCreateOperations } from './useCreateOperations'
 export { useCreateTransaction } from './useCreateTransaction'
 export { useDecrementAttribute } from './useDecrementAttribute'
 export { useDeleteDocument } from './useDeleteDocument'
 export { useDeleteTransaction } from './useDeleteTransaction'
-export { useDocument } from './useDocument'
+export { useDocument, useSuspenseDocument } from './useDocument'
 export { useGetTransaction } from './useGetTransaction'
 export { useIncrementAttribute } from './useIncrementAttribute'
+export { useInfiniteCollection } from './useInfiniteCollection'
 export { useListTransactions } from './useListTransactions'
 export { useUpdateDocument } from './useUpdateDocument'
 export { useUpdateTransaction } from './useUpdateTransaction'

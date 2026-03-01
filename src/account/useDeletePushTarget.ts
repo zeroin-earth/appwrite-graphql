@@ -37,7 +37,7 @@ export function useDeletePushTarget() {
         throw errors
       }
 
-      return data.accountDeletePushTarget
+      return data?.accountDeletePushTarget ?? { status: '' }
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
