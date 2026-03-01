@@ -43,7 +43,7 @@ describe('useUpdateName', () => {
     const { result } = renderHook(() => useUpdateName(), { wrapper })
 
     await act(async () => {
-      result.current.mutate({ name: 'Updated Name' })
+      await result.current.mutateAsync({ name: 'Updated Name' })
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -84,7 +84,7 @@ describe('useUpdateEmail', () => {
     const { result } = renderHook(() => useUpdateEmail(), { wrapper })
 
     await act(async () => {
-      result.current.mutate({ email: newEmail, password })
+      await result.current.mutateAsync({ email: newEmail, password })
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -125,7 +125,7 @@ describe('useUpdatePassword', () => {
     const { result } = renderHook(() => useUpdatePassword(), { wrapper })
 
     await act(async () => {
-      result.current.mutate({ password: newPassword, oldPassword: password })
+      await result.current.mutateAsync({ password: newPassword, oldPassword: password })
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -164,7 +164,7 @@ describe('useUpdatePrefs', () => {
     const { result } = renderHook(() => useUpdatePrefs(), { wrapper })
 
     await act(async () => {
-      result.current.mutate({ prefs: { theme: 'dark', fontSize: 14 } })
+      await result.current.mutateAsync({ prefs: { theme: 'dark', fontSize: 14 } })
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -179,7 +179,7 @@ describe('useUpdatePrefs', () => {
     const { result: updateResult } = renderHook(() => useUpdatePrefs(), { wrapper })
 
     await act(async () => {
-      updateResult.current.mutate({ prefs: { theme: 'light', notifications: true } })
+      await updateResult.current.mutateAsync({ prefs: { theme: 'light', notifications: true } })
     })
 
     await waitFor(() => expect(updateResult.current.isSuccess).toBe(true))
@@ -197,10 +197,6 @@ describe('useUpdatePrefs', () => {
     expect(prefsData.notifications).toBe(true)
   })
 })
-
-// ---------------------------------------------------------------------------
-// useUpdateStatus — skipped (destructive: disables the account)
-// ---------------------------------------------------------------------------
 
 describe('useUpdateStatus', () => {
   test.skip('is skipped because it disables the account (destructive operation)', () => {

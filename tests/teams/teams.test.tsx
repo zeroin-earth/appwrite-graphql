@@ -267,7 +267,7 @@ describe('Teams hooks', () => {
       const { result } = renderHook(() => useCreateMembership(), { wrapper })
 
       await act(async () => {
-        result.current.mutate({
+        await result.current.mutateAsync({
           teamId,
           roles: ['member'],
           userId: invited.userId,
@@ -295,7 +295,7 @@ describe('Teams hooks', () => {
       const { result } = renderHook(() => useCreateMembership(), { wrapper })
 
       await act(async () => {
-        result.current.mutate({
+        await result.current.mutateAsync({
           teamId,
           roles: ['member'],
           userId: invited.userId,
@@ -331,7 +331,7 @@ describe('Teams hooks', () => {
       const { result } = renderHook(() => useCreateMembership(), { wrapper })
 
       await act(async () => {
-        result.current.mutate({
+        await result.current.mutateAsync({
           teamId,
           roles: ['member'],
           userId: invited.userId,
@@ -342,6 +342,10 @@ describe('Teams hooks', () => {
       await waitFor(() => expect(result.current.isSuccess || result.current.isError).toBe(true))
 
       await logoutUser(wrapper)
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 3000))
+      })
 
       const message = await waitFor(async () => {
         const emails = await checkMail()

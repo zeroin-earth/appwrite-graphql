@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Channel } from 'appwrite'
 
 import type { Collection, Document } from './types'
 import { gql } from '../__generated__'
@@ -76,7 +77,7 @@ export function useCollection<TDocument>({
     }
 
     const subscriptionPromise = realtime.subscribe(
-      `databases.${databaseId}.collections.${collectionId}.documents`,
+      Channel.tablesdb(databaseId).table(collectionId).row(),
       (response) => {
         const [, operation] = response.events[0].match(/\.(\w+)$/) as RegExpMatchArray
         const document = response.payload as Document<TDocument>
@@ -166,7 +167,7 @@ export function useSuspenseCollection<TDocument>({
     }
 
     const subscriptionPromise = realtime.subscribe(
-      `databases.${databaseId}.collections.${collectionId}.documents`,
+      Channel.tablesdb(databaseId).table(collectionId).row(),
       (response) => {
         const [, operation] = response.events[0].match(/\.(\w+)$/) as RegExpMatchArray
         const document = response.payload as Document<TDocument>

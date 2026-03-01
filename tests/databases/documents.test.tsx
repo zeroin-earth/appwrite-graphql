@@ -1,14 +1,17 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
-import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
+import { Channel } from 'appwrite'
+import { afterAll, beforeAll, describe, expect, spyOn, test } from 'bun:test'
 
 import {
   useCreateDocument,
   useDeleteDocument,
   useDocument,
+  useQueryClient,
   useUpdateDocument,
   useUpsertDocument,
 } from '../../src'
 import { ID } from '../../src/types'
+import { triggerRealtimeEvent } from '../__mocks__/Realtime'
 import {
   createTestDocument,
   createTestUser,
@@ -178,11 +181,28 @@ describe('Document CRUD hooks', () => {
       createdDocumentIds.push(documentId)
     })
 
-    test('updates a document and returns updated data', async () => {
+    test('updates a document and returns updated data as well as updating the realtime subscription', async () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
 
       const { result } = renderHook(() => useUpdateDocument(), { wrapper })
+      const { result: queryClient } = renderHook(() => useQueryClient(), { wrapper })
+
+      const spy = spyOn(queryClient.current, 'setQueryData')
+
+      const { result: readResult } = renderHook(
+        () =>
+          useDocument<TestDocumentData>({
+            databaseId,
+            collectionId,
+            documentId,
+          }),
+        { wrapper },
+      )
+
+      await waitFor(() => expect(readResult.current.isSuccess).toBe(true))
+
+      expect(readResult.current.data?.name).toBe('Update Test')
 
       await act(async () => {
         await result.current.mutateAsync({
@@ -194,6 +214,22 @@ describe('Document CRUD hooks', () => {
       })
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+      triggerRealtimeEvent(
+        Channel.tablesdb(databaseId).table(collectionId).row(documentId).update(),
+        {
+          _id: documentId,
+          name: 'Updated Name',
+          age: 20,
+        },
+      )
+
+      expect(spy).toHaveBeenCalledWith(
+        ['appwrite', 'databases', databaseId, collectionId, 'documents', documentId],
+        expect.objectContaining({
+          name: 'Updated Name',
+        }),
+      )
 
       expect(result.current.data).toBeDefined()
     })

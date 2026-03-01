@@ -1,27 +1,110 @@
 import type { QueryClient } from '@tanstack/react-query'
-import { act, renderHook, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor, within } from '@testing-library/react'
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test'
 
 import {
   useCreateJWT,
+  useCreateMagicURLToken,
+  useCreateSession,
   useDeleteSession,
   useDeleteSessions,
   useGetSession,
   useListSessions,
+  useSuspenseCreateJWT,
   useUpdateSession,
 } from '../../src'
-import { createTestUser, deleteTestUser, loginUser } from '../setup/helpers'
+import {
+  checkMail,
+  createTestUser,
+  deleteTestUser,
+  emptyMail,
+  loginUser,
+  logoutUser,
+  renderMessage,
+} from '../setup/helpers'
 import { createQueryClient, createWrapper } from '../setup/wrapper'
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 type Wrapper = ReturnType<typeof createWrapper>
 
-// ---------------------------------------------------------------------------
-// useListSessions
-// ---------------------------------------------------------------------------
+describe('useCreateSession', () => {
+  let userId: string
+  let email: string
+  let password: string
+  let queryClient: QueryClient
+  let wrapper: Wrapper
+
+  beforeAll(async () => {
+    const user = await createTestUser({ name: 'ListSessions User' })
+    userId = user.userId
+    email = user.email
+    password = user.password
+  })
+
+  afterAll(async () => {
+    await deleteTestUser(userId)
+  })
+
+  beforeEach(() => {
+    queryClient = createQueryClient()
+    wrapper = createWrapper({ queryClient })
+  })
+
+  test('creates a session from a magic URL token', async () => {
+    await loginUser(email, password, wrapper)
+
+    const { result: magicURLResult } = renderHook(() => useCreateMagicURLToken(), { wrapper })
+
+    await act(async () => {
+      await magicURLResult.current.mutateAsync({
+        userId,
+        email,
+        phrase: false,
+      })
+    })
+
+    await waitFor(() => expect(magicURLResult.current.isSuccess).toBe(true))
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 3000))
+    })
+
+    const message = await waitFor(async () => {
+      const emails = await checkMail()
+      expect(emails.messages.length).toBeGreaterThan(0)
+      return emails.messages[0]
+    })
+
+    await renderMessage(message.ID)
+    const emailBody = within(document.body)
+
+    expect(emailBody.getAllByText(/Sign in to Test Project/)).toBeDefined()
+
+    const button = emailBody.getAllByText(/Sign in to Test Project/)[1]
+
+    expect(button.getAttribute('href')).toBeDefined()
+
+    const url = new URL(button.getAttribute('href') || '')
+    expect(url.pathname).toBe('/console/auth/magic-url')
+
+    await emptyMail()
+
+    const uid = url.searchParams.get('userId')
+    const secret = url.searchParams.get('secret')
+
+    await logoutUser(wrapper)
+
+    const { result } = renderHook(() => useCreateSession(), { wrapper })
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        userId: uid || '',
+        secret: secret || '',
+      })
+    })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+  })
+})
 
 describe('useListSessions', () => {
   let userId: string
@@ -66,10 +149,6 @@ describe('useListSessions', () => {
   })
 })
 
-// ---------------------------------------------------------------------------
-// useGetSession
-// ---------------------------------------------------------------------------
-
 describe('useGetSession', () => {
   let userId: string
   let email: string
@@ -111,10 +190,6 @@ describe('useGetSession', () => {
   })
 })
 
-// ---------------------------------------------------------------------------
-// useCreateJWT
-// ---------------------------------------------------------------------------
-
 describe('useCreateJWT', () => {
   let userId: string
   let email: string
@@ -144,7 +219,7 @@ describe('useCreateJWT', () => {
     const { result } = renderHook(() => useCreateJWT(), { wrapper })
 
     await act(async () => {
-      result.current.mutate()
+      await result.current.mutateAsync()
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -154,11 +229,21 @@ describe('useCreateJWT', () => {
     expect(typeof result.current.data?.jwt).toBe('string')
     expect(result.current.data!.jwt.length).toBeGreaterThan(0)
   })
-})
 
-// ---------------------------------------------------------------------------
-// useUpdateSession
-// ---------------------------------------------------------------------------
+  test('creates a JWT token with useSuspenseQuery', async () => {
+    wrapper = createWrapper({ queryClient, suspense: true })
+    await loginUser(email, password, wrapper)
+
+    const { result } = renderHook(() => useSuspenseCreateJWT(), { wrapper })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(result.current.data).toBeDefined()
+    expect(result.current.data?.jwt).toBeDefined()
+    expect(typeof result.current.data?.jwt).toBe('string')
+    expect(result.current.data!.jwt.length).toBeGreaterThan(0)
+  })
+})
 
 describe('useUpdateSession', () => {
   let userId: string
@@ -197,7 +282,7 @@ describe('useUpdateSession', () => {
     const { result } = renderHook(() => useUpdateSession(), { wrapper })
 
     await act(async () => {
-      result.current.mutate({ sessionId })
+      await result.current.mutateAsync({ sessionId })
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -207,10 +292,6 @@ describe('useUpdateSession', () => {
     expect(result.current.data?.expire).toBeDefined()
   })
 })
-
-// ---------------------------------------------------------------------------
-// useDeleteSession
-// ---------------------------------------------------------------------------
 
 describe('useDeleteSession', () => {
   let userId: string
@@ -249,7 +330,7 @@ describe('useDeleteSession', () => {
     const { result } = renderHook(() => useDeleteSession(), { wrapper })
 
     await act(async () => {
-      result.current.mutate({ sessionId })
+      await result.current.mutateAsync({ sessionId })
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -258,10 +339,6 @@ describe('useDeleteSession', () => {
     expect(result.current.data?.status).toBeDefined()
   })
 })
-
-// ---------------------------------------------------------------------------
-// useDeleteSessions — tested last because it logs out all sessions
-// ---------------------------------------------------------------------------
 
 describe('useDeleteSessions', () => {
   let userId: string
@@ -292,7 +369,7 @@ describe('useDeleteSessions', () => {
     const { result } = renderHook(() => useDeleteSessions(), { wrapper })
 
     await act(async () => {
-      result.current.mutate()
+      await result.current.mutateAsync()
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))

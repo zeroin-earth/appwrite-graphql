@@ -14,15 +14,7 @@ import {
 import { createTestUser, deleteTestUser, generateTOTP, loginUser, setupOTP } from '../setup/helpers'
 import { createQueryClient, createWrapper } from '../setup/wrapper'
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 type Wrapper = ReturnType<typeof createWrapper>
-
-// ---------------------------------------------------------------------------
-// MFA Integration Tests
-// ---------------------------------------------------------------------------
 
 describe('MFA (Multi-Factor Authentication) Challenge', () => {
   let userId: string
@@ -36,11 +28,6 @@ describe('MFA (Multi-Factor Authentication) Challenge', () => {
 
   /** Recovery codes created during the MFA setup flow. */
   let recoveryCodes: string[]
-
-  // -----------------------------------------------------------------------
-  // Setup – create user, login, and share a single QueryClient / wrapper
-  // so that the session cookie persists across all ordered tests.
-  // -----------------------------------------------------------------------
 
   beforeAll(async () => {
     const user = await createTestUser({ name: 'MFA Challenge Test User' })

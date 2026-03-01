@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Channel } from 'appwrite'
 
 import type { Document } from './types'
 import { gql } from '../__generated__'
@@ -58,7 +59,7 @@ export function useDocument<TDocument>({
 
   useEffect(() => {
     const subscriptionPromise = realtime.subscribe(
-      `databases.${databaseId}.collections.${collectionId}.documents.${documentId}`,
+      Channel.tablesdb(databaseId).table(collectionId).row(documentId).update(),
       (response) => {
         queryClient.setQueryData(
           ['appwrite', 'databases', databaseId, collectionId, 'documents', documentId],

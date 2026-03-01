@@ -2,7 +2,7 @@ import { act, renderHook, waitFor as waitForTest } from '@testing-library/react'
 import { expect } from 'bun:test'
 import { MailpitClient } from 'mailpit-api'
 import { existsSync, readFileSync } from 'node:fs'
-import { Account, Client, Databases, ID, TablesDB, Users } from 'node-appwrite'
+import { Account, Client, Databases, ID, Messaging, TablesDB, Users } from 'node-appwrite'
 import { TOTP } from 'otpauth'
 
 import type { createWrapper } from './wrapper'
@@ -61,6 +61,7 @@ export function createServerClient() {
     users: new Users(client),
     account: new Account(client),
     tablesDB: new TablesDB(client),
+    messaging: new Messaging(client),
   }
 }
 
@@ -130,6 +131,41 @@ export async function waitFor(
     await new Promise((r) => setTimeout(r, intervalMs))
   }
   throw new Error(`waitFor timed out after ${timeoutMs}ms`)
+}
+
+/** Get a user's email target ID via server SDK */
+export async function getUserEmailTargetId(userId: string): Promise<string> {
+  const { users } = createServerClient()
+  const user = await users.get({ userId })
+  const emailTarget = user.targets.find((t: any) => t.providerType === 'email')
+  if (!emailTarget) {
+    throw new Error(`No email target found for user ${userId}`)
+  }
+  return emailTarget.$id
+}
+
+/** Send a test email to a topic via server SDK and wait for delivery */
+export async function sendTopicEmail(opts: {
+  topicId: string
+  subject: string
+  content: string
+}): Promise<string> {
+  const { messaging } = createServerClient()
+  const msg = await messaging.createEmail({
+    messageId: ID.unique(),
+    subject: opts.subject,
+    content: opts.content,
+    topics: [opts.topicId],
+  })
+
+  // Poll for delivery (max 10s)
+  for (let i = 0; i < 10; i++) {
+    await new Promise((r) => setTimeout(r, 1000))
+    const status = await messaging.getMessage({ messageId: msg.$id })
+    if (status.status !== 'processing') break
+  }
+
+  return msg.$id
 }
 
 export function generateTOTP(secret: string): string {

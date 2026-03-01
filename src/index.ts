@@ -13,6 +13,7 @@ export * from './account'
 export * from './avatars'
 export * from './databases'
 export * from './locale'
+export * from './messaging'
 export * from './storage'
 export * from './teams'
 

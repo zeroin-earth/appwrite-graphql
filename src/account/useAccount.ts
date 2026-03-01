@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Channel } from 'appwrite'
 import { castDraft, produce } from 'immer'
 
 import { gql } from '../__generated__/gql'
@@ -88,7 +89,7 @@ function subscribe<Preferences extends Models.Preferences>(
   realtime: Realtime,
   queryClient: ReturnType<typeof useQueryClient>,
 ) {
-  return realtime.subscribe<Models.User<Preferences>>('account', (response) => {
+  return realtime.subscribe<Models.User<Preferences>>(Channel.account(), (response) => {
     const isUpdatingPreferences = response.events.some((event) => event.endsWith('prefs'))
 
     if (isUpdatingPreferences) {

@@ -316,6 +316,37 @@ services:
       - _APP_DOMAIN
       - _APP_OPTIONS_FORCE_HTTPS
 
+  appwrite-worker-messaging:
+    image: appwrite/appwrite:1.8.1
+    entrypoint: worker-messaging
+    container_name: appwrite-worker-messaging
+    <<: *x-logging
+    restart: unless-stopped
+    networks:
+      - appwrite
+    depends_on:
+      - redis
+      - mariadb
+    environment:
+      - _APP_ENV
+      - _APP_WORKER_PER_CORE
+      - _APP_OPENSSL_KEY_V1
+      - _APP_DB_HOST
+      - _APP_DB_PORT
+      - _APP_DB_SCHEMA
+      - _APP_DB_USER
+      - _APP_DB_PASS
+      - _APP_REDIS_HOST
+      - _APP_REDIS_PORT
+      - _APP_REDIS_USER
+      - _APP_REDIS_PASS
+      - _APP_SMTP_HOST
+      - _APP_SMTP_PORT
+      - _APP_SMTP_SECURE
+      - _APP_SMTP_USERNAME
+      - _APP_SMTP_PASSWORD
+      - _APP_LOGGING_CONFIG
+
   mariadb:
     image: mariadb:10.11
     container_name: appwrite-mariadb

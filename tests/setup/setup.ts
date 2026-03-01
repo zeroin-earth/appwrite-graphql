@@ -3,7 +3,7 @@
  * Creates admin account, project, API key, database, and collections.
  * Run this once before tests: `bun run tests/setup/setup.ts`
  */
-import { Client, Databases, ID, Permission, Role } from 'node-appwrite'
+import { Client, Databases, ID, Permission, Role, TablesDB } from 'node-appwrite'
 
 const ENDPOINT = process.env.APPWRITE_ENDPOINT || 'http://localhost/v1'
 const ADMIN_EMAIL = 'admin@test.local'
@@ -12,6 +12,8 @@ const PROJECT_ID = 'test-project'
 const DATABASE_ID = 'test-db'
 const COLLECTION_ID = 'test-collection'
 const BUCKET_ID = 'test-bucket'
+const PROVIDER_ID = 'test-smtp'
+const TOPIC_ID = 'test-topic'
 
 const ALL_SCOPES = [
   'users.read',
@@ -40,6 +42,14 @@ const ALL_SCOPES = [
   'avatars.read',
   'health.read',
   'sessions.write',
+  'providers.read',
+  'providers.write',
+  'topics.write',
+  'subscribers.read',
+  'subscribers.write',
+  'targets.read',
+  'messages.read',
+  'messages.write',
 ]
 
 async function waitForAppwrite(maxRetries = 60) {
@@ -255,11 +265,12 @@ async function setupDatabase(apiKey: string) {
   console.log('Setting up database and collections...')
   const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID).setKey(apiKey)
 
+  const tablesDb = new TablesDB(client)
   const databases = new Databases(client)
 
   // Create database
   try {
-    await databases.create(DATABASE_ID, 'Test Database')
+    await tablesDb.create({ databaseId: DATABASE_ID, name: 'Test Database' })
     console.log(`Database "${DATABASE_ID}" created`)
   } catch (e: any) {
     if (e?.code === 409) {
@@ -271,25 +282,49 @@ async function setupDatabase(apiKey: string) {
 
   // Create collection with document-level permissions
   try {
-    await databases.createCollection(DATABASE_ID, COLLECTION_ID, 'Test Collection', [
-      Permission.read(Role.any()),
-      Permission.create(Role.users()),
-      Permission.update(Role.users()),
-      Permission.delete(Role.users()),
-    ])
+    await tablesDb.createTable({
+      databaseId: DATABASE_ID,
+      tableId: COLLECTION_ID,
+      name: 'Test Collection',
+      permissions: [
+        Permission.read(Role.any()),
+        Permission.create(Role.users()),
+        Permission.update(Role.users()),
+        Permission.delete(Role.users()),
+      ],
+    })
     console.log(`Collection "${COLLECTION_ID}" created`)
   } catch (e: any) {
     if (e?.code === 409) {
       console.log('Collection already exists')
-      return
+    } else {
+      throw e
     }
-    throw e
   }
 
-  // Create attributes
-  await databases.createStringAttribute(DATABASE_ID, COLLECTION_ID, 'name', 255, true)
-  await databases.createIntegerAttribute(DATABASE_ID, COLLECTION_ID, 'age', false)
-  await databases.createBooleanAttribute(DATABASE_ID, COLLECTION_ID, 'active', false)
+  // Create attributes via Databases API (TablesDB.createTable columns param is not supported)
+  const attributes = [
+    { method: 'createStringAttribute', params: { key: 'name', size: 255, required: true } },
+    { method: 'createIntegerAttribute', params: { key: 'age', required: false } },
+    { method: 'createBooleanAttribute', params: { key: 'active', required: false } },
+  ] as const
+
+  for (const attr of attributes) {
+    try {
+      await (databases[attr.method] as any)({
+        databaseId: DATABASE_ID,
+        collectionId: COLLECTION_ID,
+        ...attr.params,
+      })
+      console.log(`Attribute "${attr.params.key}" created`)
+    } catch (e: any) {
+      if (e?.code === 409) {
+        console.log(`Attribute "${attr.params.key}" already exists`)
+      } else {
+        throw e
+      }
+    }
+  }
 
   // Wait for attributes to be processed
   console.log('Waiting for attributes to be processed...')
@@ -333,6 +368,85 @@ async function setupBucket(apiKey: string) {
   console.log(`Bucket "${BUCKET_ID}" created!`)
 }
 
+async function setupMessaging(apiKey: string) {
+  console.log('Setting up messaging topics...')
+
+  const resp = await fetch(`${ENDPOINT}/messaging/providers/smtp`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Appwrite-Project': PROJECT_ID,
+      'X-Appwrite-Key': apiKey,
+    },
+    body: JSON.stringify({
+      providerId: PROVIDER_ID,
+      name: 'Test SMTP Provider',
+      host: 'host.docker.internal',
+      port: 1025,
+      secure: false,
+      enabled: true,
+      fromEmail: 'test@test.local',
+      fromName: 'Test Sender',
+    }),
+  })
+
+  if (!resp.ok) {
+    const body = await resp.text()
+    if (body.includes('already exists') || body.includes('messaging_provider_already_exists')) {
+      console.log('Messaging provider already exists, updating...')
+      const updateResp = await fetch(`${ENDPOINT}/messaging/providers/smtp/${PROVIDER_ID}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Appwrite-Project': PROJECT_ID,
+          'X-Appwrite-Key': apiKey,
+        },
+        body: JSON.stringify({
+          enabled: true,
+          fromEmail: 'test@test.local',
+          fromName: 'Test Sender',
+          host: 'host.docker.internal',
+          port: 1025,
+        }),
+      })
+      if (!updateResp.ok) {
+        console.warn(`Warning: Failed to update provider: ${await updateResp.text()}`)
+      }
+    } else {
+      throw new Error(`Failed to create messaging provider: ${body}`)
+    }
+  }
+
+  console.log('Messaging provider created!')
+
+  // Create a topic
+  console.log('Creating messaging topic...')
+
+  const topicResp = await fetch(`${ENDPOINT}/messaging/topics`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Appwrite-Project': PROJECT_ID,
+      'X-Appwrite-Key': apiKey,
+    },
+    body: JSON.stringify({
+      topicId: TOPIC_ID,
+      name: 'Test Topic',
+    }),
+  })
+
+  if (!topicResp.ok) {
+    const body = await topicResp.text()
+    if (body.includes('already exists') || body.includes('messaging_topic_already_exists')) {
+      console.log('Messaging topic already exists')
+      return
+    }
+    throw new Error(`Failed to create messaging topic: ${body}`)
+  }
+
+  console.log('Messaging topic created!')
+}
+
 async function main() {
   await waitForAppwrite()
 
@@ -342,6 +456,7 @@ async function main() {
   const apiKey = await createApiKey(cookies)
   await setupDatabase(apiKey)
   await setupBucket(apiKey)
+  await setupMessaging(apiKey)
 
   // Output env vars for tests
   console.log('\n=== Test Configuration ===')
@@ -361,6 +476,8 @@ async function main() {
     databaseId: DATABASE_ID,
     collectionId: COLLECTION_ID,
     bucketId: BUCKET_ID,
+    providerId: PROVIDER_ID,
+    topicId: TOPIC_ID,
   }
 
   await Bun.write('tests/.test-config.json', JSON.stringify(config, null, 2))

@@ -16,12 +16,12 @@
   "author": "Matt Suhay <matthew.suhay@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "tsup && tsup --config tsup.native.config.ts && node post-build.js",
+    "build": "bun run codegen && tsup && tsup --config tsup.native.config.ts && node post-build.js",
     "codegen": "graphql-codegen --config codegen.ts",
-    "prepublishOnly": "bun run tsc && bun run codegen && bun run build",
+    "prepublishOnly": "bun run tsc && bun run build",
     "tsc": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "bun test --timeout 30000 --only-failures",
+    "test": "bun test --timeout 30000",
     "test:setup": "bun run tests/setup/setup.ts",
     "test:teardown": "bun run tests/setup/teardown.ts"
   },

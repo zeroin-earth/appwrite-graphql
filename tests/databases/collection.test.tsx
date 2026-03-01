@@ -1,7 +1,9 @@
 import { renderHook, waitFor } from '@testing-library/react'
-import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
+import { Channel } from 'appwrite'
+import { afterAll, beforeAll, describe, expect, spyOn, test } from 'bun:test'
 
-import { useCollection, useSuspenseCollection } from '../../src'
+import { useCollection, useQueryClient, useSuspenseCollection } from '../../src'
+import { triggerRealtimeEvent } from '../__mocks__/Realtime'
 import {
   createTestDocument,
   createTestUser,
@@ -192,6 +194,49 @@ describe('Collection query hooks', () => {
       expect(result.current.documents).toBeDefined()
       expect(result.current.total).toBeGreaterThanOrEqual(testDocuments.length)
     })
+
+    test('is listening for realtime updates', async () => {
+      const wrapper = createWrapper()
+      await loginUser(userEmail, userPassword, wrapper)
+
+      const { result: queryClient } = renderHook(() => useQueryClient(), { wrapper })
+
+      const spy = spyOn(queryClient.current, 'setQueryData')
+
+      const { result } = renderHook(
+        () =>
+          useCollection<TestDocumentData>({
+            databaseId,
+            collectionId,
+            queries: [],
+          }),
+        { wrapper },
+      )
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+      // Standard react-query properties should be present
+      expect(result.current.isLoading).toBe(false)
+      expect(result.current.isError).toBe(false)
+      expect(result.current.data).toBeDefined()
+
+      triggerRealtimeEvent(
+        Channel.tablesdb(databaseId).table(collectionId).row(),
+        {
+          $id: 'some-doc-id',
+          name: 'Updated Name',
+          age: 20,
+        },
+        ['databases.test-db.collections.test-collection.documents.some-doc-id.update'],
+      )
+
+      expect(spy).toHaveBeenCalledWith(
+        ['appwrite', 'databases', databaseId, collectionId, 'documents', 'some-doc-id'],
+        expect.objectContaining({
+          name: 'Updated Name',
+        }),
+      )
+    })
   })
 
   describe('useSuspenseCollection', () => {
@@ -205,6 +250,7 @@ describe('Collection query hooks', () => {
             databaseId,
             collectionId,
             queries: [],
+            subscribe: false,
           }),
         { wrapper },
       )
@@ -261,6 +307,44 @@ describe('Collection query hooks', () => {
 
       expect(typeof result.current.total).toBe('number')
       expect(result.current.total).toBeGreaterThanOrEqual(3)
+    })
+
+    test('is listening for realtime updates', async () => {
+      const wrapper = createWrapper({ suspense: true })
+      await loginUser(userEmail, userPassword, wrapper)
+
+      const { result: queryClient } = renderHook(() => useQueryClient(), { wrapper })
+
+      const spy = spyOn(queryClient.current, 'setQueryData')
+
+      const { result } = renderHook(
+        () =>
+          useSuspenseCollection<TestDocumentData>({
+            databaseId,
+            collectionId,
+            queries: [],
+          }),
+        { wrapper },
+      )
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+      triggerRealtimeEvent(
+        Channel.tablesdb(databaseId).table(collectionId).row(),
+        {
+          $id: 'some-doc-id',
+          name: 'Updated Name',
+          age: 20,
+        },
+        ['databases.test-db.collections.test-collection.documents.some-doc-id.update'],
+      )
+
+      expect(spy).toHaveBeenCalledWith(
+        ['appwrite', 'databases', databaseId, collectionId, 'documents', 'some-doc-id'],
+        expect.objectContaining({
+          name: 'Updated Name',
+        }),
+      )
     })
   })
 })

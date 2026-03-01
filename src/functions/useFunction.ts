@@ -25,7 +25,7 @@ const createExecution = gql(/* GraphQL */ `
     $async: Boolean
     $path: String
     $method: String
-    $headers: Json
+    $headers: String
     $scheduledAt: String
   ) {
     functionsCreateExecution(
