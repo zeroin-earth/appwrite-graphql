@@ -17,6 +17,8 @@ export * from './messaging'
 export * from './storage'
 export * from './teams'
 
+export * from './query/QueryBuilder'
+
 export * from './functions/useFunction'
 export * from './functions/useGetExecution'
 export * from './functions/useListExecutions'
