@@ -11,6 +11,7 @@ export function useInfiniteCollection<TDocument>({
   transactionId,
   limit = 25,
   subscribe = true,
+  fields,
 }: {
   databaseId: string
   collectionId: string
@@ -18,6 +19,7 @@ export function useInfiniteCollection<TDocument>({
   transactionId?: string
   limit?: number
   subscribe?: boolean
+  fields?: (keyof TDocument & string)[]
 }) {
   const [page, setPage] = useState(1)
   const [accumulated, setAccumulated] = useState<Document<TDocument>[]>([])
@@ -31,6 +33,7 @@ export function useInfiniteCollection<TDocument>({
     queries: paginatedQueries,
     transactionId,
     subscribe,
+    fields,
   })
 
   // Accumulate documents across pages

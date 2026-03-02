@@ -1,11 +1,12 @@
 import { gql } from '../__generated__'
-import type { CreateJwtMutation } from '../__generated__/graphql'
+import type { CreateJwtMutation, CreateJwtMutationVariables } from '../__generated__/graphql'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 import { useSuspenseQuery } from '../useSuspenseQuery'
 
+//The documentation says there should be a duration parameter, but including one causes a server error.
 const accountCreateJWT = gql(/* GraphQL */ `
   mutation CreateJWT {
     accountCreateJWT {
@@ -18,7 +19,11 @@ export function useCreateJWT({ gcTime = 600000 }: { gcTime?: number } = {}) {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useMutation<CreateJwtMutation['accountCreateJWT'], AppwriteException[]>({
+  const queryResult = useMutation<
+    CreateJwtMutation['accountCreateJWT'],
+    AppwriteException[],
+    CreateJwtMutationVariables
+  >({
     gcTime,
     mutationKey: ['appwrite', 'jwt'],
     mutationFn: async () => {

@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Channel } from 'appwrite'
 
 import type { Document } from './types'
+import { mergeFieldsQuery } from './types'
 import { gql } from '../__generated__'
 import type { GetDocumentQueryVariables } from '../__generated__/graphql'
 import type { AppwriteException } from '../types'
@@ -31,9 +32,21 @@ const getDocument = gql(/* GraphQL */ `
   }
 `)
 
-function useDocumentQueryConfig<TDocument>(variables: GetDocumentQueryVariables) {
+type DocumentParams<TDocument = Record<string, unknown>> = GetDocumentQueryVariables & {
+  fields?: (keyof TDocument & string)[]
+}
+
+function useDocumentQueryConfig<TDocument>({
+  databaseId,
+  collectionId,
+  documentId,
+  queries,
+  transactionId,
+  fields,
+}: DocumentParams<TDocument>) {
   const { graphql } = useAppwrite()
-  const { databaseId, collectionId, documentId, queries, transactionId } = variables
+  const rawQueries = Array.isArray(queries) ? queries : queries ? [queries] : []
+  const mergedQueries = mergeFieldsQuery(rawQueries, fields)
 
   return {
     queryKey: [
@@ -43,7 +56,7 @@ function useDocumentQueryConfig<TDocument>(variables: GetDocumentQueryVariables)
       collectionId,
       'documents',
       documentId,
-      { queries },
+      { queries: mergedQueries },
     ] as const,
     queryFn: async () => {
       const { data, errors } = await graphql.query({
@@ -52,7 +65,7 @@ function useDocumentQueryConfig<TDocument>(variables: GetDocumentQueryVariables)
           databaseId,
           collectionId,
           documentId,
-          queries,
+          queries: mergedQueries.length > 0 ? mergedQueries : undefined,
           transactionId,
         },
       })
@@ -99,22 +112,50 @@ function useDocumentRealtime(
   }, [databaseId, collectionId, documentId, realtime, queryClient, queriesKey])
 }
 
-export function useDocument<TDocument>(variables: GetDocumentQueryVariables) {
-  const config = useDocumentQueryConfig<TDocument>(variables)
-  const queriesKey = JSON.stringify(variables.queries)
+export function useDocument<TDocument>({
+  databaseId,
+  collectionId,
+  documentId,
+  queries,
+  transactionId,
+  fields,
+}: DocumentParams<TDocument>) {
+  const config = useDocumentQueryConfig<TDocument>({
+    databaseId,
+    collectionId,
+    documentId,
+    queries,
+    transactionId,
+    fields,
+  })
+  const queriesKey = JSON.stringify(queries)
 
   const queryResult = useQuery<Document<TDocument>, AppwriteException[], Document<TDocument>>(
     config,
   )
 
-  useDocumentRealtime(variables.databaseId, variables.collectionId, variables.documentId, queriesKey)
+  useDocumentRealtime(databaseId, collectionId, documentId, queriesKey)
 
   return { ...queryResult }
 }
 
-export function useSuspenseDocument<TDocument>(variables: GetDocumentQueryVariables) {
-  const config = useDocumentQueryConfig<TDocument>(variables)
-  const queriesKey = JSON.stringify(variables.queries)
+export function useSuspenseDocument<TDocument>({
+  databaseId,
+  collectionId,
+  documentId,
+  queries,
+  transactionId,
+  fields,
+}: DocumentParams<TDocument>) {
+  const config = useDocumentQueryConfig<TDocument>({
+    databaseId,
+    collectionId,
+    documentId,
+    queries,
+    transactionId,
+    fields,
+  })
+  const queriesKey = JSON.stringify(queries)
 
   const queryResult = useSuspenseQuery<
     Document<TDocument>,
@@ -122,7 +163,7 @@ export function useSuspenseDocument<TDocument>(variables: GetDocumentQueryVariab
     Document<TDocument>
   >(config)
 
-  useDocumentRealtime(variables.databaseId, variables.collectionId, variables.documentId, queriesKey)
+  useDocumentRealtime(databaseId, collectionId, documentId, queriesKey)
 
   return { ...queryResult }
 }

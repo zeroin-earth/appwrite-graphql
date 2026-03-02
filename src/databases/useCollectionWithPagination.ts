@@ -3,12 +3,13 @@ import { Query } from 'appwrite'
 
 import { useCollection, useSuspenseCollection } from './useCollection'
 
-type PaginationParams = {
+type PaginationParams<TDocument = Record<string, unknown>> = {
   databaseId: string
   collectionId: string
   queries: string[]
   transactionId?: string
   limit?: number
+  fields?: (keyof TDocument & string)[]
 }
 
 function usePaginationState(limit: number) {
@@ -48,7 +49,8 @@ export function useCollectionWithPagination<TDocument>({
   queries,
   transactionId,
   limit = 25,
-}: PaginationParams) {
+  fields,
+}: PaginationParams<TDocument>) {
   const { page, offset, totalRef, nextPage, previousPage, handlePageChange } =
     usePaginationState(limit)
 
@@ -57,6 +59,7 @@ export function useCollectionWithPagination<TDocument>({
     collectionId,
     queries: [...queries, Query.limit(limit), Query.offset(offset)],
     transactionId,
+    fields,
   })
 
   const total = collection.data?.total ?? 0
@@ -84,7 +87,8 @@ export function useSuspenseCollectionWithPagination<TDocument>({
   queries,
   transactionId,
   limit = 25,
-}: PaginationParams) {
+  fields,
+}: PaginationParams<TDocument>) {
   const { page, offset, totalRef, nextPage, previousPage, handlePageChange } =
     usePaginationState(limit)
 
@@ -93,6 +97,7 @@ export function useSuspenseCollectionWithPagination<TDocument>({
     collectionId,
     queries: [...queries, Query.limit(limit), Query.offset(offset)],
     transactionId,
+    fields,
   })
 
   const total = collection.total ?? 0
