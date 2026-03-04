@@ -1,3 +1,4 @@
+import { Keys } from '../query/Keys'
 import type { AppwriteException, Models } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -22,6 +23,7 @@ export function useCreateFile() {
   const queryClient = useQueryClient()
 
   const mutationResult = useMutation<Models.File, AppwriteException, CreateFileVariables>({
+    mutationKey: Keys.buckets().files().create(),
     mutationFn: async ({ bucketId, fileId, file, permissions, onProgress }) => {
       return storage.createFile({
         bucketId,
@@ -33,7 +35,7 @@ export function useCreateFile() {
     },
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({
-        queryKey: ['appwrite', 'storage', variables.bucketId, 'files'],
+        queryKey: Keys.bucket(variables.bucketId).files().key(),
       })
     },
   })

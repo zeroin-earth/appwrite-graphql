@@ -1,8 +1,7 @@
-import { gql } from '../__generated__'
-import type {
-  UpdatePhoneVerificationMutation,
-  UpdatePhoneVerificationMutationVariables,
-} from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -15,14 +14,14 @@ const updatePhoneVerification = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof updatePhoneVerification>
+type Result = ResultOf<typeof updatePhoneVerification>['accountUpdatePhoneVerification']
+
 export function useUpdatePhoneVerification() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation<
-    UpdatePhoneVerificationMutation['accountUpdatePhoneVerification'],
-    AppwriteException[],
-    UpdatePhoneVerificationMutationVariables
-  >({
+  const queryResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.account().phoneVerification().update(),
     mutationFn: async ({ userId, secret }) => {
       const { data, errors } = await graphql.mutation({
         query: updatePhoneVerification,

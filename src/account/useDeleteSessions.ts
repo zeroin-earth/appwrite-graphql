@@ -1,5 +1,7 @@
-import { gql } from '../__generated__'
-import type { DeleteSessionsMutation } from '../__generated__/graphql'
+import type { ResultOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -13,14 +15,14 @@ const deleteSessions = gql(/* GraphQL */ `
   }
 `)
 
+type Result = ResultOf<typeof deleteSessions>['accountDeleteSessions']
+
 export function useDeleteSessions() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useMutation<
-    DeleteSessionsMutation['accountDeleteSessions'],
-    AppwriteException[]
-  >({
+  const queryResult = useMutation<Result, AppwriteException[], void>({
+    mutationKey: Keys.account().session().delete(),
     mutationFn: async () => {
       const { data, errors } = await graphql.mutation({
         query: deleteSessions,
@@ -33,8 +35,8 @@ export function useDeleteSessions() {
       return data?.accountDeleteSessions ?? { status: '' }
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
-      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'sessions'] })
+      void queryClient.invalidateQueries({ queryKey: Keys.account().key() })
+      void queryClient.invalidateQueries({ queryKey: Keys.account().sessions() })
     },
   })
 

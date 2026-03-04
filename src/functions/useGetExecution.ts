@@ -1,5 +1,7 @@
-import { gql } from '../__generated__'
-import type { GetExecutionQuery, GetExecutionQueryVariables } from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
@@ -23,15 +25,14 @@ const getExecution = gql(/* GraphQL */ `
   }
 `)
 
-export function useGetExecution({ functionId, executionId }: GetExecutionQueryVariables) {
+type Variables = VariablesOf<typeof getExecution>
+type Result = ResultOf<typeof getExecution>['functionsGetExecution']
+
+export function useGetExecution({ functionId, executionId }: Variables) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<
-    GetExecutionQuery['functionsGetExecution'],
-    AppwriteException[],
-    GetExecutionQuery['functionsGetExecution']
-  >({
-    queryKey: ['appwrite', 'functions', functionId, 'executions', executionId],
+  const queryResult = useQuery<Result, AppwriteException[], Result>({
+    queryKey: Keys.function(functionId).execution(executionId).key(),
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: getExecution,

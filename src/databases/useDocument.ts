@@ -1,10 +1,11 @@
 import { useEffect } from 'react'
 import { Channel } from 'appwrite'
+import type { VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
 import type { Document } from './types'
 import { mergeFieldsQuery } from './types'
-import { gql } from '../__generated__'
-import type { GetDocumentQueryVariables } from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
@@ -32,7 +33,9 @@ const getDocument = gql(/* GraphQL */ `
   }
 `)
 
-type DocumentParams<TDocument = Record<string, unknown>> = GetDocumentQueryVariables & {
+type Variables = VariablesOf<typeof getDocument>
+
+type DocumentParams<TDocument = Record<string, unknown>> = Variables & {
   fields?: (keyof TDocument & string)[]
 }
 
@@ -50,13 +53,8 @@ function useDocumentQueryConfig<TDocument>({
 
   return {
     queryKey: [
-      'appwrite',
-      'databases',
-      databaseId,
-      collectionId,
-      'documents',
-      documentId,
-      { queries: mergedQueries },
+      ...Keys.database(databaseId).collection(collectionId).document(documentId).key(),
+      ...mergedQueries,
     ] as const,
     queryFn: async () => {
       const { data, errors } = await graphql.query({
@@ -77,9 +75,9 @@ function useDocumentQueryConfig<TDocument>({
       const document = {
         ...data.databasesGetDocument,
         ...(data.databasesGetDocument
-          ? (JSON.parse(data.databasesGetDocument.data) as TDocument)
+          ? (JSON.parse(data.databasesGetDocument.data as string) as TDocument)
           : {}),
-      } as Document<TDocument>
+      } as unknown as Document<TDocument>
 
       return document
     },
@@ -100,7 +98,7 @@ function useDocumentRealtime(
       Channel.tablesdb(databaseId).table(collectionId).row(documentId).update(),
       (response) => {
         queryClient.setQueryData(
-          ['appwrite', 'databases', databaseId, collectionId, 'documents', documentId],
+          Keys.database(databaseId).collection(collectionId).document(documentId).key(),
           response.payload,
         )
       },

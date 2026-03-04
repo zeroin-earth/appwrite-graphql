@@ -232,7 +232,7 @@ describe('Collection query hooks', () => {
       )
 
       expect(spy).toHaveBeenCalledWith(
-        ['appwrite', 'databases', databaseId, collectionId, 'documents', 'some-doc-id'],
+        ['appwrite', 'databases', databaseId, 'collections', collectionId, 'documents', 'some-doc-id'],
         expect.objectContaining({
           name: 'Updated Name',
         }),
@@ -341,7 +341,7 @@ describe('Collection query hooks', () => {
       )
 
       expect(spy).toHaveBeenCalledWith(
-        ['appwrite', 'databases', databaseId, collectionId, 'documents', 'some-doc-id'],
+        ['appwrite', 'databases', databaseId, 'collections', collectionId, 'documents', 'some-doc-id'],
         expect.objectContaining({
           name: 'Updated Name',
         }),

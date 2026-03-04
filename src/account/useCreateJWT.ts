@@ -1,5 +1,7 @@
-import { gql } from '../__generated__'
-import type { CreateJwtMutation, CreateJwtMutationVariables } from '../__generated__/graphql'
+import type { ResultOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -15,17 +17,15 @@ const accountCreateJWT = gql(/* GraphQL */ `
   }
 `)
 
+type Result = ResultOf<typeof accountCreateJWT>['accountCreateJWT']
+
 export function useCreateJWT({ gcTime = 600000 }: { gcTime?: number } = {}) {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useMutation<
-    CreateJwtMutation['accountCreateJWT'],
-    AppwriteException[],
-    CreateJwtMutationVariables
-  >({
+  const queryResult = useMutation<Result, AppwriteException[], void>({
     gcTime,
-    mutationKey: ['appwrite', 'jwt'],
+    mutationKey: Keys.account().jwt().create(),
     mutationFn: async () => {
       const { data, errors } = await graphql.mutation({
         query: accountCreateJWT,
@@ -39,7 +39,7 @@ export function useCreateJWT({ gcTime = 600000 }: { gcTime?: number } = {}) {
     },
     onSuccess: (data) => {
       graphql.client.setJWT(data.jwt)
-      queryClient.setQueryData(['appwrite', 'jwt'], data.jwt, { updatedAt: Date.now() })
+      queryClient.setQueryData(Keys.account().jwt().create(), data.jwt, { updatedAt: Date.now() })
     },
   })
 
@@ -49,13 +49,9 @@ export function useCreateJWT({ gcTime = 600000 }: { gcTime?: number } = {}) {
 export function useSuspenseCreateJWT({ gcTime = 600000 }: { gcTime?: number } = {}) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useSuspenseQuery<
-    CreateJwtMutation['accountCreateJWT'],
-    AppwriteException[],
-    CreateJwtMutation['accountCreateJWT']
-  >({
+  const queryResult = useSuspenseQuery<Result, AppwriteException[], Result>({
     gcTime,
-    queryKey: ['appwrite', 'jwt'],
+    queryKey: Keys.account().jwt().create(),
     queryFn: async () => {
       const { data, errors } = await graphql.mutation({
         query: accountCreateJWT,

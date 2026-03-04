@@ -1,8 +1,7 @@
-import { gql } from '../__generated__'
-import type {
-  IncrementDocumentAttributeMutation,
-  IncrementDocumentAttributeMutationVariables,
-} from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -33,17 +32,32 @@ const incrementDocumentAttribute = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof incrementDocumentAttribute>
+type Result = ResultOf<typeof incrementDocumentAttribute>['databasesIncrementDocumentAttribute']
+
 export function useIncrementAttribute() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
   const mutationResult = useMutation<
-    IncrementDocumentAttributeMutation['databasesIncrementDocumentAttribute'],
+    Result,
     AppwriteException[],
-    IncrementDocumentAttributeMutationVariables,
-    { previousEntries: [queryKey: readonly unknown[], data: unknown][]; documentKeyPrefix: readonly unknown[] }
+    Variables,
+    {
+      previousEntries: [queryKey: readonly unknown[], data: unknown][]
+      documentKeyPrefix: readonly unknown[]
+    }
   >({
-    mutationFn: async ({ databaseId, collectionId, documentId, attribute, value, max, transactionId }) => {
+    mutationKey: Keys.database().transactions().operations().key(),
+    mutationFn: async ({
+      databaseId,
+      collectionId,
+      documentId,
+      attribute,
+      value,
+      max,
+      transactionId,
+    }) => {
       const { data: mutationData, errors } = await graphql.mutation({
         query: incrementDocumentAttribute,
         variables: { databaseId, collectionId, documentId, attribute, value, max, transactionId },
@@ -56,14 +70,10 @@ export function useIncrementAttribute() {
       return mutationData.databasesIncrementDocumentAttribute
     },
     onMutate: async (variables) => {
-      const documentKeyPrefix = [
-        'appwrite',
-        'databases',
-        variables.databaseId,
-        variables.collectionId,
-        'documents',
-        variables.documentId,
-      ]
+      const documentKeyPrefix = Keys.database(variables.databaseId)
+        .collection(variables.collectionId)
+        .document(variables.documentId)
+        .key()
 
       await queryClient.cancelQueries({ queryKey: documentKeyPrefix })
 
@@ -76,7 +86,9 @@ export function useIncrementAttribute() {
           const current = (old[variables.attribute] as number) ?? 0
           const increment = variables.value ?? 1
           const newValue =
-            variables.max != null ? Math.min(current + increment, variables.max) : current + increment
+            variables.max != null
+              ? Math.min(current + increment, variables.max)
+              : current + increment
 
           return { ...old, [variables.attribute]: newValue }
         },
@@ -93,7 +105,7 @@ export function useIncrementAttribute() {
     },
     onSettled: (_, __, variables) => {
       void queryClient.invalidateQueries({
-        queryKey: ['appwrite', 'databases', variables.databaseId, variables.collectionId],
+        queryKey: Keys.database(variables.databaseId).collection(variables.collectionId).key(),
       })
     },
   })

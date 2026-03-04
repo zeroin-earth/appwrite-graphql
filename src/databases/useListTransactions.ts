@@ -1,5 +1,7 @@
-import { gql } from '../__generated__'
-import type { ListTransactionsQuery } from '../__generated__/graphql'
+import type { ResultOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
@@ -20,15 +22,13 @@ const listTransactions = gql(/* GraphQL */ `
   }
 `)
 
+type Result = ResultOf<typeof listTransactions>['databasesListTransactions']
+
 export function useListTransactions({ queries }: { queries?: string } = {}) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<
-    ListTransactionsQuery['databasesListTransactions'],
-    AppwriteException[],
-    ListTransactionsQuery['databasesListTransactions']
-  >({
-    queryKey: ['appwrite', 'databases', 'transactions', { queries }],
+  const queryResult = useQuery<Result, AppwriteException[], Result>({
+    queryKey: [...Keys.database().transactions().key(), ...(queries ? [queries] : [])],
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: listTransactions,

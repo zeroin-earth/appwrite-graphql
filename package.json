@@ -34,8 +34,7 @@
   "author": "Matt Suhay <matthew.suhay@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "bun run codegen && tsup && tsup --config tsup.native.config.ts && node post-build.js",
-    "codegen": "graphql-codegen --config codegen.ts",
+    "build": "tsup && tsup --config tsup.native.config.ts && node post-build.js",
     "prepublishOnly": "bun run tsc && bun run build",
     "tsc": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
@@ -45,6 +44,7 @@
   },
   "dependencies": {
     "@graphql-typed-document-node/core": "^3.2.0",
+    "gql.tada": "^1.9.0",
     "graphql": "^16.10.0",
     "graphql-scalars": "^1.24.2",
     "immer": "^11.1.4"
@@ -63,8 +63,6 @@
   "devDependencies": {
     "@apollo/client": "^4.1.6",
     "@eslint/js": "^10.0.1",
-    "@graphql-codegen/cli": "^6.1.2",
-    "@graphql-codegen/client-preset": "^5.2.3",
     "@happy-dom/global-registrator": "^20.7.0",
     "@tanstack/react-query": "^5.70.0",
     "@testing-library/react": "^16.3.2",

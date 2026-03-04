@@ -1,5 +1,7 @@
-import { gql } from '../__generated__'
-import type { GetTransactionQuery, GetTransactionQueryVariables } from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
@@ -17,15 +19,14 @@ const getTransaction = gql(/* GraphQL */ `
   }
 `)
 
-export function useGetTransaction({ transactionId }: GetTransactionQueryVariables) {
+type Variables = VariablesOf<typeof getTransaction>
+type Result = ResultOf<typeof getTransaction>['databasesGetTransaction']
+
+export function useGetTransaction({ transactionId }: Variables) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<
-    GetTransactionQuery['databasesGetTransaction'],
-    AppwriteException[],
-    GetTransactionQuery['databasesGetTransaction']
-  >({
-    queryKey: ['appwrite', 'databases', 'transactions', transactionId],
+  const queryResult = useQuery<Result, AppwriteException[], Result>({
+    queryKey: Keys.database().transaction(transactionId).key(),
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: getTransaction,

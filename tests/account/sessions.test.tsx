@@ -219,7 +219,7 @@ describe('useCreateJWT', () => {
     const { result } = renderHook(() => useCreateJWT(), { wrapper })
 
     await act(async () => {
-      await result.current.mutateAsync({})
+      await result.current.mutateAsync()
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))

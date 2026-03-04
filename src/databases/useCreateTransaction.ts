@@ -1,8 +1,7 @@
-import { gql } from '../__generated__'
-import type {
-  CreateTransactionMutation,
-  CreateTransactionMutationVariables,
-} from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -19,15 +18,15 @@ const createTransaction = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof createTransaction>
+type Result = ResultOf<typeof createTransaction>['databasesCreateTransaction']
+
 export function useCreateTransaction() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const mutationResult = useMutation<
-    CreateTransactionMutation['databasesCreateTransaction'],
-    AppwriteException[],
-    CreateTransactionMutationVariables
-  >({
+  const mutationResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.database().transactions().create(),
     mutationFn: async ({ ttl } = {}) => {
       const { data, errors } = await graphql.mutation({
         query: createTransaction,
@@ -42,7 +41,7 @@ export function useCreateTransaction() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ['appwrite', 'databases', 'transactions'],
+        queryKey: Keys.database().transactions().key(),
       })
     },
   })

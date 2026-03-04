@@ -1,33 +1,38 @@
 import { useEffect, useState } from 'react'
 import { Channel } from 'appwrite'
+import type { ResultOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 import { castDraft, produce } from 'immer'
 
-import { gql } from '../__generated__/gql'
-import type { AccountGetQuery } from '../__generated__/graphql'
+import { Account_User } from './fragments'
+import { Keys } from '../query/Keys'
 import type { AppwriteException, Models, Realtime } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useLazyQuery } from '../useLazyQuery'
 import { useQuery } from '../useQuery'
 import { useQueryClient } from '../useQueryClient'
 
-export const getAccount = gql(/* GraphQL */ `
-  query AccountGet {
-    accountGet {
-      ...Account_User
+const getAccount = gql(
+  /* GraphQL */ `
+    query AccountGet {
+      accountGet {
+        ...Account_User
+      }
     }
-  }
-`)
+  `,
+  [Account_User],
+)
+
+type Result = ResultOf<typeof getAccount>['accountGet']
 
 export function useLazyAccount() {
   const { graphql, realtime } = useAppwrite()
   const queryClient = useQueryClient()
   const [isActive, setIsActive] = useState(false)
 
-  const queryResult = useLazyQuery<
-    AccountGetQuery['accountGet'],
-    AppwriteException[],
-    AccountGetQuery['accountGet']
-  >(getAccountQueryOptions(graphql))
+  const queryResult = useLazyQuery<Result, AppwriteException[], Result>(
+    getAccountQueryOptions(graphql),
+  )
 
   useEffect(() => {
     if (!isActive) return
@@ -51,11 +56,9 @@ export function useAccount() {
   const { graphql, realtime } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useQuery<
-    AccountGetQuery['accountGet'],
-    AppwriteException[],
-    AccountGetQuery['accountGet']
-  >(getAccountQueryOptions(graphql))
+  const queryResult = useQuery<Result, AppwriteException[], Result>(
+    getAccountQueryOptions(graphql),
+  )
 
   useEffect(() => {
     const subscriptionPromise = subscribe(realtime, queryClient)
@@ -69,7 +72,7 @@ export function useAccount() {
 
 function getAccountQueryOptions(graphql: ReturnType<typeof useAppwrite>['graphql']) {
   return {
-    queryKey: ['appwrite', 'account'],
+    queryKey: Keys.account().key(),
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: getAccount,
@@ -93,7 +96,7 @@ function subscribe<Preferences extends Models.Preferences>(
     const isUpdatingPreferences = response.events.some((event) => event.endsWith('prefs'))
 
     if (isUpdatingPreferences) {
-      queryClient.setQueryData<Models.User<Preferences>>(['appwrite', 'account'], (account) =>
+      queryClient.setQueryData<Models.User<Preferences>>(Keys.account().key(), (account) =>
         produce(account, (draft) => {
           if (draft) {
             draft.prefs = castDraft(response.payload.prefs) as typeof draft.prefs
@@ -104,6 +107,6 @@ function subscribe<Preferences extends Models.Preferences>(
       return
     }
 
-    queryClient.setQueryData<Models.User<Preferences>>(['appwrite', 'account'], response.payload)
+    queryClient.setQueryData<Models.User<Preferences>>(Keys.account().key(), response.payload)
   })
 }

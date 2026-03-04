@@ -226,7 +226,7 @@ describe('Document CRUD hooks', () => {
       )
 
       expect(spy).toHaveBeenCalledWith(
-        ['appwrite', 'databases', databaseId, collectionId, 'documents', documentId],
+        ['appwrite', 'databases', databaseId, 'collections', collectionId, 'documents', documentId],
         expect.objectContaining({
           name: 'Updated Name',
         }),
@@ -450,7 +450,7 @@ describe('Document CRUD hooks', () => {
       )
 
       expect(spy).toHaveBeenCalledWith(
-        ['appwrite', 'databases', databaseId, collectionId, 'documents', documentId],
+        ['appwrite', 'databases', databaseId, 'collections', collectionId, 'documents', documentId],
         expect.objectContaining({
           name: 'Realtime Updated',
         }),

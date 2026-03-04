@@ -1,8 +1,7 @@
-import { gql } from '../__generated__'
-import type {
-  CreateRecoveryMutation,
-  CreateRecoveryMutationVariables,
-} from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -15,17 +14,17 @@ const createRecovery = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof createRecovery>
+type Result = ResultOf<typeof createRecovery>['accountCreateRecovery']
+
 /**
  * Send the recovery email to the address supplied
  */
 export function usePasswordRecovery() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation<
-    CreateRecoveryMutation['accountCreateRecovery'],
-    AppwriteException[],
-    CreateRecoveryMutationVariables
-  >({
+  const queryResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.account().recovery().create(),
     mutationFn: async ({ email, url: resetUrl }) => {
       const { data, errors } = await graphql.mutation({
         query: createRecovery,

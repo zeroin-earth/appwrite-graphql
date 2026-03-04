@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react'
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 
 import {
+  Keys,
   useDecrementAttribute,
   useDeleteDocument,
   useDocument,
@@ -87,14 +88,7 @@ describe('Optimistic update hooks', () => {
 
       // The cache should be optimistically updated immediately (before server response)
       const entries = queryClient.current.getQueriesData({
-        queryKey: [
-          'appwrite',
-          'databases',
-          databaseId,
-          collectionId,
-          'documents',
-          doc.$id,
-        ],
+        queryKey: Keys.database(databaseId).collection(collectionId).document(doc.$id).key(),
       })
 
       expect(entries.length).toBeGreaterThan(0)
@@ -140,14 +134,7 @@ describe('Optimistic update hooks', () => {
       })
 
       const entries = queryClient.current.getQueriesData({
-        queryKey: [
-          'appwrite',
-          'databases',
-          databaseId,
-          collectionId,
-          'documents',
-          doc.$id,
-        ],
+        queryKey: Keys.database(databaseId).collection(collectionId).document(doc.$id).key(),
       })
 
       expect(entries.length).toBeGreaterThan(0)
@@ -184,7 +171,15 @@ describe('Optimistic update hooks', () => {
 
       const { result: queryClient } = renderHook(() => useQueryClient(), { wrapper })
 
-      const documentKeyPrefix = ['appwrite', 'databases', databaseId, collectionId, 'documents', doc.$id]
+      const documentKeyPrefix = [
+        'appwrite',
+        'databases',
+        databaseId,
+        'collections',
+        collectionId,
+        'documents',
+        doc.$id,
+      ]
 
       // Verify cache is populated
       const beforeEntries = queryClient.current.getQueriesData({ queryKey: documentKeyPrefix })
@@ -248,14 +243,7 @@ describe('Optimistic update hooks', () => {
       })
 
       const entries = queryClient.current.getQueriesData({
-        queryKey: [
-          'appwrite',
-          'databases',
-          databaseId,
-          collectionId,
-          'documents',
-          doc.$id,
-        ],
+        queryKey: Keys.database(databaseId).collection(collectionId).document(doc.$id).key(),
       })
 
       expect(entries.length).toBeGreaterThan(0)
@@ -305,14 +293,7 @@ describe('Optimistic update hooks', () => {
       })
 
       const incEntries = queryClient.current.getQueriesData({
-        queryKey: [
-          'appwrite',
-          'databases',
-          databaseId,
-          collectionId,
-          'documents',
-          doc.$id,
-        ],
+        queryKey: Keys.database(databaseId).collection(collectionId).document(doc.$id).key(),
       })
 
       expect(incEntries.length).toBeGreaterThan(0)
@@ -357,14 +338,7 @@ describe('Optimistic update hooks', () => {
       })
 
       const maxEntries = queryClient.current.getQueriesData({
-        queryKey: [
-          'appwrite',
-          'databases',
-          databaseId,
-          collectionId,
-          'documents',
-          doc.$id,
-        ],
+        queryKey: Keys.database(databaseId).collection(collectionId).document(doc.$id).key(),
       })
 
       expect(maxEntries.length).toBeGreaterThan(0)
@@ -412,14 +386,7 @@ describe('Optimistic update hooks', () => {
       })
 
       const decEntries = queryClient.current.getQueriesData({
-        queryKey: [
-          'appwrite',
-          'databases',
-          databaseId,
-          collectionId,
-          'documents',
-          doc.$id,
-        ],
+        queryKey: Keys.database(databaseId).collection(collectionId).document(doc.$id).key(),
       })
 
       expect(decEntries.length).toBeGreaterThan(0)
@@ -464,14 +431,7 @@ describe('Optimistic update hooks', () => {
       })
 
       const minEntries = queryClient.current.getQueriesData({
-        queryKey: [
-          'appwrite',
-          'databases',
-          databaseId,
-          collectionId,
-          'documents',
-          doc.$id,
-        ],
+        queryKey: Keys.database(databaseId).collection(collectionId).document(doc.$id).key(),
       })
 
       expect(minEntries.length).toBeGreaterThan(0)

@@ -1,8 +1,7 @@
-import { gql } from '../__generated__'
-import type {
-  CreatePhoneTokenMutation,
-  CreatePhoneTokenMutationVariables,
-} from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -15,14 +14,14 @@ const createPhoneToken = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof createPhoneToken>
+type Result = ResultOf<typeof createPhoneToken>['accountCreatePhoneToken']
+
 export function useCreatePhoneToken() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation<
-    CreatePhoneTokenMutation['accountCreatePhoneToken'],
-    AppwriteException[],
-    CreatePhoneTokenMutationVariables
-  >({
+  const queryResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.account().phoneToken().create(),
     mutationFn: async ({ userId, phone }) => {
       const { data, errors } = await graphql.mutation({
         query: createPhoneToken,

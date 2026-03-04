@@ -1,10 +1,7 @@
-import { gql } from '../__generated__'
-import type {
-  InputMaybe,
-  Scalars,
-  UpsertDocumentMutation,
-  UpsertDocumentMutationVariables,
-} from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -32,8 +29,11 @@ const upsertDocument = gql(/* GraphQL */ `
   }
 `)
 
-type UpsertDocumentVariables = Omit<UpsertDocumentMutationVariables, 'permissions'> & {
-  permissions?: InputMaybe<Array<Scalars['String']['input']>>
+type Variables = VariablesOf<typeof upsertDocument>
+type Result = ResultOf<typeof upsertDocument>['databasesUpsertDocument']
+
+type UpsertDocumentVariables = Omit<Variables, 'permissions'> & {
+  permissions?: string[] | null
 }
 
 export function useUpsertDocument() {
@@ -41,12 +41,23 @@ export function useUpsertDocument() {
   const queryClient = useQueryClient()
 
   const mutationResult = useMutation<
-    UpsertDocumentMutation['databasesUpsertDocument'],
+    Result,
     AppwriteException[],
     UpsertDocumentVariables,
-    { previousEntries: [queryKey: readonly unknown[], data: unknown][]; documentKeyPrefix: readonly unknown[] }
+    {
+      previousEntries: [queryKey: readonly unknown[], data: unknown][]
+      documentKeyPrefix: readonly unknown[]
+    }
   >({
-    mutationFn: async ({ databaseId, collectionId, documentId, data, permissions, transactionId }) => {
+    mutationKey: Keys.database().collections().documents().upsert(),
+    mutationFn: async ({
+      databaseId,
+      collectionId,
+      documentId,
+      data,
+      permissions,
+      transactionId,
+    }) => {
       const { data: mutationData, errors } = await graphql.mutation({
         query: upsertDocument,
         variables: {
@@ -66,14 +77,10 @@ export function useUpsertDocument() {
       return mutationData.databasesUpsertDocument
     },
     onMutate: async (variables) => {
-      const documentKeyPrefix = [
-        'appwrite',
-        'databases',
-        variables.databaseId,
-        variables.collectionId,
-        'documents',
-        variables.documentId,
-      ]
+      const documentKeyPrefix = Keys.database(variables.databaseId)
+        .collection(variables.collectionId)
+        .document(variables.documentId)
+        .key()
 
       await queryClient.cancelQueries({ queryKey: documentKeyPrefix })
 
@@ -96,7 +103,7 @@ export function useUpsertDocument() {
     },
     onSettled: (_, __, variables) => {
       void queryClient.invalidateQueries({
-        queryKey: ['appwrite', 'databases', variables.databaseId, variables.collectionId],
+        queryKey: Keys.database(variables.databaseId).collection(variables.collectionId).key(),
       })
     },
   })

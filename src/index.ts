@@ -1,4 +1,5 @@
-import type { Account_UserFragment, Identity_ProviderFragment } from './__generated__/graphql'
+import type { ResultOf } from 'gql.tada'
+import { readFragment } from 'gql.tada'
 import * as frags from './account/fragments'
 
 export { useAppwrite } from './useAppwrite'
@@ -18,15 +19,16 @@ export * from './storage'
 export * from './teams'
 
 export * from './query/QueryBuilder'
+export { Keys } from './query/Keys'
 
 export * from './functions/useFunction'
 export * from './functions/useGetExecution'
 export * from './functions/useListExecutions'
 
-export { getFragmentData } from './__generated__'
+export { readFragment, readFragment as getFragmentData }
 
-export type Account_UserFragmentType = Account_UserFragment
-export type Identity_ProviderFragmentType = Identity_ProviderFragment
+export type Account_UserFragmentType = ResultOf<typeof frags.Account_User>
+export type Identity_ProviderFragmentType = ResultOf<typeof frags.Identity_Provider>
 
 export const fragments = {
   Account_UserFragment: frags.Account_User,

@@ -1,8 +1,7 @@
-import { gql } from '../__generated__'
-import type {
-  UpdateTeamPrefsMutation,
-  UpdateTeamPrefsMutationVariables,
-} from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -16,15 +15,15 @@ const updateTeamPrefs = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof updateTeamPrefs>
+type Result = ResultOf<typeof updateTeamPrefs>['teamsUpdatePrefs']
+
 export function useUpdateTeamPrefs() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const mutationResult = useMutation<
-    UpdateTeamPrefsMutation['teamsUpdatePrefs'],
-    AppwriteException[],
-    UpdateTeamPrefsMutationVariables
-  >({
+  const mutationResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.teams().teamPrefs().update(),
     mutationFn: async ({ teamId, prefs }) => {
       const { data, errors } = await graphql.mutation({
         query: updateTeamPrefs,
@@ -38,7 +37,7 @@ export function useUpdateTeamPrefs() {
       return data.teamsUpdatePrefs
     },
     onSuccess: (_, variables) => {
-      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'teams', variables.teamId] })
+      void queryClient.invalidateQueries({ queryKey: Keys.team(variables.teamId).key() })
     },
   })
 

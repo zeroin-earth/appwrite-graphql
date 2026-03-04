@@ -1,5 +1,7 @@
-import { gql } from '../__generated__'
-import type { ListCountriesPhonesQuery } from '../__generated__/graphql'
+import type { ResultOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
@@ -17,15 +19,13 @@ const listCountriesPhones = gql(/* GraphQL */ `
   }
 `)
 
+type Result = ResultOf<typeof listCountriesPhones>['localeListCountriesPhones']
+
 export function useLocaleCountriesPhones() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<
-    ListCountriesPhonesQuery['localeListCountriesPhones'],
-    AppwriteException[],
-    ListCountriesPhonesQuery['localeListCountriesPhones']
-  >({
-    queryKey: ['appwrite', 'locale', 'countries-phones'],
+  const queryResult = useQuery<Result, AppwriteException[], Result>({
+    queryKey: Keys.locale().countriesPhones(),
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: listCountriesPhones,

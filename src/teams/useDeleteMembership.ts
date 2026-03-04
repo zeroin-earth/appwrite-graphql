@@ -1,8 +1,7 @@
-import { gql } from '../__generated__'
-import type {
-  DeleteMembershipMutation,
-  DeleteMembershipMutationVariables,
-} from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -16,15 +15,15 @@ const deleteMembership = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof deleteMembership>
+type Result = ResultOf<typeof deleteMembership>['teamsDeleteMembership']
+
 export function useDeleteMembership() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const mutationResult = useMutation<
-    DeleteMembershipMutation['teamsDeleteMembership'],
-    AppwriteException[],
-    DeleteMembershipMutationVariables
-  >({
+  const mutationResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.teams().memberships().delete(),
     mutationFn: async ({ teamId, membershipId }) => {
       const { data, errors } = await graphql.mutation({
         query: deleteMembership,
@@ -39,12 +38,12 @@ export function useDeleteMembership() {
     },
     onSuccess: (_, variables) => {
       queryClient.removeQueries({
-        queryKey: ['appwrite', 'teams', variables.teamId, 'memberships', variables.membershipId],
+        queryKey: Keys.team(variables.teamId).membership(variables.membershipId).key(),
       })
       void queryClient.invalidateQueries({
-        queryKey: ['appwrite', 'teams', variables.teamId, 'memberships'],
+        queryKey: Keys.team(variables.teamId).memberships().key(),
       })
-      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'teams', variables.teamId] })
+      void queryClient.invalidateQueries({ queryKey: Keys.team(variables.teamId).key() })
     },
   })
 

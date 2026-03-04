@@ -1,5 +1,7 @@
-import { gql } from '../__generated__'
-import type { CreateMfaChallengeMutation } from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -14,14 +16,14 @@ const accountCreateMfaChallenge = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof accountCreateMfaChallenge>
+type Result = ResultOf<typeof accountCreateMfaChallenge>['accountCreateMfaChallenge']
+
 export function useCreateMfaChallenge() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation<
-    CreateMfaChallengeMutation['accountCreateMfaChallenge'],
-    AppwriteException[],
-    { factor: 'email' | 'phone' | 'totp' | 'recoveryCode' }
-  >({
+  const queryResult = useMutation<Result, AppwriteException, Variables>({
+    mutationKey: Keys.account().mfaChallenge().create(),
     mutationFn: async ({ factor }) => {
       const { data, errors } = await graphql.mutation({
         query: accountCreateMfaChallenge,

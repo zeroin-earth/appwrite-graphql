@@ -1,8 +1,7 @@
-import { gql } from '../__generated__'
-import type {
-  DeleteSubscriberMutation,
-  DeleteSubscriberMutationVariables,
-} from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -15,14 +14,14 @@ const deleteSubscriber = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof deleteSubscriber>
+type Result = ResultOf<typeof deleteSubscriber>['messagingDeleteSubscriber']
+
 export function useDeleteSubscriber() {
   const { graphql } = useAppwrite()
 
-  const mutationResult = useMutation<
-    DeleteSubscriberMutation['messagingDeleteSubscriber'],
-    AppwriteException[],
-    DeleteSubscriberMutationVariables
-  >({
+  const mutationResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.messaging().subscriber().delete(),
     mutationFn: async ({ topicId, subscriberId }) => {
       const { data: mutationData, errors } = await graphql.mutation({
         query: deleteSubscriber,

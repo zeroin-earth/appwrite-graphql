@@ -1,8 +1,7 @@
-import { gql } from '../__generated__'
-import type {
-  CreateMembershipMutation,
-  CreateMembershipMutationVariables,
-} from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -36,15 +35,15 @@ const createMembership = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof createMembership>
+type Result = ResultOf<typeof createMembership>['teamsCreateMembership']
+
 export function useCreateMembership() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const mutationResult = useMutation<
-    CreateMembershipMutation['teamsCreateMembership'],
-    AppwriteException[],
-    CreateMembershipMutationVariables
-  >({
+  const mutationResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.teams().memberships().create(),
     mutationFn: async ({ teamId, roles, email, userId, phone, url, name }) => {
       const { data, errors } = await graphql.mutation({
         query: createMembership,
@@ -59,9 +58,9 @@ export function useCreateMembership() {
     },
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({
-        queryKey: ['appwrite', 'teams', variables.teamId, 'memberships'],
+        queryKey: Keys.team(variables.teamId).memberships().key(),
       })
-      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'teams', variables.teamId] })
+      void queryClient.invalidateQueries({ queryKey: Keys.team(variables.teamId).key() })
     },
   })
 

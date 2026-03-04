@@ -1,10 +1,7 @@
-import { gql } from '../__generated__'
-import type {
-  CreateDocumentMutation,
-  InputMaybe,
-  Scalars,
-  UpdateDocumentMutationVariables,
-} from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -32,8 +29,11 @@ const updateDocument = gql(/* GraphQL */ `
   }
 `)
 
-type UpdateDocumentVariables = Omit<UpdateDocumentMutationVariables, 'permissions'> & {
-  permissions?: InputMaybe<Array<Scalars['String']['input']>>
+type Variables = VariablesOf<typeof updateDocument>
+type Result = ResultOf<typeof updateDocument>['databasesUpdateDocument']
+
+type UpdateDocumentVariables = Omit<Variables, 'permissions'> & {
+  permissions?: string[] | null
 }
 
 export function useUpdateDocument() {
@@ -41,12 +41,23 @@ export function useUpdateDocument() {
   const queryClient = useQueryClient()
 
   const mutationResult = useMutation<
-    CreateDocumentMutation['databasesCreateDocument'],
+    Result,
     AppwriteException[],
     UpdateDocumentVariables,
-    { previousEntries: [queryKey: readonly unknown[], data: unknown][]; documentKeyPrefix: readonly unknown[] }
+    {
+      previousEntries: [queryKey: readonly unknown[], data: unknown][]
+      documentKeyPrefix: readonly unknown[]
+    }
   >({
-    mutationFn: async ({ databaseId, collectionId, documentId, data, permissions, transactionId }) => {
+    mutationKey: Keys.database().collections().documents().update(),
+    mutationFn: async ({
+      databaseId,
+      collectionId,
+      documentId,
+      data,
+      permissions,
+      transactionId,
+    }) => {
       const { data: mutationData, errors } = await graphql.mutation({
         query: updateDocument,
         variables: {
@@ -66,14 +77,10 @@ export function useUpdateDocument() {
       return mutationData.databasesUpdateDocument
     },
     onMutate: async (variables) => {
-      const documentKeyPrefix = [
-        'appwrite',
-        'databases',
-        variables.databaseId,
-        variables.collectionId,
-        'documents',
-        variables.documentId,
-      ]
+      const documentKeyPrefix = Keys.database(variables.databaseId)
+        .collection(variables.collectionId)
+        .document(variables.documentId)
+        .key()
 
       await queryClient.cancelQueries({ queryKey: documentKeyPrefix })
 
@@ -96,7 +103,7 @@ export function useUpdateDocument() {
     },
     onSettled: (_, __, variables) => {
       void queryClient.invalidateQueries({
-        queryKey: ['appwrite', 'databases', variables.databaseId, variables.collectionId],
+        queryKey: Keys.database(variables.databaseId).collection(variables.collectionId).key(),
       })
     },
   })

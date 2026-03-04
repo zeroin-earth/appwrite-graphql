@@ -1,8 +1,7 @@
-import { gql } from '../__generated__'
-import type {
-  DecrementDocumentAttributeMutation,
-  DecrementDocumentAttributeMutationVariables,
-} from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -33,17 +32,32 @@ const decrementDocumentAttribute = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof decrementDocumentAttribute>
+type Result = ResultOf<typeof decrementDocumentAttribute>['databasesDecrementDocumentAttribute']
+
 export function useDecrementAttribute() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
   const mutationResult = useMutation<
-    DecrementDocumentAttributeMutation['databasesDecrementDocumentAttribute'],
+    Result,
     AppwriteException[],
-    DecrementDocumentAttributeMutationVariables,
-    { previousEntries: [queryKey: readonly unknown[], data: unknown][]; documentKeyPrefix: readonly unknown[] }
+    Variables,
+    {
+      previousEntries: [queryKey: readonly unknown[], data: unknown][]
+      documentKeyPrefix: readonly unknown[]
+    }
   >({
-    mutationFn: async ({ databaseId, collectionId, documentId, attribute, value, min, transactionId }) => {
+    mutationKey: Keys.database().transactions().operations().key(),
+    mutationFn: async ({
+      databaseId,
+      collectionId,
+      documentId,
+      attribute,
+      value,
+      min,
+      transactionId,
+    }) => {
       const { data: mutationData, errors } = await graphql.mutation({
         query: decrementDocumentAttribute,
         variables: { databaseId, collectionId, documentId, attribute, value, min, transactionId },
@@ -56,14 +70,10 @@ export function useDecrementAttribute() {
       return mutationData.databasesDecrementDocumentAttribute
     },
     onMutate: async (variables) => {
-      const documentKeyPrefix = [
-        'appwrite',
-        'databases',
-        variables.databaseId,
-        variables.collectionId,
-        'documents',
-        variables.documentId,
-      ]
+      const documentKeyPrefix = Keys.database(variables.databaseId)
+        .collection(variables.collectionId)
+        .document(variables.documentId)
+        .key()
 
       await queryClient.cancelQueries({ queryKey: documentKeyPrefix })
 
@@ -76,7 +86,9 @@ export function useDecrementAttribute() {
           const current = (old[variables.attribute] as number) ?? 0
           const decrement = variables.value ?? 1
           const newValue =
-            variables.min != null ? Math.max(current - decrement, variables.min) : current - decrement
+            variables.min != null
+              ? Math.max(current - decrement, variables.min)
+              : current - decrement
 
           return { ...old, [variables.attribute]: newValue }
         },
@@ -93,7 +105,7 @@ export function useDecrementAttribute() {
     },
     onSettled: (_, __, variables) => {
       void queryClient.invalidateQueries({
-        queryKey: ['appwrite', 'databases', variables.databaseId, variables.collectionId],
+        queryKey: Keys.database(variables.databaseId).collection(variables.collectionId).key(),
       })
     },
   })

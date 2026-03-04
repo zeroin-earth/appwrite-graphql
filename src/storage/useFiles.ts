@@ -1,5 +1,7 @@
-import { gql } from '../__generated__'
-import type { ListFilesQuery } from '../__generated__/graphql'
+import type { ResultOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
@@ -25,6 +27,8 @@ const listFiles = gql(/* GraphQL */ `
   }
 `)
 
+type Result = ResultOf<typeof listFiles>['storageListFiles']
+
 export function useFiles({
   bucketId,
   queries,
@@ -36,12 +40,8 @@ export function useFiles({
 }) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<
-    ListFilesQuery['storageListFiles'],
-    AppwriteException[],
-    ListFilesQuery['storageListFiles']
-  >({
-    queryKey: ['appwrite', 'storage', bucketId, 'files', { queries, search }],
+  const queryResult = useQuery<Result, AppwriteException[], Result>({
+    queryKey: [...Keys.bucket(bucketId).files().key(), ...(queries ?? []), ...(search ? [search] : [])],
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: listFiles,

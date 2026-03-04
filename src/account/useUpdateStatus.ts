@@ -1,5 +1,7 @@
-import { gql } from '../__generated__'
-import type { UpdateStatusMutation } from '../__generated__/graphql'
+import type { ResultOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -14,28 +16,29 @@ const accountUpdateStatus = gql(/* GraphQL */ `
   }
 `)
 
+type Result = ResultOf<typeof accountUpdateStatus>['accountUpdateStatus']
+
 export function useUpdateStatus() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useMutation<UpdateStatusMutation['accountUpdateStatus'], AppwriteException[]>(
-    {
-      mutationFn: async () => {
-        const { data, errors } = await graphql.mutation({
-          query: accountUpdateStatus,
-        })
+  const queryResult = useMutation<Result, AppwriteException[], void>({
+    mutationKey: Keys.account().status().update(),
+    mutationFn: async () => {
+      const { data, errors } = await graphql.mutation({
+        query: accountUpdateStatus,
+      })
 
-        if (errors) {
-          throw errors
-        }
+      if (errors) {
+        throw errors
+      }
 
-        return data.accountUpdateStatus
-      },
-      onSuccess: async () => {
-        void queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
-      },
+      return data.accountUpdateStatus
     },
-  )
+    onSuccess: async () => {
+      void queryClient.invalidateQueries({ queryKey: Keys.account().key() })
+    },
+  })
 
   return { ...queryResult }
 }

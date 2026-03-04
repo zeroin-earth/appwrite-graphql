@@ -1,15 +1,19 @@
-import { gql } from '../__generated__'
-import type {
-  DeleteDocumentMutation,
-  DeleteDocumentMutationVariables,
-} from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
 const deleteDocument = gql(/* GraphQL */ `
-  mutation DeleteDocument($databaseId: String!, $collectionId: String!, $documentId: String!, $transactionId: String) {
+  mutation DeleteDocument(
+    $databaseId: String!
+    $collectionId: String!
+    $documentId: String!
+    $transactionId: String
+  ) {
     databasesDeleteDocument(
       databaseId: $databaseId
       collectionId: $collectionId
@@ -21,16 +25,23 @@ const deleteDocument = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof deleteDocument>
+type Result = ResultOf<typeof deleteDocument>['databasesDeleteDocument']
+
 export function useDeleteDocument() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
   const mutationResult = useMutation<
-    DeleteDocumentMutation['databasesDeleteDocument'],
+    Result,
     AppwriteException[],
-    DeleteDocumentMutationVariables,
-    { previousEntries: [queryKey: readonly unknown[], data: unknown][]; documentKeyPrefix: readonly unknown[] }
+    Variables,
+    {
+      previousEntries: [queryKey: readonly unknown[], data: unknown][]
+      documentKeyPrefix: readonly unknown[]
+    }
   >({
+    mutationKey: Keys.database().collections().documents().delete(),
     mutationFn: async ({ databaseId, collectionId, documentId, transactionId }) => {
       const { data: mutationData, errors } = await graphql.mutation({
         query: deleteDocument,
@@ -49,14 +60,10 @@ export function useDeleteDocument() {
       return mutationData?.databasesDeleteDocument ?? { status: '' }
     },
     onMutate: async (variables) => {
-      const documentKeyPrefix = [
-        'appwrite',
-        'databases',
-        variables.databaseId,
-        variables.collectionId,
-        'documents',
-        variables.documentId,
-      ]
+      const documentKeyPrefix = Keys.database(variables.databaseId)
+        .collection(variables.collectionId)
+        .document(variables.documentId)
+        .key()
 
       await queryClient.cancelQueries({ queryKey: documentKeyPrefix })
 
@@ -75,17 +82,13 @@ export function useDeleteDocument() {
     },
     onSettled: (_, __, variables) => {
       queryClient.removeQueries({
-        queryKey: [
-          'appwrite',
-          'databases',
-          variables.databaseId,
-          variables.collectionId,
-          'documents',
-          variables.documentId,
-        ],
+        queryKey: Keys.database(variables.databaseId)
+          .collection(variables.collectionId)
+          .document(variables.documentId)
+          .key(),
       })
       void queryClient.invalidateQueries({
-        queryKey: ['appwrite', 'databases', variables.databaseId, variables.collectionId],
+        queryKey: Keys.database(variables.databaseId).collection(variables.collectionId).key(),
       })
     },
   })

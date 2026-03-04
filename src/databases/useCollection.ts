@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
 import { Channel } from 'appwrite'
+import { graphql as gql } from 'gql.tada'
 
 import type { Collection, Document } from './types'
 import { mergeFieldsQuery } from './types'
-import { gql } from '../__generated__'
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
@@ -12,7 +13,7 @@ import { useSuspenseQuery } from '../useSuspenseQuery'
 
 type DocumentOperation = 'create' | 'update' | 'delete'
 
-type CollectionParams<TDocument = Record<string, unknown>> = {
+type CollectionParams<TDocument = Record<string, string | number | boolean | null>> = {
   databaseId: string
   collectionId: string
   queries: string[]
@@ -54,7 +55,10 @@ function useCollectionQueryConfig<TDocument>({
   const mergedQueries = mergeFieldsQuery(queries, fields)
 
   return {
-    queryKey: ['appwrite', 'databases', databaseId, collectionId, { queries: mergedQueries }] as const,
+    queryKey: [
+      ...Keys.database(databaseId).collection(collectionId).key(),
+      ...mergedQueries,
+    ] as const,
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: listDocuments,
@@ -73,13 +77,13 @@ function useCollectionQueryConfig<TDocument>({
       const documents =
         data.databasesListDocuments?.documents?.map((document) => ({
           ...document,
-          ...(document ? (JSON.parse(document.data) as TDocument) : {}),
+          ...(document ? (JSON.parse(document.data as string) as TDocument) : {}),
         })) ?? []
 
       return {
         total: data.databasesListDocuments?.total ?? 0,
         documents,
-      } as Collection<TDocument>
+      } as unknown as Collection<TDocument>
     },
   }
 }
@@ -110,13 +114,12 @@ function useCollectionRealtime<TDocument>(
           case 'update':
           case 'delete':
             queryClient.setQueryData(
-              ['appwrite', 'databases', databaseId, collectionId, 'documents', document.$id],
+              Keys.database(databaseId).collection(collectionId).document(document.$id).key(),
               document,
             )
 
             void queryClient.invalidateQueries({
-              queryKey: ['appwrite', 'databases', databaseId, collectionId, { queries }],
-              exact: true,
+              queryKey: Keys.database(databaseId).collection(collectionId).key(),
             })
 
             break

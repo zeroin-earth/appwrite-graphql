@@ -1,5 +1,7 @@
-import { gql } from '../__generated__'
-import type { CreateMfaRecoveryCodesMutation } from '../__generated__/graphql'
+import type { ResultOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -13,14 +15,14 @@ const accountCreateMfaRecoveryCodes = gql(/* GraphQL */ `
   }
 `)
 
+type Result = ResultOf<typeof accountCreateMfaRecoveryCodes>['accountCreateMfaRecoveryCodes']
+
 export function useCreateMfaRecoveryCodes() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useMutation<
-    CreateMfaRecoveryCodesMutation['accountCreateMfaRecoveryCodes'],
-    AppwriteException[]
-  >({
+  const queryResult = useMutation<Result, AppwriteException[], void>({
+    mutationKey: Keys.account().mfaCodes().create(),
     mutationFn: async () => {
       const { data, errors } = await graphql.mutation({
         query: accountCreateMfaRecoveryCodes,
@@ -34,7 +36,7 @@ export function useCreateMfaRecoveryCodes() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ['appwrite', 'account', 'mfa', 'recovery-codes'],
+        queryKey: Keys.account().mfaCodes().key(),
       })
     },
   })

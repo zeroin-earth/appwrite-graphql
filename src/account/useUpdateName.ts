@@ -1,5 +1,7 @@
-import { gql } from '../__generated__'
-import type { UpdateNameMutation, UpdateNameMutationVariables } from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -13,15 +15,15 @@ const accountUpdateName = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof accountUpdateName>
+type Result = ResultOf<typeof accountUpdateName>['accountUpdateName']
+
 export function useUpdateName() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useMutation<
-    UpdateNameMutation['accountUpdateName'],
-    AppwriteException[],
-    UpdateNameMutationVariables
-  >({
+  const queryResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.account().name().update(),
     mutationFn: async ({ name }) => {
       const { data: mutationData, errors } = await graphql.mutation({
         query: accountUpdateName,
@@ -37,7 +39,7 @@ export function useUpdateName() {
       return mutationData.accountUpdateName
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      void queryClient.invalidateQueries({ queryKey: Keys.account().key() })
     },
   })
 

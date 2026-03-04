@@ -1,4 +1,4 @@
-import { gql } from '../__generated__'
+import { graphql as gql } from 'gql.tada'
 
 export const Account_User = gql(/* GraphQL */ `
   fragment Account_User on User {

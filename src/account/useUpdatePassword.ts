@@ -1,8 +1,7 @@
-import { gql } from '../__generated__'
-import type {
-  UpdatePasswordMutation,
-  UpdatePasswordMutationVariables,
-} from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -16,15 +15,15 @@ const updatePassword = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof updatePassword>
+type Result = ResultOf<typeof updatePassword>['accountUpdatePassword']
+
 export function useUpdatePassword() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useMutation<
-    UpdatePasswordMutation['accountUpdatePassword'],
-    AppwriteException[],
-    UpdatePasswordMutationVariables
-  >({
+  const queryResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.account().password().update(),
     mutationFn: async ({ password, oldPassword }) => {
       const { data, errors } = await graphql.mutation({
         query: updatePassword,
@@ -41,7 +40,7 @@ export function useUpdatePassword() {
       return data?.accountUpdatePassword
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      void queryClient.invalidateQueries({ queryKey: Keys.account().key() })
     },
   })
 

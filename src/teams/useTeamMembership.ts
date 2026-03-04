@@ -1,5 +1,7 @@
-import { gql } from '../__generated__'
-import type { GetMembershipQuery, GetMembershipQueryVariables } from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
@@ -24,15 +26,14 @@ const getMembership = gql(/* GraphQL */ `
   }
 `)
 
-export function useTeamMembership({ teamId, membershipId }: GetMembershipQueryVariables) {
+type Variables = VariablesOf<typeof getMembership>
+type Result = ResultOf<typeof getMembership>['teamsGetMembership']
+
+export function useTeamMembership({ teamId, membershipId }: Variables) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<
-    GetMembershipQuery['teamsGetMembership'],
-    AppwriteException[],
-    GetMembershipQuery['teamsGetMembership']
-  >({
-    queryKey: ['appwrite', 'teams', teamId, 'memberships', membershipId],
+  const queryResult = useQuery<Result, AppwriteException[], Result>({
+    queryKey: Keys.team(teamId).membership(membershipId).key(),
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: getMembership,

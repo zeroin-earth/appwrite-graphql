@@ -1,8 +1,7 @@
-import { gql } from '../__generated__'
-import type {
-  DeleteMfaAuthenticatorMutation,
-  DeleteMfaAuthenticatorMutationVariables,
-} from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -16,15 +15,15 @@ const deleteMFAAuthenticator = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof deleteMFAAuthenticator>
+type Result = ResultOf<typeof deleteMFAAuthenticator>['accountDeleteMfaAuthenticator']
+
 export function useDeleteMfaAuthenticator() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useMutation<
-    DeleteMfaAuthenticatorMutation['accountDeleteMfaAuthenticator'],
-    AppwriteException[],
-    DeleteMfaAuthenticatorMutationVariables
-  >({
+  const queryResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.account().mfaAuthenticator().delete(),
     mutationFn: async ({ type = 'totp' }) => {
       const { data, errors } = await graphql.mutation({
         query: deleteMFAAuthenticator,
@@ -40,9 +39,9 @@ export function useDeleteMfaAuthenticator() {
       return data?.accountDeleteMfaAuthenticator ?? { status: '' }
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      void queryClient.invalidateQueries({ queryKey: Keys.account().key() })
       void queryClient.invalidateQueries({
-        queryKey: ['appwrite', 'account', 'mfa', 'factors'],
+        queryKey: Keys.account().mfaAuthenticator().key(),
       })
     },
   })

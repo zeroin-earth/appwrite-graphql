@@ -1,19 +1,14 @@
-import { gql } from '../__generated__'
-import type {
-  CreateSubscriberMutation,
-  CreateSubscriberMutationVariables,
-} from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 
 const createSubscriber = gql(/* GraphQL */ `
   mutation CreateSubscriber($subscriberId: String!, $topicId: String!, $targetId: String!) {
-    messagingCreateSubscriber(
-      subscriberId: $subscriberId
-      topicId: $topicId
-      targetId: $targetId
-    ) {
+    messagingCreateSubscriber(subscriberId: $subscriberId, topicId: $topicId, targetId: $targetId) {
       _id
       _createdAt
       _updatedAt
@@ -26,14 +21,14 @@ const createSubscriber = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof createSubscriber>
+type Result = ResultOf<typeof createSubscriber>['messagingCreateSubscriber']
+
 export function useCreateSubscriber() {
   const { graphql } = useAppwrite()
 
-  const mutationResult = useMutation<
-    CreateSubscriberMutation['messagingCreateSubscriber'],
-    AppwriteException[],
-    CreateSubscriberMutationVariables
-  >({
+  const mutationResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.messaging().subscriber().create(),
     mutationFn: async ({ subscriberId, topicId, targetId }) => {
       const { data: mutationData, errors } = await graphql.mutation({
         query: createSubscriber,

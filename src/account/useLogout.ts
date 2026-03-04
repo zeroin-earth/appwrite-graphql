@@ -1,5 +1,7 @@
-import { gql } from '../__generated__'
-import type { DeleteSessionMutation, DeleteSessionMutationVariables } from '../__generated__/graphql'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
@@ -13,15 +15,15 @@ const deleteSession = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof deleteSession>
+type Result = ResultOf<typeof deleteSession>['accountDeleteSession']
+
 export function useLogout() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useMutation<
-    DeleteSessionMutation['accountDeleteSession'],
-    AppwriteException[],
-    DeleteSessionMutationVariables
-  >({
+  const queryResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.account().session().delete(),
     mutationFn: async ({ sessionId }) => {
       const { data, errors } = await graphql.mutation({
         query: deleteSession,
