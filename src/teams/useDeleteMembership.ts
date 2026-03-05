@@ -7,7 +7,7 @@ import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
-const deleteMembership = gql(/* GraphQL */ `
+export const deleteMembership = gql(/* GraphQL */ `
   mutation DeleteMembership($teamId: String!, $membershipId: String!) {
     teamsDeleteMembership(teamId: $teamId, membershipId: $membershipId) {
       status

@@ -7,7 +7,7 @@ import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
-const decrementDocumentAttribute = gql(/* GraphQL */ `
+export const decrementDocumentAttribute = gql(/* GraphQL */ `
   mutation DecrementDocumentAttribute(
     $databaseId: String!
     $collectionId: String!
@@ -48,7 +48,7 @@ export function useDecrementAttribute() {
       documentKeyPrefix: readonly unknown[]
     }
   >({
-    mutationKey: Keys.database().transactions().operations().key(),
+    mutationKey: [...Keys.databases().transactions().operations().key(), 'decrementAttribute'],
     mutationFn: async ({
       databaseId,
       collectionId,

@@ -4,7 +4,7 @@ import type { VariablesOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import type { Document } from './types'
-import { mergeFieldsQuery } from './types'
+import { mergeFieldsQuery } from './utils'
 import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'

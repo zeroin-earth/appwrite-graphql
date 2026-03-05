@@ -7,7 +7,7 @@ import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
-const updateMembership = gql(/* GraphQL */ `
+export const updateMembership = gql(/* GraphQL */ `
   mutation UpdateMembership($teamId: String!, $membershipId: String!, $roles: [String!]!) {
     teamsUpdateMembership(teamId: $teamId, membershipId: $membershipId, roles: $roles) {
       _id

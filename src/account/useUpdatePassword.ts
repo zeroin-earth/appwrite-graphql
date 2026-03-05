@@ -7,7 +7,7 @@ import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
-const updatePassword = gql(/* GraphQL */ `
+export const updatePassword = gql(/* GraphQL */ `
   mutation UpdatePassword($password: String!, $oldPassword: String!) {
     accountUpdatePassword(password: $password, oldPassword: $oldPassword) {
       status

@@ -28,7 +28,7 @@ export function useListTransactions({ queries }: { queries?: string } = {}) {
   const { graphql } = useAppwrite()
 
   const queryResult = useQuery<Result, AppwriteException[], Result>({
-    queryKey: [...Keys.database().transactions().key(), ...(queries ? [queries] : [])],
+    queryKey: [...Keys.databases().transactions().key(), ...(queries ? [queries] : [])],
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: listTransactions,

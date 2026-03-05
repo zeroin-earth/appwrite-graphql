@@ -1,8 +1,8 @@
 import * as React from 'react'
 import { QueryClient } from '@tanstack/react-query'
-import { Provider } from 'jotai'
 
 import { getTestConfig } from './helpers'
+import { createAppwriteClient } from '../../src'
 import { AppwriteProvider } from '../../src/AppwriteProvider'
 const { Suspense } = React
 
@@ -22,17 +22,16 @@ export function createWrapper(opts?: { queryClient?: QueryClient; suspense?: boo
     globalThis.localStorage.removeItem('cookieFallback')
   }
 
+  const client = createAppwriteClient({
+    endpoint: config.endpoint,
+    projectId: config.projectId,
+  })
+
   return function TestWrapper({ children }: { children: React.ReactNode }) {
     const inner = (
-      <Provider>
-        <AppwriteProvider
-          endpoint={config.endpoint}
-          projectId={config.projectId}
-          queryClient={queryClient}
-        >
-          {children}
-        </AppwriteProvider>
-      </Provider>
+      <AppwriteProvider client={client} queryClient={queryClient}>
+        {children}
+      </AppwriteProvider>
     )
 
     if (opts?.suspense) {

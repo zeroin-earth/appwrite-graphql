@@ -6,7 +6,7 @@ import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 
-const deleteSubscriber = gql(/* GraphQL */ `
+export const deleteSubscriber = gql(/* GraphQL */ `
   mutation DeleteSubscriber($topicId: String!, $subscriberId: String!) {
     messagingDeleteSubscriber(topicId: $topicId, subscriberId: $subscriberId) {
       status

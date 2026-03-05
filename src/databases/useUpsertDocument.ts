@@ -7,7 +7,7 @@ import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
-const upsertDocument = gql(/* GraphQL */ `
+export const upsertDocument = gql(/* GraphQL */ `
   mutation UpsertDocument(
     $databaseId: String!
     $collectionId: String!
@@ -49,7 +49,7 @@ export function useUpsertDocument() {
       documentKeyPrefix: readonly unknown[]
     }
   >({
-    mutationKey: Keys.database().collections().documents().upsert(),
+    mutationKey: Keys.databases().collections().documents().upsert(),
     mutationFn: async ({
       databaseId,
       collectionId,

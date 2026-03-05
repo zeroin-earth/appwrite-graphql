@@ -7,7 +7,7 @@ import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
-const createDocument = gql(/* GraphQL */ `
+export const createDocument = gql(/* GraphQL */ `
   mutation CreateDocument(
     $databaseId: String!
     $collectionId: String!
@@ -43,7 +43,7 @@ export function useCreateDocument() {
       permissions?: string[] | null
     }
   >({
-    mutationKey: Keys.database().collections().documents().create(),
+    mutationKey: Keys.databases().collections().documents().create(),
     mutationFn: async ({
       databaseId,
       collectionId,

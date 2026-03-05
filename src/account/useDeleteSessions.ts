@@ -37,6 +37,7 @@ export function useDeleteSessions() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: Keys.account().key() })
       void queryClient.invalidateQueries({ queryKey: Keys.account().sessions() })
+      queryClient.clear()
     },
   })
 

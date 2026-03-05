@@ -7,7 +7,7 @@ import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
-const accountUpdatePrefs = gql(/* GraphQL */ `
+export const accountUpdatePrefs = gql(/* GraphQL */ `
   mutation UpdatePrefs($prefs: Assoc!) {
     accountUpdatePrefs(prefs: $prefs) {
       prefs {

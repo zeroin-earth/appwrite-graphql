@@ -7,7 +7,7 @@ import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
-const accountUpdateEmail = gql(/* GraphQL */ `
+export const accountUpdateEmail = gql(/* GraphQL */ `
   mutation UpdateEmail($email: String!, $password: String!) {
     accountUpdateEmail(email: $email, password: $password) {
       name

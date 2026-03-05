@@ -7,7 +7,7 @@ import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
-const updateFile = gql(/* GraphQL */ `
+export const updateFile = gql(/* GraphQL */ `
   mutation UpdateFile(
     $bucketId: String!
     $fileId: String!

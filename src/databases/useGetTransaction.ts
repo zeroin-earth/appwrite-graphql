@@ -26,7 +26,7 @@ export function useGetTransaction({ transactionId }: Variables) {
   const { graphql } = useAppwrite()
 
   const queryResult = useQuery<Result, AppwriteException[], Result>({
-    queryKey: Keys.database().transaction(transactionId).key(),
+    queryKey: Keys.databases().transaction(transactionId).key(),
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: getTransaction,

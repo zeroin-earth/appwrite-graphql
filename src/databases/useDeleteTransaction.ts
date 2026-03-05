@@ -23,7 +23,7 @@ export function useDeleteTransaction() {
   const queryClient = useQueryClient()
 
   const mutationResult = useMutation<Result, AppwriteException[], Variables>({
-    mutationKey: Keys.database().transactions().delete(),
+    mutationKey: Keys.databases().transactions().delete(),
     mutationFn: async ({ transactionId }) => {
       const { data, errors } = await graphql.mutation({
         query: deleteTransaction,
@@ -38,10 +38,10 @@ export function useDeleteTransaction() {
     },
     onSuccess: (_, variables) => {
       queryClient.removeQueries({
-        queryKey: Keys.database().transaction(variables.transactionId).key(),
+        queryKey: Keys.databases().transaction(variables.transactionId).key(),
       })
       void queryClient.invalidateQueries({
-        queryKey: Keys.database().transactions().key(),
+        queryKey: Keys.databases().transactions().key(),
       })
     },
   })

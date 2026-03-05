@@ -7,7 +7,7 @@ import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
-const incrementDocumentAttribute = gql(/* GraphQL */ `
+export const incrementDocumentAttribute = gql(/* GraphQL */ `
   mutation IncrementDocumentAttribute(
     $databaseId: String!
     $collectionId: String!
@@ -48,7 +48,7 @@ export function useIncrementAttribute() {
       documentKeyPrefix: readonly unknown[]
     }
   >({
-    mutationKey: Keys.database().transactions().operations().key(),
+    mutationKey: [...Keys.databases().transactions().operations().key(), 'incrementAttribute'],
     mutationFn: async ({
       databaseId,
       collectionId,

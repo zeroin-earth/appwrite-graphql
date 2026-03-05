@@ -7,7 +7,7 @@ import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
-const deleteDocument = gql(/* GraphQL */ `
+export const deleteDocument = gql(/* GraphQL */ `
   mutation DeleteDocument(
     $databaseId: String!
     $collectionId: String!
@@ -41,7 +41,7 @@ export function useDeleteDocument() {
       documentKeyPrefix: readonly unknown[]
     }
   >({
-    mutationKey: Keys.database().collections().documents().delete(),
+    mutationKey: Keys.databases().collections().documents().delete(),
     mutationFn: async ({ databaseId, collectionId, documentId, transactionId }) => {
       const { data: mutationData, errors } = await graphql.mutation({
         query: deleteDocument,

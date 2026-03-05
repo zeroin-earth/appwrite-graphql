@@ -7,7 +7,7 @@ import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
-const updateDocument = gql(/* GraphQL */ `
+export const updateDocument = gql(/* GraphQL */ `
   mutation UpdateDocument(
     $databaseId: String!
     $collectionId: String!
@@ -49,7 +49,7 @@ export function useUpdateDocument() {
       documentKeyPrefix: readonly unknown[]
     }
   >({
-    mutationKey: Keys.database().collections().documents().update(),
+    mutationKey: Keys.databases().collections().documents().update(),
     mutationFn: async ({
       databaseId,
       collectionId,

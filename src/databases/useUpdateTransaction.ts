@@ -29,7 +29,7 @@ export function useUpdateTransaction() {
   const queryClient = useQueryClient()
 
   const mutationResult = useMutation<Result, AppwriteException[], Variables>({
-    mutationKey: Keys.database().transactions().update(),
+    mutationKey: Keys.databases().transactions().update(),
     mutationFn: async ({ transactionId, commit, rollback }) => {
       const { data, errors } = await graphql.mutation({
         query: updateTransaction,
@@ -44,10 +44,10 @@ export function useUpdateTransaction() {
     },
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({
-        queryKey: Keys.database().transaction(variables.transactionId).key(),
+        queryKey: Keys.databases().transaction(variables.transactionId).key(),
       })
       void queryClient.invalidateQueries({
-        queryKey: Keys.database().transactions().key(),
+        queryKey: Keys.databases().transactions().key(),
       })
     },
   })

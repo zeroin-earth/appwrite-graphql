@@ -1,5 +1,6 @@
 import type { ResultOf } from 'gql.tada'
 import { readFragment } from 'gql.tada'
+
 import * as frags from './account/fragments'
 
 export { useAppwrite } from './useAppwrite'
@@ -8,6 +9,8 @@ export { useQuery } from './useQuery'
 export { useLazyQuery } from './useLazyQuery'
 export { useSuspenseQuery } from './useSuspenseQuery'
 export { useQueryClient } from './useQueryClient'
+
+export { createAppwriteClient } from './client'
 export { AppwriteProvider } from './AppwriteProvider'
 
 export * from './account'
@@ -20,6 +23,8 @@ export * from './teams'
 
 export * from './query/QueryBuilder'
 export { Keys } from './query/Keys'
+
+export * from './offline'
 
 export * from './functions/useFunction'
 export * from './functions/useGetExecution'

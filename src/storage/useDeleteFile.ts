@@ -7,7 +7,7 @@ import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
-const deleteFile = gql(/* GraphQL */ `
+export const deleteFile = gql(/* GraphQL */ `
   mutation DeleteFile($bucketId: String!, $fileId: String!) {
     storageDeleteFile(bucketId: $bucketId, fileId: $fileId) {
       status

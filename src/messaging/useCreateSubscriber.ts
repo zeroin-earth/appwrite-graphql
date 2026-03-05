@@ -6,7 +6,7 @@ import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 
-const createSubscriber = gql(/* GraphQL */ `
+export const createSubscriber = gql(/* GraphQL */ `
   mutation CreateSubscriber($subscriberId: String!, $topicId: String!, $targetId: String!) {
     messagingCreateSubscriber(subscriberId: $subscriberId, topicId: $topicId, targetId: $targetId) {
       _id

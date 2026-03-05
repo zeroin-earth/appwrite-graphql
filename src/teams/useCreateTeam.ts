@@ -7,7 +7,7 @@ import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
-const createTeam = gql(/* GraphQL */ `
+export const createTeam = gql(/* GraphQL */ `
   mutation CreateTeam($teamId: String!, $name: String!, $roles: [String!]) {
     teamsCreate(teamId: $teamId, name: $name, roles: $roles) {
       _id

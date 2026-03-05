@@ -82,12 +82,16 @@ export class Keys<T> {
     return Keys.create<Account>('account')
   }
 
-  static database(id?: string) {
-    return id ? Keys.create<Database>('databases', id) : Keys.create<Database>('databases')
+  static databases() {
+    return Keys.create<Database>('databases')
+  }
+
+  static database(id: string) {
+    return Keys.create<Database>('databases', id)
   }
 
   static tablesDB(id: string) {
-    return Keys.create<TablesDB>('tablesdb', id)
+    return Keys.create<TablesDB>('tablesDB', id)
   }
 
   static buckets() {
@@ -303,6 +307,11 @@ export class Keys<T> {
   table(this: Keys<TablesDB>, id: string) {
     this.keys.push('table', id)
     return this as unknown as Keys<Table>
+  }
+
+  rows(this: Keys<Table>) {
+    this.keys.push('rows')
+    return this as unknown as Keys<Actionable>
   }
 
   row(this: Keys<Table>, id: string) {

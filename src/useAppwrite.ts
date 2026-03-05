@@ -1,7 +1,9 @@
-import { useAtomValue } from 'jotai'
+import { useContext } from 'react'
 
-import { appwriteAtom } from './states/appwrite'
+import { AppwriteContext } from './AppwriteProvider'
 
 export function useAppwrite() {
-  return useAtomValue(appwriteAtom)
+  const ctx = useContext(AppwriteContext)
+  if (!ctx) throw new Error('Wrap your app in <AppwriteProvider>')
+  return ctx
 }
