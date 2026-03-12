@@ -1,11 +1,10 @@
 import { useEffect } from 'react'
 import { Channel } from 'appwrite'
-import { graphql as gql } from 'gql.tada'
 
+import { collectionQueryOptions } from './queryOptions'
 import type { Collection, Document } from './types'
-import { mergeFieldsQuery } from './utils'
 import { Keys } from '../query/Keys'
-import type { AppwriteException } from '../types'
+import type { AppwriteException, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 import { useQueryClient } from '../useQueryClient'
@@ -22,28 +21,6 @@ type CollectionParams<TDocument = Record<string, string | number | boolean | nul
   fields?: (keyof TDocument & string)[]
 }
 
-const listDocuments = gql(/* GraphQL */ `
-  query ListDocuments(
-    $databaseId: String!
-    $collectionId: String!
-    $queries: [String!]
-    $transactionId: String
-  ) {
-    databasesListDocuments(
-      databaseId: $databaseId
-      collectionId: $collectionId
-      queries: $queries
-      transactionId: $transactionId
-    ) {
-      total
-      documents {
-        _id
-        data
-      }
-    }
-  }
-`)
-
 function useCollectionQueryConfig<TDocument>({
   databaseId,
   collectionId,
@@ -51,41 +28,15 @@ function useCollectionQueryConfig<TDocument>({
   transactionId,
   fields,
 }: Omit<CollectionParams<TDocument>, 'subscribe'>) {
-  const { graphql } = useAppwrite()
-  const mergedQueries = mergeFieldsQuery(queries, fields)
+  const client = useAppwrite()
 
-  return {
-    queryKey: [
-      ...Keys.database(databaseId).collection(collectionId).key(),
-      ...mergedQueries,
-    ] as const,
-    queryFn: async () => {
-      const { data, errors } = await graphql.query({
-        query: listDocuments,
-        variables: {
-          databaseId,
-          collectionId,
-          queries: mergedQueries,
-          transactionId,
-        },
-      })
-
-      if (errors) {
-        throw errors
-      }
-
-      const documents =
-        data.databasesListDocuments?.documents?.map((document) => ({
-          ...document,
-          ...(document ? (JSON.parse(document.data as string) as TDocument) : {}),
-        })) ?? []
-
-      return {
-        total: data.databasesListDocuments?.total ?? 0,
-        documents,
-      } as unknown as Collection<TDocument>
-    },
-  }
+  return collectionQueryOptions<TDocument>(client, {
+    databaseId,
+    collectionId,
+    queries,
+    transactionId,
+    fields,
+  })
 }
 
 function useCollectionRealtime<TDocument>(
@@ -133,14 +84,17 @@ function useCollectionRealtime<TDocument>(
   }, [databaseId, collectionId, realtime, queryClient, queriesKey, subscribe])
 }
 
-export function useCollection<TDocument>({
-  databaseId,
-  collectionId,
-  queries,
-  transactionId,
-  subscribe = true,
-  fields,
-}: CollectionParams<TDocument>) {
+export function useCollection<TDocument>(
+  {
+    databaseId,
+    collectionId,
+    queries,
+    transactionId,
+    subscribe = true,
+    fields,
+  }: CollectionParams<TDocument>,
+  opts: QueryOptions = {},
+) {
   const config = useCollectionQueryConfig<TDocument>({
     databaseId,
     collectionId,
@@ -149,9 +103,10 @@ export function useCollection<TDocument>({
     fields,
   })
 
-  const collection = useQuery<Collection<TDocument>, AppwriteException[], Collection<TDocument>>(
-    config,
-  )
+  const collection = useQuery<Collection<TDocument>, AppwriteException[], Collection<TDocument>>({
+    ...config,
+    ...opts,
+  })
 
   useCollectionRealtime<TDocument>(databaseId, collectionId, queries, subscribe)
 
@@ -162,14 +117,17 @@ export function useCollection<TDocument>({
   }
 }
 
-export function useSuspenseCollection<TDocument>({
-  databaseId,
-  collectionId,
-  queries,
-  transactionId,
-  subscribe = true,
-  fields,
-}: CollectionParams<TDocument>) {
+export function useSuspenseCollection<TDocument>(
+  {
+    databaseId,
+    collectionId,
+    queries,
+    transactionId,
+    subscribe = true,
+    fields,
+  }: CollectionParams<TDocument>,
+  opts: QueryOptions = {},
+) {
   const config = useCollectionQueryConfig<TDocument>({
     databaseId,
     collectionId,
@@ -182,7 +140,10 @@ export function useSuspenseCollection<TDocument>({
     Collection<TDocument>,
     AppwriteException[],
     Collection<TDocument>
-  >(config)
+  >({
+    ...config,
+    ...opts,
+  })
 
   useCollectionRealtime<TDocument>(databaseId, collectionId, queries, subscribe)
 

@@ -3,8 +3,6 @@ import { Channel } from 'appwrite'
 import { afterAll, afterEach, beforeAll, describe, expect, spyOn, test } from 'bun:test'
 
 import {
-  fragments,
-  getFragmentData,
   useAccount,
   useCreateAnonymousSession,
   useLazyAccount,
@@ -276,10 +274,9 @@ describe('useAccount', () => {
       expect(accountResult.current.isSuccess).toBe(true)
     })
 
-    const rawAccountData = accountResult.current.data
-    expect(rawAccountData).toBeDefined()
+    const accountData = accountResult.current.data
+    expect(accountData).toBeDefined()
 
-    const accountData = getFragmentData(fragments.Account_UserFragment, rawAccountData)
     expect(accountData._id).toBeDefined()
     expect(typeof accountData._id).toBe('string')
     expect(accountData.name).toBe(testUser.name)
@@ -357,10 +354,8 @@ describe('useLazyAccount', () => {
       expect(result.current.query.isSuccess).toBe(true)
     })
 
-    const rawAccountData = result.current.query.data
-    expect(rawAccountData).toBeDefined()
-
-    const accountData = getFragmentData(fragments.Account_UserFragment, rawAccountData)
+    const accountData = result.current.query.data
+    expect(accountData).toBeDefined()
     expect(accountData._id).toBeDefined()
     expect(accountData.name).toBe(testUser.name)
     expect(accountData.email).toBe(testUser.email)
@@ -434,8 +429,7 @@ describe('auth lifecycle', () => {
       expect(accountResult.current.isSuccess).toBe(true)
     })
 
-    const rawAccountData = accountResult.current.data
-    const accountData = getFragmentData(fragments.Account_UserFragment, rawAccountData)
+    const accountData = accountResult.current.data
     expect(accountData._id).toBeDefined()
     expect(accountData.email).toBe(testUser.email)
 

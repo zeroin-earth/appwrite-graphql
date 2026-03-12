@@ -2,7 +2,7 @@ import type { ResultOf, VariablesOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException } from '../types'
+import type { AppwriteException, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -40,7 +40,7 @@ const accountListLogs = gql(/* GraphQL */ `
 type Variables = VariablesOf<typeof accountListLogs>
 type Result = ResultOf<typeof accountListLogs>['accountListLogs']
 
-export function useLogs({ queries }: Variables) {
+export function useLogs({ queries }: Variables, opts: QueryOptions = {}) {
   const { graphql } = useAppwrite()
 
   const queryResult = useQuery<Result, AppwriteException[], Result>({
@@ -59,6 +59,7 @@ export function useLogs({ queries }: Variables) {
 
       return data.accountListLogs
     },
+    ...opts,
   })
 
   return { ...queryResult }

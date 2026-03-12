@@ -22,7 +22,7 @@ export function useCreateFile() {
   const { storage } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const mutationResult = useMutation<Models.File, AppwriteException, CreateFileVariables>({
+  const mutationResult = useMutation<Models.File, AppwriteException[], CreateFileVariables>({
     mutationKey: Keys.buckets().files().create(),
     mutationFn: async ({ bucketId, fileId, file, permissions, onProgress }) => {
       return storage.createFile({

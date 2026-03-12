@@ -2,6 +2,7 @@ import * as React from 'react'
 import { type ReactNode } from 'react'
 import type { Persister } from '@tanstack/query-persist-client-core'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 
 import type { AppwriteClient } from './client'
@@ -42,6 +43,7 @@ export function AppwriteProvider({
         }}
       >
         <AppwriteContext.Provider value={client}>{children}</AppwriteContext.Provider>
+        <ReactQueryDevtools initialIsOpen={false} />
       </PersistQueryClientProvider>
     )
   }
@@ -49,6 +51,7 @@ export function AppwriteProvider({
   return (
     <QueryClientProvider client={qc}>
       <AppwriteContext.Provider value={client}>{children}</AppwriteContext.Provider>
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )
 }

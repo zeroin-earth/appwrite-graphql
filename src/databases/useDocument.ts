@@ -1,37 +1,16 @@
 import { useEffect } from 'react'
 import { Channel } from 'appwrite'
 import type { VariablesOf } from 'gql.tada'
-import { graphql as gql } from 'gql.tada'
 
+import type { getDocument } from './queryOptions'
+import { documentQueryOptions } from './queryOptions'
 import type { Document } from './types'
-import { mergeFieldsQuery } from './utils'
 import { Keys } from '../query/Keys'
-import type { AppwriteException } from '../types'
+import type { AppwriteException, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 import { useQueryClient } from '../useQueryClient'
 import { useSuspenseQuery } from '../useSuspenseQuery'
-
-const getDocument = gql(/* GraphQL */ `
-  query GetDocument(
-    $databaseId: String!
-    $collectionId: String!
-    $documentId: String!
-    $queries: [String!]
-    $transactionId: String
-  ) {
-    databasesGetDocument(
-      databaseId: $databaseId
-      collectionId: $collectionId
-      documentId: $documentId
-      queries: $queries
-      transactionId: $transactionId
-    ) {
-      _id
-      data
-    }
-  }
-`)
 
 type Variables = VariablesOf<typeof getDocument>
 
@@ -47,41 +26,16 @@ function useDocumentQueryConfig<TDocument>({
   transactionId,
   fields,
 }: DocumentParams<TDocument>) {
-  const { graphql } = useAppwrite()
-  const rawQueries = Array.isArray(queries) ? queries : queries ? [queries] : []
-  const mergedQueries = mergeFieldsQuery(rawQueries, fields)
+  const client = useAppwrite()
 
-  return {
-    queryKey: [
-      ...Keys.database(databaseId).collection(collectionId).document(documentId).key(),
-      ...mergedQueries,
-    ] as const,
-    queryFn: async () => {
-      const { data, errors } = await graphql.query({
-        query: getDocument,
-        variables: {
-          databaseId,
-          collectionId,
-          documentId,
-          queries: mergedQueries.length > 0 ? mergedQueries : undefined,
-          transactionId,
-        },
-      })
-
-      if (errors) {
-        throw errors
-      }
-
-      const document = {
-        ...data.databasesGetDocument,
-        ...(data.databasesGetDocument
-          ? (JSON.parse(data.databasesGetDocument.data as string) as TDocument)
-          : {}),
-      } as unknown as Document<TDocument>
-
-      return document
-    },
-  }
+  return documentQueryOptions<TDocument>(client, {
+    databaseId,
+    collectionId,
+    documentId,
+    queries,
+    transactionId,
+    fields,
+  })
 }
 
 function useDocumentRealtime(
@@ -110,14 +64,17 @@ function useDocumentRealtime(
   }, [databaseId, collectionId, documentId, realtime, queryClient, queriesKey])
 }
 
-export function useDocument<TDocument>({
-  databaseId,
-  collectionId,
-  documentId,
-  queries,
-  transactionId,
-  fields,
-}: DocumentParams<TDocument>) {
+export function useDocument<TDocument>(
+  {
+    databaseId,
+    collectionId,
+    documentId,
+    queries,
+    transactionId,
+    fields,
+  }: DocumentParams<TDocument>,
+  opts: QueryOptions = {},
+) {
   const config = useDocumentQueryConfig<TDocument>({
     databaseId,
     collectionId,
@@ -128,23 +85,27 @@ export function useDocument<TDocument>({
   })
   const queriesKey = JSON.stringify(queries)
 
-  const queryResult = useQuery<Document<TDocument>, AppwriteException[], Document<TDocument>>(
-    config,
-  )
+  const queryResult = useQuery<Document<TDocument>, AppwriteException[], Document<TDocument>>({
+    ...config,
+    ...opts,
+  })
 
   useDocumentRealtime(databaseId, collectionId, documentId, queriesKey)
 
   return { ...queryResult }
 }
 
-export function useSuspenseDocument<TDocument>({
-  databaseId,
-  collectionId,
-  documentId,
-  queries,
-  transactionId,
-  fields,
-}: DocumentParams<TDocument>) {
+export function useSuspenseDocument<TDocument>(
+  {
+    databaseId,
+    collectionId,
+    documentId,
+    queries,
+    transactionId,
+    fields,
+  }: DocumentParams<TDocument>,
+  opts: QueryOptions = {},
+) {
   const config = useDocumentQueryConfig<TDocument>({
     databaseId,
     collectionId,
@@ -159,7 +120,7 @@ export function useSuspenseDocument<TDocument>({
     Document<TDocument>,
     AppwriteException[],
     Document<TDocument>
-  >(config)
+  >({ ...config, ...opts })
 
   useDocumentRealtime(databaseId, collectionId, documentId, queriesKey)
 

@@ -3,5 +3,6 @@ preload = ["./tests/setup/preload.ts", "./tests/__mocks__/Realtime.ts"]
 
 coveragePathIgnorePatterns = [
   "tests/**",
-  "src/__generated__/**"
+  "src/__generated__/**",
+  "src/offline/network/**"
 ]

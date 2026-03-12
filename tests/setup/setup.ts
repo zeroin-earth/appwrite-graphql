@@ -3,7 +3,7 @@
  * Creates admin account, project, API key, database, and collections.
  * Run this once before tests: `bun run tests/setup/setup.ts`
  */
-import { Client, Databases, ID, Permission, Role, TablesDB } from 'node-appwrite'
+import { Client, Databases, ID, Permission, Role, Runtime, TablesDB } from 'node-appwrite'
 
 import type { TestConfig } from './helpers'
 
@@ -491,6 +491,104 @@ async function setupMessaging(apiKey: string) {
   console.log('Messaging topic created!')
 }
 
+async function deployFunction(apiKey: string) {
+  console.log('Deploying test function...')
+
+  const resp = await fetch(`${ENDPOINT}/functions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Appwrite-Project': PROJECT_ID,
+      'X-Appwrite-Key': apiKey,
+    },
+    body: JSON.stringify({
+      functionId: 'test-function',
+      name: 'Test Function',
+      execute: [Role.any()],
+      runtime: Runtime.Node22,
+      enabled: true,
+      entrypoint: 'index.js',
+      commands: 'npm i',
+    }),
+  })
+
+  if (!resp.ok) {
+    const body = await resp.text()
+    if (body.includes('already exists') || body.includes('function_already_exists')) {
+      console.log('Function already exists, skipping deployment')
+      return
+    } else {
+      const runtimes = await fetch(`${ENDPOINT}/functions/runtimes`, {
+        headers: {
+          'X-Appwrite-Project': PROJECT_ID,
+        },
+      }).then((r) => r.json())
+      console.error('Available runtimes:', runtimes)
+      throw new Error(`Failed to create function: ${body}`)
+    }
+  }
+
+  //@ts-expect-error - FormData types are wrong
+  const codePath = new URL('./code.tar.gz', import.meta.url)
+  const codeFile = Bun.file(codePath)
+  const formData = new FormData()
+  formData.append('functionId', 'test-function')
+  formData.append('code', codeFile, 'code.tar.gz')
+  formData.append('activate', 'true')
+
+  const deployResp = await fetch(`${ENDPOINT}/functions/test-function/deployments`, {
+    method: 'POST',
+    headers: {
+      'X-Appwrite-Project': PROJECT_ID,
+      'X-Appwrite-Key': apiKey,
+    },
+    body: formData,
+  })
+
+  if (!deployResp.ok) {
+    throw new Error(`Failed to deploy function: ${await deployResp.text()}`)
+  }
+
+  const deployment = await deployResp.json()
+
+  const deploymentId = deployment.$id
+  console.log('Waiting for deployment to be ready...')
+  await new Promise((r) => setTimeout(r, 3000))
+
+  console.log(`Deployment "${deploymentId}" created, activating...`)
+
+  const setDeployment = await fetch(`${ENDPOINT}/functions/test-function/deployment`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Appwrite-Project': PROJECT_ID,
+      'X-Appwrite-Key': apiKey,
+    },
+    body: JSON.stringify({
+      functionId: 'test-function',
+      deploymentId,
+    }),
+  })
+
+  if (!setDeployment.ok) {
+    const theDeplymnet = await fetch(
+      `${ENDPOINT}/functions/test-function/deployments/${deploymentId}`,
+      {
+        headers: {
+          'X-Appwrite-Project': PROJECT_ID,
+          'X-Appwrite-Key': apiKey,
+        },
+      },
+    ).then((r) => r.json())
+    console.log('Deployment details:', theDeplymnet)
+
+    console.error(`Failed to set active deployment: ${deploymentId}`)
+    throw new Error(`Failed to set active deployment: ${await setDeployment.text()}`)
+  }
+
+  console.log('Function created!')
+}
+
 async function main() {
   await waitForAppwrite()
 
@@ -501,6 +599,7 @@ async function main() {
   await setupDatabase(apiKey)
   await setupBucket(apiKey)
   await setupMessaging(apiKey)
+  await deployFunction(apiKey)
 
   // Output env vars for tests
   console.log('\n=== Test Configuration ===')

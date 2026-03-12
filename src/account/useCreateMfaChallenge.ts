@@ -22,7 +22,7 @@ type Result = ResultOf<typeof accountCreateMfaChallenge>['accountCreateMfaChalle
 export function useCreateMfaChallenge() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation<Result, AppwriteException, Variables>({
+  const queryResult = useMutation<Result, AppwriteException[], Variables>({
     mutationKey: Keys.account().mfaChallenge().create(),
     mutationFn: async ({ factor }) => {
       const { data, errors } = await graphql.mutation({

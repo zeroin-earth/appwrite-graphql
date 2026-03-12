@@ -135,3 +135,5 @@ react-native
 !.github/workflows/
 tests/.test-config.json
 mailpit*
+
+.DS_Store

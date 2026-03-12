@@ -2,7 +2,7 @@ import type { ResultOf, VariablesOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException } from '../types'
+import type { AppwriteException, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -19,7 +19,7 @@ const getSession = gql(/* GraphQL */ `
 type Variables = VariablesOf<typeof getSession>
 type Result = ResultOf<typeof getSession>['accountGetSession']
 
-export function useGetSession({ sessionId }: Variables) {
+export function useGetSession({ sessionId }: Variables, opts: QueryOptions = {}) {
   const { graphql } = useAppwrite()
 
   const queryResult = useQuery<Result, AppwriteException[], Result>({
@@ -36,6 +36,7 @@ export function useGetSession({ sessionId }: Variables) {
 
       return data.accountGetSession
     },
+    ...opts,
   })
 
   return queryResult

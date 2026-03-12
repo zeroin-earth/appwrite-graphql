@@ -5,9 +5,9 @@ import { graphql as gql } from 'gql.tada'
 import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
-import { useLazyQuery } from '../useLazyQuery'
 import { useMutation } from '../useMutation'
 import { useQuery } from '../useQuery'
+import { useSuspenseQuery } from '../useSuspenseQuery'
 
 type Props = {
   functionId: string
@@ -62,6 +62,8 @@ const getFunctionExecution = gql(/* GraphQL */ `
 
 type GetExecutionResult = ResultOf<typeof getFunctionExecution>['functionsGetExecution']
 
+type ResponseBody = string | null | undefined | Record<string, string | number | boolean | null>
+
 function useCurrentExecution({
   currentExecution,
   currentFunction,
@@ -70,33 +72,36 @@ function useCurrentExecution({
   currentFunction: string | null
 }) {
   const { graphql } = useAppwrite()
+  const enabled = !!currentFunction && !!currentExecution
 
-  const getExecution = useLazyQuery<
-    GetExecutionResult | null,
-    AppwriteException[],
-    GetExecutionResult | null
-  >({
-    queryKey:
-      currentFunction && currentExecution
+  const query = useQuery<GetExecutionResult | null, AppwriteException[], GetExecutionResult | null>(
+    {
+      queryKey: enabled
         ? Keys.function(currentFunction).execution(currentExecution).key()
-        : ['appwrite', 'functions'],
-    queryFn: async () => {
-      if (!currentExecution || !currentFunction) {
-        return null
-      }
-      const { data } = await graphql.query({
-        query: getFunctionExecution,
-        variables: {
-          functionId: currentFunction,
-          executionId: currentExecution,
-        },
-      })
+        : Keys.functions().key(),
+      queryFn: async () => {
+        if (!currentExecution || !currentFunction) {
+          return null
+        }
+        const { data } = await graphql.query({
+          query: getFunctionExecution,
+          variables: {
+            functionId: currentFunction,
+            executionId: currentExecution,
+          },
+        })
 
-      return data.functionsGetExecution ?? null
+        if (!data?.functionsGetExecution) {
+          throw new Error('Execution not found')
+        }
+
+        return data.functionsGetExecution ?? null
+      },
+      enabled,
     },
-  })
+  )
 
-  return getExecution
+  return { ...query }
 }
 
 export function useFunction() {
@@ -105,7 +110,7 @@ export function useFunction() {
   const [currentFunction, setCurrentFunction] = useState<string | null>(null)
   const getExecution = useCurrentExecution({ currentExecution, currentFunction })
 
-  const executeFunction = useMutation<Record<string, unknown>, AppwriteException[], Props>({
+  const executeFunction = useMutation<ResponseBody, AppwriteException[], Props>({
     mutationKey: Keys.functions().executions().create(),
     mutationFn: async ({
       functionId,
@@ -131,7 +136,7 @@ export function useFunction() {
         },
       })
 
-      const { _id, status, responseBody, errors } = data.functionsCreateExecution ?? {}
+      const { _id, status, errors, responseBody } = data.functionsCreateExecution ?? {}
 
       if (status === 'failed') {
         throw new Error(errors)
@@ -139,14 +144,17 @@ export function useFunction() {
 
       setCurrentExecution(_id ?? null)
 
-      let parsedResponseBody = {}
-      try {
-        parsedResponseBody = JSON.parse(responseBody ?? '{}')
-      } catch (error) {
-        console.error('Failed to parse response body:', error)
+      if (typeof responseBody === 'string') {
+        if (responseBody.trim().startsWith('{') && responseBody.trim().endsWith('}')) {
+          try {
+            return JSON.parse(responseBody)
+          } catch (error) {
+            console.error('Failed to parse response body:', error)
+            return responseBody
+          }
+        }
+        return responseBody
       }
-
-      return parsedResponseBody
     },
   })
 
@@ -167,12 +175,8 @@ export function useSuspenseFunction({
 }: Props) {
   const { graphql } = useAppwrite()
 
-  const executeFunction = useQuery<
-    Record<string, unknown>,
-    AppwriteException[],
-    Record<string, unknown>
-  >({
-    queryKey: Keys.function(functionId).key(),
+  const executeFunction = useSuspenseQuery<ResponseBody, AppwriteException[], ResponseBody>({
+    queryKey: [...Keys.function(functionId).key(), 'execute', { path, method, body }],
     queryFn: async () => {
       const { data } = await graphql.mutation({
         query: createExecution,
@@ -187,21 +191,25 @@ export function useSuspenseFunction({
         },
       })
 
-      const { status, responseBody, errors } = data.functionsCreateExecution ?? {}
-
-      if (status === 'failed') {
-        throw new Error(errors)
+      if (data?.functionsCreateExecution?.status === 'failed') {
+        throw new Error(data.functionsCreateExecution.errors)
       }
 
-      let parsedResponseBody = {}
-      try {
-        parsedResponseBody = JSON.parse(responseBody ?? '{}')
-      } catch (error) {
-        console.error('Failed to parse response body:', error)
-      }
+      const { responseBody } = data.functionsCreateExecution ?? {}
 
-      return parsedResponseBody
+      if (typeof responseBody === 'string') {
+        if (responseBody.trim().startsWith('{') && responseBody.trim().endsWith('}')) {
+          try {
+            return JSON.parse(responseBody)
+          } catch (error) {
+            console.error('Failed to parse response body:', error)
+            return responseBody
+          }
+        }
+      }
+      return responseBody
     },
+    staleTime: Infinity,
   })
 
   return {

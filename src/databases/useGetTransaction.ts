@@ -2,7 +2,7 @@ import type { ResultOf, VariablesOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException } from '../types'
+import type { AppwriteException, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -22,7 +22,7 @@ const getTransaction = gql(/* GraphQL */ `
 type Variables = VariablesOf<typeof getTransaction>
 type Result = ResultOf<typeof getTransaction>['databasesGetTransaction']
 
-export function useGetTransaction({ transactionId }: Variables) {
+export function useGetTransaction({ transactionId }: Variables, opts: QueryOptions = {}) {
   const { graphql } = useAppwrite()
 
   const queryResult = useQuery<Result, AppwriteException[], Result>({
@@ -39,6 +39,7 @@ export function useGetTransaction({ transactionId }: Variables) {
 
       return data.databasesGetTransaction
     },
+    ...opts,
   })
 
   return { ...queryResult }

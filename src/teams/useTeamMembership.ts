@@ -2,7 +2,7 @@ import type { ResultOf, VariablesOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException } from '../types'
+import type { AppwriteException, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -29,7 +29,7 @@ const getMembership = gql(/* GraphQL */ `
 type Variables = VariablesOf<typeof getMembership>
 type Result = ResultOf<typeof getMembership>['teamsGetMembership']
 
-export function useTeamMembership({ teamId, membershipId }: Variables) {
+export function useTeamMembership({ teamId, membershipId }: Variables, opts: QueryOptions = {}) {
   const { graphql } = useAppwrite()
 
   const queryResult = useQuery<Result, AppwriteException[], Result>({
@@ -46,6 +46,7 @@ export function useTeamMembership({ teamId, membershipId }: Variables) {
 
       return data.teamsGetMembership
     },
+    ...opts,
   })
 
   return { ...queryResult }

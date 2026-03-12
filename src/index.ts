@@ -1,8 +1,3 @@
-import type { ResultOf } from 'gql.tada'
-import { readFragment } from 'gql.tada'
-
-import * as frags from './account/fragments'
-
 export { useAppwrite } from './useAppwrite'
 export { useMutation } from './useMutation'
 export { useQuery } from './useQuery'
@@ -29,13 +24,3 @@ export * from './offline'
 export * from './functions/useFunction'
 export * from './functions/useGetExecution'
 export * from './functions/useListExecutions'
-
-export { readFragment, readFragment as getFragmentData }
-
-export type Account_UserFragmentType = ResultOf<typeof frags.Account_User>
-export type Identity_ProviderFragmentType = ResultOf<typeof frags.Identity_Provider>
-
-export const fragments = {
-  Account_UserFragment: frags.Account_User,
-  Identity_ProviderFragment: frags.Identity_Provider,
-}

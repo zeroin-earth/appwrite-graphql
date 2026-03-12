@@ -49,6 +49,7 @@ export function createOfflineClient({
   storage,
   persister: externalPersister,
   networkAdapter,
+  throttleTime = 1000,
 }: {
   endpoint: string
   projectId: string
@@ -57,6 +58,8 @@ export function createOfflineClient({
   /** BYOP: provide a pre-built TanStack Persister. */
   persister?: Persister
   networkAdapter: NetworkAdapter
+  /** Throttle time for network status changes to prevent rapid toggling. Default: 1000ms. */
+  throttleTime?: number
 }): OfflineClient {
   if (storage && externalPersister) {
     throw new Error('Provide either `storage` or `persister`, not both.')
@@ -76,7 +79,11 @@ export function createOfflineClient({
   const persister =
     externalPersister ??
     (storage
-      ? createAsyncStoragePersister({ storage, key: 'appwrite-graphql-offline-cache' })
+      ? createAsyncStoragePersister({
+          storage,
+          key: 'appwrite-graphql-offline-cache',
+          throttleTime,
+        })
       : undefined)
 
   networkAdapter.listen((isOnline) => {

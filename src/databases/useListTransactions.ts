@@ -2,7 +2,7 @@ import type { ResultOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException } from '../types'
+import type { AppwriteException, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -24,7 +24,10 @@ const listTransactions = gql(/* GraphQL */ `
 
 type Result = ResultOf<typeof listTransactions>['databasesListTransactions']
 
-export function useListTransactions({ queries }: { queries?: string } = {}) {
+export function useListTransactions(
+  { queries }: { queries?: string } = {},
+  opts: QueryOptions = {},
+) {
   const { graphql } = useAppwrite()
 
   const queryResult = useQuery<Result, AppwriteException[], Result>({
@@ -41,6 +44,7 @@ export function useListTransactions({ queries }: { queries?: string } = {}) {
 
       return data.databasesListTransactions
     },
+    ...opts,
   })
 
   return { ...queryResult }

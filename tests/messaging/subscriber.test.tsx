@@ -191,7 +191,9 @@ describe('Subscriber hooks', () => {
       })
 
       const emails = await checkMail()
-      const matchingEmails = emails.messages?.filter((m: any) => m.Subject === 'Should Not Arrive')
+      const matchingEmails = emails.messages?.filter(
+        (m: { Subject: string }) => m.Subject === 'Should Not Arrive',
+      )
       expect(matchingEmails?.length ?? 0).toBe(0)
     }, 30000)
   })

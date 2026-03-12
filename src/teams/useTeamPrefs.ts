@@ -2,7 +2,7 @@ import type { ResultOf, VariablesOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException } from '../types'
+import type { AppwriteException, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -17,7 +17,7 @@ const getTeamPrefs = gql(/* GraphQL */ `
 type Variables = VariablesOf<typeof getTeamPrefs>
 type Result = ResultOf<typeof getTeamPrefs>['teamsGetPrefs']
 
-export function useTeamPrefs({ teamId }: Variables) {
+export function useTeamPrefs({ teamId }: Variables, opts: QueryOptions = {}) {
   const { graphql } = useAppwrite()
 
   const queryResult = useQuery<Result, AppwriteException[], Result>({
@@ -34,6 +34,7 @@ export function useTeamPrefs({ teamId }: Variables) {
 
       return data.teamsGetPrefs
     },
+    ...opts,
   })
 
   return { ...queryResult }

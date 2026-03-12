@@ -56,7 +56,7 @@ export function useSignUp() {
     },
   })
 
-  const verifyEmail = useMutation<VerifyResult, Error, VerifyProps>({
+  const verifyEmail = useMutation<VerifyResult, AppwriteException[], VerifyProps>({
     mutationKey: Keys.account().emailVerification().create(),
     mutationFn: async ({ verifyUrl }) => {
       const { data, errors } = await graphql.mutation({

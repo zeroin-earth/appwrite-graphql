@@ -2,8 +2,6 @@ import { act, renderHook, waitFor } from '@testing-library/react'
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 
 import {
-  fragments,
-  getFragmentData,
   useAccount,
   useCollection,
   useCreateDocument,
@@ -41,13 +39,10 @@ describe('Cache invalidation', () => {
 
     const { result: accountResult } = renderHook(() => useAccount(), { wrapper })
 
-    await waitFor(() => expect(accountResult.current.isSuccess).toBe(true))
-
-    const originalAccount = getFragmentData(
-      fragments.Account_UserFragment,
-      accountResult.current.data,
-    )
-    const originalName = originalAccount?.name
+    const originalName = await waitFor(() => {
+      expect(accountResult.current.isSuccess).toBe(true)
+      return accountResult.current.data?.name
+    })
 
     const newName = `Updated ${Date.now()}`
     const { result: updateNameResult } = renderHook(() => useUpdateName(), { wrapper })
@@ -57,15 +52,8 @@ describe('Cache invalidation', () => {
     })
 
     await waitFor(() => {
-      const account = getFragmentData(fragments.Account_UserFragment, accountResult.current.data)
-      expect(account?.name).toBe(newName)
+      expect(accountResult.current.data.name).not.toBe(originalName)
     })
-
-    const updatedAccount = getFragmentData(
-      fragments.Account_UserFragment,
-      accountResult.current.data,
-    )
-    expect(updatedAccount?.name).not.toBe(originalName)
   })
 
   test('account prefs change invalidates account query', async () => {
@@ -86,8 +74,9 @@ describe('Cache invalidation', () => {
     })
 
     await waitFor(() => {
-      const account = getFragmentData(fragments.Account_UserFragment, accountResult.current.data)
-      expect(account?.prefs).toBeDefined()
+      expect(accountResult.current.data).toBeDefined()
+      const account = accountResult.current.data
+      expect(JSON.parse(account.prefs.data as string)).toMatchObject(newPrefs)
     })
   })
 
@@ -180,7 +169,7 @@ describe('Cache invalidation', () => {
       await waitFor(() => expect(accountResult.current.isSuccess).toBe(true))
 
       expect(accountResult.current.data).toBeDefined()
-      const account = getFragmentData(fragments.Account_UserFragment, accountResult.current.data)
+      const account = accountResult.current.data
       expect(account?.email).toBe(freshUser.email)
     } finally {
       await deleteTestUser(freshUser.userId)

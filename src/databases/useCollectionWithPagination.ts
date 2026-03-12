@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { Query } from 'appwrite'
 
 import { useCollection, useSuspenseCollection } from './useCollection'
+import type { QueryOptions } from '../types'
 
 type PaginationParams<TDocument = Record<string, unknown>> = {
   databaseId: string
@@ -43,24 +44,30 @@ function usePaginationState(limit: number) {
   return { page, offset, totalRef, nextPage, previousPage, handlePageChange }
 }
 
-export function useCollectionWithPagination<TDocument>({
-  databaseId,
-  collectionId,
-  queries,
-  transactionId,
-  limit = 25,
-  fields,
-}: PaginationParams<TDocument>) {
+export function useCollectionWithPagination<TDocument>(
+  {
+    databaseId,
+    collectionId,
+    queries,
+    transactionId,
+    limit = 25,
+    fields,
+  }: PaginationParams<TDocument>,
+  opts: QueryOptions = {},
+) {
   const { page, offset, totalRef, nextPage, previousPage, handlePageChange } =
     usePaginationState(limit)
 
-  const collection = useCollection<TDocument>({
-    databaseId,
-    collectionId,
-    queries: [...queries, Query.limit(limit), Query.offset(offset)],
-    transactionId,
-    fields,
-  })
+  const collection = useCollection<TDocument>(
+    {
+      databaseId,
+      collectionId,
+      queries: [...queries, Query.limit(limit), Query.offset(offset)],
+      transactionId,
+      fields,
+    },
+    opts,
+  )
 
   const total = collection.data?.total ?? 0
   totalRef.current = total
@@ -81,24 +88,30 @@ export function useCollectionWithPagination<TDocument>({
   }
 }
 
-export function useSuspenseCollectionWithPagination<TDocument>({
-  databaseId,
-  collectionId,
-  queries,
-  transactionId,
-  limit = 25,
-  fields,
-}: PaginationParams<TDocument>) {
+export function useSuspenseCollectionWithPagination<TDocument>(
+  {
+    databaseId,
+    collectionId,
+    queries,
+    transactionId,
+    limit = 25,
+    fields,
+  }: PaginationParams<TDocument>,
+  opts: QueryOptions = {},
+) {
   const { page, offset, totalRef, nextPage, previousPage, handlePageChange } =
     usePaginationState(limit)
 
-  const collection = useSuspenseCollection<TDocument>({
-    databaseId,
-    collectionId,
-    queries: [...queries, Query.limit(limit), Query.offset(offset)],
-    transactionId,
-    fields,
-  })
+  const collection = useSuspenseCollection<TDocument>(
+    {
+      databaseId,
+      collectionId,
+      queries: [...queries, Query.limit(limit), Query.offset(offset)],
+      transactionId,
+      fields,
+    },
+    opts,
+  )
 
   const total = collection.total ?? 0
   totalRef.current = total

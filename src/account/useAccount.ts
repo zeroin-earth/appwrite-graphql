@@ -1,47 +1,36 @@
 import { useEffect, useState } from 'react'
+import type { ResultOf } from '@graphql-typed-document-node/core'
 import { Channel } from 'appwrite'
-import type { ResultOf } from 'gql.tada'
-import { graphql as gql } from 'gql.tada'
 import { castDraft, produce } from 'immer'
 
-import { Account_User } from './fragments'
+import type { getAccount } from './queryOptions'
+import { accountQueryOptions } from './queryOptions'
 import { Keys } from '../query/Keys'
-import type { AppwriteException, Models, Realtime } from '../types'
+import type { AppwriteException, Models, QueryOptions, Realtime } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useLazyQuery } from '../useLazyQuery'
 import { useQuery } from '../useQuery'
 import { useQueryClient } from '../useQueryClient'
 
-const getAccount = gql(
-  /* GraphQL */ `
-    query AccountGet {
-      accountGet {
-        ...Account_User
-      }
-    }
-  `,
-  [Account_User],
-)
-
 type Result = ResultOf<typeof getAccount>['accountGet']
 
 export function useLazyAccount() {
-  const { graphql, realtime } = useAppwrite()
+  const client = useAppwrite()
   const queryClient = useQueryClient()
   const [isActive, setIsActive] = useState(false)
 
   const queryResult = useLazyQuery<Result, AppwriteException[], Result>(
-    getAccountQueryOptions(graphql),
+    getAccountQueryOptions(client),
   )
 
   useEffect(() => {
     if (!isActive) return
 
-    const subscriptionPromise = subscribe(realtime, queryClient)
+    const subscriptionPromise = subscribe(client.realtime, queryClient)
     return () => {
       void subscriptionPromise.then((sub) => sub.close())
     }
-  }, [isActive, realtime, queryClient])
+  }, [isActive, client.realtime, queryClient])
 
   return {
     ...queryResult,
@@ -52,40 +41,27 @@ export function useLazyAccount() {
   }
 }
 
-export function useAccount() {
-  const { graphql, realtime } = useAppwrite()
+export function useAccount(opts: QueryOptions = {}) {
+  const client = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useQuery<Result, AppwriteException[], Result>(
-    getAccountQueryOptions(graphql),
-  )
+  const queryResult = useQuery<Result, AppwriteException[], Result>({
+    ...getAccountQueryOptions(client),
+    ...opts,
+  })
 
   useEffect(() => {
-    const subscriptionPromise = subscribe(realtime, queryClient)
+    const subscriptionPromise = subscribe(client.realtime, queryClient)
     return () => {
       void subscriptionPromise.then((sub) => sub.close())
     }
-  }, [realtime, queryClient])
+  }, [client.realtime, queryClient])
 
   return queryResult
 }
 
-function getAccountQueryOptions(graphql: ReturnType<typeof useAppwrite>['graphql']) {
-  return {
-    queryKey: Keys.account().key(),
-    queryFn: async () => {
-      const { data, errors } = await graphql.query({
-        query: getAccount,
-      })
-
-      if (errors) {
-        throw errors
-      }
-
-      return data.accountGet
-    },
-    retry: false,
-  }
+function getAccountQueryOptions(client: ReturnType<typeof useAppwrite>) {
+  return accountQueryOptions(client)
 }
 
 function subscribe<Preferences extends Models.Preferences>(

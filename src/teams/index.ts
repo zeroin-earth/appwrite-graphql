@@ -1,3 +1,4 @@
+export { teamQueryOptions } from './queryOptions'
 export { useTeam } from './useTeam'
 export { useTeams } from './useTeams'
 export { useTeamPrefs } from './useTeamPrefs'

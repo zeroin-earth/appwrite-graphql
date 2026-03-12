@@ -1,3 +1,4 @@
+export { accountQueryOptions } from './queryOptions'
 export { useAccount, useLazyAccount } from './useAccount'
 export { useCreateAnonymousSession } from './useCreateAnonymousSession'
 export { useCreateEmailToken } from './useCreateEmailToken'

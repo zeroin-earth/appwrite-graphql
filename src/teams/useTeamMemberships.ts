@@ -2,7 +2,7 @@ import type { ResultOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException } from '../types'
+import type { AppwriteException, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -31,19 +31,26 @@ const listMemberships = gql(/* GraphQL */ `
 
 type Result = ResultOf<typeof listMemberships>['teamsListMemberships']
 
-export function useTeamMemberships({
-  teamId,
-  queries,
-  search,
-}: {
-  teamId: string
-  queries?: string[]
-  search?: string
-}) {
+export function useTeamMemberships(
+  {
+    teamId,
+    queries,
+    search,
+  }: {
+    teamId: string
+    queries?: string[]
+    search?: string
+  },
+  opts: QueryOptions = {},
+) {
   const { graphql } = useAppwrite()
 
   const queryResult = useQuery<Result, AppwriteException[], Result>({
-    queryKey: [...Keys.team(teamId).memberships().key(), ...(queries ?? []), ...(search ? [search] : [])],
+    queryKey: [
+      ...Keys.team(teamId).memberships().key(),
+      ...(queries ?? []),
+      ...(search ? [search] : []),
+    ],
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: listMemberships,
@@ -56,6 +63,7 @@ export function useTeamMemberships({
 
       return data.teamsListMemberships
     },
+    ...opts,
   })
 
   return { ...queryResult }
