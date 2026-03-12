@@ -1,9 +1,8 @@
-import { gql } from '../__generated__'
-import {
-  CreateEmailTokenMutation,
-  CreateEmailTokenMutationVariables,
-} from '../__generated__/graphql'
-import { AppwriteException } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 
@@ -15,14 +14,14 @@ const createEmailToken = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof createEmailToken>
+type Result = ResultOf<typeof createEmailToken>['accountCreateEmailToken']
+
 export function useCreateEmailToken() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation<
-    CreateEmailTokenMutation['accountCreateEmailToken'],
-    AppwriteException[],
-    CreateEmailTokenMutationVariables
-  >({
+  const queryResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.account().emailToken().create(),
     mutationFn: async ({ userId, email, phrase }) => {
       const { data, errors } = await graphql.mutation({
         query: createEmailToken,

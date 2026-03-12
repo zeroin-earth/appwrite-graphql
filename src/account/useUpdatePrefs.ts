@@ -1,12 +1,13 @@
-import { AppwriteException } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import { UpdatePrefsMutation, UpdatePrefsMutationVariables } from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
-const accountUpdatePrefs = gql(/* GraphQL */ `
+export const accountUpdatePrefs = gql(/* GraphQL */ `
   mutation UpdatePrefs($prefs: Assoc!) {
     accountUpdatePrefs(prefs: $prefs) {
       prefs {
@@ -16,15 +17,15 @@ const accountUpdatePrefs = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof accountUpdatePrefs>
+type Result = ResultOf<typeof accountUpdatePrefs>['accountUpdatePrefs']
+
 export function useUpdatePrefs() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useMutation<
-    UpdatePrefsMutation['accountUpdatePrefs'],
-    AppwriteException[],
-    UpdatePrefsMutationVariables
-  >({
+  const queryResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.account().prefs().update(),
     mutationFn: async ({ prefs }) => {
       const { data, errors } = await graphql.mutation({
         query: accountUpdatePrefs,
@@ -38,7 +39,7 @@ export function useUpdatePrefs() {
       return data?.accountUpdatePrefs
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      void queryClient.invalidateQueries({ queryKey: Keys.account().key() })
     },
   })
 

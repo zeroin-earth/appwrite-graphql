@@ -1,7 +1,8 @@
-import { AppwriteException } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import { GetTeamPrefsQuery, GetTeamPrefsQueryVariables } from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -13,15 +14,14 @@ const getTeamPrefs = gql(/* GraphQL */ `
   }
 `)
 
-export function useTeamPrefs({ teamId }: GetTeamPrefsQueryVariables) {
+type Variables = VariablesOf<typeof getTeamPrefs>
+type Result = ResultOf<typeof getTeamPrefs>['teamsGetPrefs']
+
+export function useTeamPrefs({ teamId }: Variables, opts: QueryOptions = {}) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<
-    GetTeamPrefsQuery['teamsGetPrefs'],
-    AppwriteException[],
-    GetTeamPrefsQuery['teamsGetPrefs']
-  >({
-    queryKey: ['appwrite', 'teams', teamId, 'prefs'],
+  const queryResult = useQuery<Result, AppwriteException[], Result>({
+    queryKey: Keys.team(teamId).teamPrefs().key(),
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: getTeamPrefs,
@@ -34,6 +34,7 @@ export function useTeamPrefs({ teamId }: GetTeamPrefsQueryVariables) {
 
       return data.teamsGetPrefs
     },
+    ...opts,
   })
 
   return { ...queryResult }

@@ -1,12 +1,13 @@
-import { AppwriteException } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import { DeleteFileMutation, DeleteFileMutationVariables } from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
-const deleteFile = gql(/* GraphQL */ `
+export const deleteFile = gql(/* GraphQL */ `
   mutation DeleteFile($bucketId: String!, $fileId: String!) {
     storageDeleteFile(bucketId: $bucketId, fileId: $fileId) {
       status
@@ -14,15 +15,15 @@ const deleteFile = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof deleteFile>
+type Result = ResultOf<typeof deleteFile>['storageDeleteFile']
+
 export function useDeleteFile() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const mutationResult = useMutation<
-    DeleteFileMutation['storageDeleteFile'],
-    AppwriteException[],
-    DeleteFileMutationVariables
-  >({
+  const mutationResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.buckets().files().delete(),
     mutationFn: async ({ bucketId, fileId }) => {
       const { data, errors } = await graphql.mutation({
         query: deleteFile,
@@ -33,14 +34,14 @@ export function useDeleteFile() {
         throw errors
       }
 
-      return data?.storageDeleteFile ?? { status: true }
+      return data?.storageDeleteFile ?? { status: '' }
     },
     onSuccess: (_, variables) => {
       queryClient.removeQueries({
-        queryKey: ['appwrite', 'storage', variables.bucketId, 'files', variables.fileId],
+        queryKey: Keys.bucket(variables.bucketId).file(variables.fileId).key(),
       })
-      queryClient.invalidateQueries({
-        queryKey: ['appwrite', 'storage', variables.bucketId, 'files'],
+      void queryClient.invalidateQueries({
+        queryKey: Keys.bucket(variables.bucketId).files().key(),
       })
     },
   })

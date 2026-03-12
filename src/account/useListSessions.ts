@@ -1,7 +1,8 @@
-import { AppwriteException } from '../types'
+import type { ResultOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import { ListSessionsQuery } from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -18,15 +19,13 @@ const accountListSessions = gql(/* GraphQL */ `
   }
 `)
 
-export function useListSessions() {
+type Result = ResultOf<typeof accountListSessions>['accountListSessions']
+
+export function useListSessions(opts: QueryOptions = {}) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<
-    ListSessionsQuery['accountListSessions'],
-    AppwriteException[],
-    ListSessionsQuery['accountListSessions']
-  >({
-    queryKey: ['appwrite', 'account', 'sessions'],
+  const queryResult = useQuery<Result, AppwriteException[], Result>({
+    queryKey: Keys.account().sessions(),
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: accountListSessions,
@@ -38,6 +37,7 @@ export function useListSessions() {
 
       return data.accountListSessions
     },
+    ...opts,
   })
 
   return { ...queryResult }

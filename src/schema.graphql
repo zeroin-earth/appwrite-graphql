@@ -1,6 +1,6 @@
 scalar Json
-scalar Date
 scalar Assoc
+scalar InputFile
 
 schema {
   query: Query
@@ -13,24 +13,32 @@ type Query {
   accountGetPrefs: Preferences
   accountGetMfaRecoveryCodes: MfaRecoveryCodes
   accountGetSession(sessionId: String!): Session
-  accountListIdentities: IdentityList
-  accountListLogs(queries: [String!]): LogsList
+  accountListIdentities(queries: String, total: Boolean): IdentityList
+  accountListLogs(queries: [String], total: Boolean): LogList
   accountListMfaFactors: MfaFactors
   accountListSessions: SessionList
 
   # Databases
-  databasesGetDocument(databaseId: String!, collectionId: String!, documentId: String!): Document
+  databasesGetDocument(
+    databaseId: String!
+    collectionId: String!
+    documentId: String!
+    queries: [String]
+    transactionId: String
+  ): Document
   databasesGetTransaction(transactionId: String!): Transaction
   databasesListDocuments(
     databaseId: String!
     collectionId: String!
-    queries: [String!]
+    queries: [String]
+    transactionId: String
+    total: Boolean
   ): DocumentList
   databasesListTransactions(queries: String): TransactionList
 
   # Functions
   functionsGetExecution(functionId: String!, executionId: String!): Execution
-  functionsListExecutions(functionId: String!, queries: [String!]): ExecutionList
+  functionsListExecutions(functionId: String!, queries: [String], total: Boolean): ExecutionList
 
   # Locale
   localeGet: Locale
@@ -44,14 +52,37 @@ type Query {
 
   # Storage
   storageGetFile(bucketId: String!, fileId: String!): File
-  storageListFiles(bucketId: String!, queries: [String!], search: String): FileList
+  storageGetFileDownload(bucketId: String!, fileId: String!, token: String): None
+  storageGetFilePreview(
+    bucketId: String!
+    fileId: String!
+    width: Int
+    height: Int
+    gravity: String
+    quality: Int
+    borderWidth: Int
+    borderColor: String
+    borderRadius: Int
+    opacity: Float
+    rotation: Int
+    background: String
+    output: String
+    token: String
+  ): None
+  storageGetFileView(bucketId: String!, fileId: String!, token: String): None
+  storageListFiles(bucketId: String!, queries: [String], search: String, total: Boolean): FileList
 
   # Teams
   teamsGet(teamId: String!): Team
   teamsGetMembership(teamId: String!, membershipId: String!): Membership
   teamsGetPrefs(teamId: String!): Preferences
-  teamsList(queries: [String!], search: String): TeamList
-  teamsListMemberships(teamId: String!, queries: [String!], search: String): MembershipList
+  teamsList(queries: [String], search: String, total: Boolean): TeamList
+  teamsListMemberships(
+    teamId: String!
+    queries: [String]
+    search: String
+    total: Boolean
+  ): MembershipList
 }
 
 type Mutation {
@@ -59,33 +90,30 @@ type Mutation {
   accountCreate(userId: String!, email: String!, password: String!, name: String): User
   accountCreateAnonymousSession: Session
   accountCreateEmailPasswordSession(email: String!, password: String!): Session
-  accountCreateJWT: JWT
+  accountCreateJWT: Jwt
   accountCreateEmailToken(userId: String!, email: String!, phrase: Boolean): Token
-  accountCreateMagicURLSession(userId: String!, email: String!, url: String): Token
   accountCreateMagicURLToken(userId: String!, email: String!, url: String, phrase: Boolean): Token
   accountCreateMfaAuthenticator(type: String!): MfaType
-  accountCreateMfaChallenge(factor: String!): MFAChallenge
+  accountCreateMfaChallenge(factor: String!): MfaChallenge
   accountCreateMfaRecoveryCodes: MfaRecoveryCodes
-  accountCreatePhoneSession(userId: String!, phone: String!): Token
   accountCreatePhoneToken(userId: String!, phone: String!): Token
   accountCreatePhoneVerification: Token
   accountCreateRecovery(email: String!, url: String!): Token
   accountCreateSession(userId: String!, secret: String!): Session
   accountCreateVerification(url: String!): Token
   accountCreateEmailVerification(url: String!): Token
-  accountDelete: None
-  accountDeleteIdentity(identityId: String!): Status
+  accountDeleteIdentity(identityId: String!): None
   accountDeleteMfaAuthenticator(type: String!): None
-  accountDeleteSession(sessionId: String!): Status
-  accountDeleteSessions: Status
+  accountDeleteSession(sessionId: String!): None
+  accountDeleteSessions: None
   accountUpdateEmail(email: String!, password: String!): User
   accountUpdateMagicURLSession(userId: String!, secret: String!): Session
   accountUpdateMFA(mfa: Boolean!): User
   accountUpdateMfaAuthenticator(type: String!, otp: String!): User
-  accountUpdateMfaChallenge(challengeId: String!, otp: String!): Status
+  accountUpdateMfaChallenge(challengeId: String!, otp: String!): Session
   accountUpdateMfaRecoveryCodes: MfaRecoveryCodes
   accountUpdateName(name: String!): User
-  accountUpdatePassword(password: String!, oldPassword: String!): User
+  accountUpdatePassword(password: String!, oldPassword: String): User
   accountUpdatePhone(phone: String!, password: String!): User
   accountUpdatePhoneSession(userId: String!, secret: String!): Session
   accountUpdatePhoneVerification(userId: String!, secret: String!): Token
@@ -96,53 +124,40 @@ type Mutation {
   accountUpdateEmailVerification(userId: String!, secret: String!): Token
   accountCreatePushTarget(targetId: String!, identifier: String!, providerId: String): Target
   accountUpdatePushTarget(targetId: String!, identifier: String!): Target
-  accountDeletePushTarget(targetId: String!): Status
+  accountDeletePushTarget(targetId: String!): None
   accountUpdateStatus: User
 
   # Databases
   databasesCreateDocument(
     databaseId: String!
+    documentId: String!
+    collectionId: String!
+    data: Json!
+    permissions: [String]
+    transactionId: String
+  ): Document
+  databasesDeleteDocument(
+    databaseId: String!
     collectionId: String!
     documentId: String!
-    data: Json!
-    permissions: [String!]
-  ): Document
-  databasesCreateDocuments(
-    databaseId: String!
-    collectionId: String!
-    documents: [Json!]!
-  ): DocumentList
-  databasesDeleteDocument(databaseId: String!, collectionId: String!, documentId: String!): Status
-  databasesDeleteDocuments(
-    databaseId: String!
-    collectionId: String!
-    queries: [String!]
-  ): DocumentList
+    transactionId: String
+  ): None
   databasesUpdateDocument(
     databaseId: String!
     collectionId: String!
     documentId: String!
     data: Json
-    permissions: [String!]
+    permissions: [String]
+    transactionId: String
   ): Document
-  databasesUpdateDocuments(
-    databaseId: String!
-    collectionId: String!
-    data: Json
-    queries: [String!]
-  ): DocumentList
   databasesUpsertDocument(
     databaseId: String!
     collectionId: String!
     documentId: String!
     data: Json!
-    permissions: [String!]
+    permissions: [String]
+    transactionId: String
   ): Document
-  databasesUpsertDocuments(
-    databaseId: String!
-    collectionId: String!
-    documents: [Json!]!
-  ): DocumentList
   databasesIncrementDocumentAttribute(
     databaseId: String!
     collectionId: String!
@@ -150,6 +165,7 @@ type Mutation {
     attribute: String!
     value: Int
     max: Int
+    transactionId: String
   ): Document
   databasesDecrementDocumentAttribute(
     databaseId: String!
@@ -158,10 +174,15 @@ type Mutation {
     attribute: String!
     value: Int
     min: Int
+    transactionId: String
   ): Document
   databasesCreateTransaction(ttl: Int): Transaction
-  databasesCreateOperations(transactionId: String!, operations: [String!]): Transaction
-  databasesUpdateTransaction(transactionId: String!, commit: Boolean, rollback: Boolean): Transaction
+  databasesCreateOperations(transactionId: String!, operations: [String]): Transaction
+  databasesUpdateTransaction(
+    transactionId: String!
+    commit: Boolean
+    rollback: Boolean
+  ): Transaction
   databasesDeleteTransaction(transactionId: String!): None
 
   # Functions
@@ -171,22 +192,32 @@ type Mutation {
     async: Boolean
     path: String
     method: String
-    headers: Json
+    headers: String
+    scheduledAt: String
   ): Execution
 
+  # Messaging
+  messagingCreateSubscriber(subscriberId: String!, topicId: String!, targetId: String!): Subscriber
+  messagingDeleteSubscriber(topicId: String!, subscriberId: String!): None
+
   # Storage
-  storageCreateFile(bucketId: String!, fileId: String!, file: String!, permissions: [String!]): File
-  storageUpdateFile(bucketId: String!, fileId: String!, name: String, permissions: [String!]): File
+  storageCreateFile(
+    bucketId: String!
+    fileId: String!
+    file: InputFile!
+    permissions: [String]
+  ): File
+  storageUpdateFile(bucketId: String!, fileId: String!, name: String, permissions: [String]): File
   storageDeleteFile(bucketId: String!, fileId: String!): None
 
   # Teams
-  teamsCreate(teamId: String!, name: String!, roles: [String!]): Team
+  teamsCreate(teamId: String!, name: String!, roles: [String]): Team
   teamsCreateMembership(
     teamId: String!
-    roles: [String!]!
     email: String
     userId: String
     phone: String
+    roles: [String!]!
     url: String
     name: String
   ): Membership
@@ -205,11 +236,11 @@ type Mutation {
 
 type User {
   _id: String
-  _createdAt: Date
-  _updatedAt: Date
+  _createdAt: String
+  _updatedAt: String
   name: String
   registration: String
-  status: String
+  status: Boolean
   labels: [String]
   email: String
   phone: String
@@ -219,13 +250,12 @@ type User {
   accessedAt: String
   prefs: Preferences
   targets: [Target]
-  accessedAt: String
 }
 
 type Target {
   _id: String
-  _createdAt: Date
-  _updatedAt: Date
+  _createdAt: String
+  _updatedAt: String
   name: String
   userId: String
   providerId: String
@@ -240,13 +270,14 @@ type Preferences {
 
 type Session {
   _id: String
-  _createdAt: Date
+  _createdAt: String
+  _updatedAt: String
   userId: String
-  expire: Date
+  expire: String
   provider: String
   providerUid: String
   providerAccessToken: String
-  providerAccessTokenExpiry: Date
+  providerAccessTokenExpiry: String
   providerRefreshToken: String
   ip: String
   osCode: String
@@ -266,7 +297,7 @@ type Session {
   current: Boolean
   factors: [String]
   secret: String
-  mfaUpdatedAt: Date
+  mfaUpdatedAt: String
 }
 
 type SessionList {
@@ -294,7 +325,7 @@ type Token {
   _createdAt: String
   userId: String
   secret: String
-  expire: Date
+  expire: String
   phrase: String
 }
 
@@ -307,32 +338,39 @@ type Execution {
   _id: String
   _createdAt: String
   _updatedAt: String
+  _permissions: [String]
   functionId: String
+  deploymentId: String
   trigger: String
   status: String
   requestMethod: String
   requestPath: String
+  requestHeaders: [Headers]
   responseStatusCode: Int
   responseBody: String
+  responseHeaders: [Headers]
+  logs: String
   errors: String
   duration: Float
+  scheduledAt: String
 }
 
-type Status {
-  status: Boolean
+type Headers {
+  name: String
+  value: String
 }
 
 type None {
-  status: Boolean
+  status: String
 }
 
-type JWT {
+type Jwt {
   jwt: String
 }
 
 type IdentityList {
-  total: Int!
-  identities: [Identity!]
+  total: Int
+  identities: [Identity]
 }
 
 type Identity {
@@ -348,15 +386,12 @@ type Identity {
   providerRefreshToken: String
 }
 
-type LogsList {
-  total: Int!
-  logs: [Log!]
+type LogList {
+  total: Int
+  logs: [Log]
 }
 
 type Log {
-  _id: String
-  _createdAt: String
-  _updatedAt: String
   event: String
   userId: String
   userEmail: String
@@ -385,21 +420,34 @@ type MfaType {
   uri: String
 }
 
-type MFAChallenge {
+type MfaChallenge {
   _id: String
-  _createdAt: Date
+  _createdAt: String
   userId: String
-  expire: Date
+  expire: String
 }
 
 type MfaFactors {
   totp: Boolean
   phone: Boolean
   email: Boolean
+  recoveryCode: Boolean
 }
 
 type MfaRecoveryCodes {
-  recoveryCodes: [String!]!
+  recoveryCodes: [String]
+}
+
+type Subscriber {
+  _id: String
+  _createdAt: String
+  _updatedAt: String
+  targetId: String
+  target: Target
+  userId: String
+  userName: String
+  topicId: String
+  providerType: String
 }
 
 type Locale {

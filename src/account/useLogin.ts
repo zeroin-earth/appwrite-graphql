@@ -1,9 +1,8 @@
-import { gql } from '../__generated__/gql'
-import {
-  CreateEmailPasswordSessionMutation,
-  CreateEmailPasswordSessionMutationVariables,
-} from '../__generated__/graphql'
-import { AppwriteException, OAuthProvider } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
+import type { AppwriteException, OAuthProvider } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -24,15 +23,17 @@ const accountCreateEmailPasswordSession = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof accountCreateEmailPasswordSession>
+type Result = ResultOf<
+  typeof accountCreateEmailPasswordSession
+>['accountCreateEmailPasswordSession']
+
 export function useLogin() {
   const { account, graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const login = useMutation<
-    CreateEmailPasswordSessionMutation['accountCreateEmailPasswordSession'],
-    AppwriteException[],
-    CreateEmailPasswordSessionMutationVariables
-  >({
+  const login = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.account().login().create(),
     mutationFn: async ({ email, password }) => {
       const { data, errors } = await graphql.mutation({
         query: accountCreateEmailPasswordSession,
@@ -49,8 +50,8 @@ export function useLogin() {
       return data.accountCreateEmailPasswordSession
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'sessions'] })
+      void queryClient.invalidateQueries({ queryKey: Keys.account().key() })
+      void queryClient.invalidateQueries({ queryKey: Keys.account().sessions() })
     },
   })
 

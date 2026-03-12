@@ -1,7 +1,8 @@
-import { AppwriteException } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import { GetSessionQuery, GetSessionQueryVariables } from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -15,15 +16,14 @@ const getSession = gql(/* GraphQL */ `
   }
 `)
 
-export function useGetSession({ sessionId }: GetSessionQueryVariables) {
+type Variables = VariablesOf<typeof getSession>
+type Result = ResultOf<typeof getSession>['accountGetSession']
+
+export function useGetSession({ sessionId }: Variables, opts: QueryOptions = {}) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<
-    GetSessionQuery['accountGetSession'],
-    AppwriteException[],
-    GetSessionQueryVariables
-  >({
-    queryKey: ['appwrite', 'account', 'sessions', sessionId],
+  const queryResult = useQuery<Result, AppwriteException[], Result>({
+    queryKey: Keys.account().session(sessionId).key(),
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: getSession,
@@ -36,6 +36,7 @@ export function useGetSession({ sessionId }: GetSessionQueryVariables) {
 
       return data.accountGetSession
     },
+    ...opts,
   })
 
   return queryResult

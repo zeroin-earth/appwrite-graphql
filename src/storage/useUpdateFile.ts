@@ -1,12 +1,13 @@
-import { AppwriteException } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import { UpdateFileMutation, UpdateFileMutationVariables } from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
-const updateFile = gql(/* GraphQL */ `
+export const updateFile = gql(/* GraphQL */ `
   mutation UpdateFile(
     $bucketId: String!
     $fileId: String!
@@ -27,15 +28,15 @@ const updateFile = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof updateFile>
+type Result = ResultOf<typeof updateFile>['storageUpdateFile']
+
 export function useUpdateFile() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const mutationResult = useMutation<
-    UpdateFileMutation['storageUpdateFile'],
-    AppwriteException[],
-    UpdateFileMutationVariables
-  >({
+  const mutationResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.buckets().files().update(),
     mutationFn: async ({ bucketId, fileId, name, permissions }) => {
       const { data, errors } = await graphql.mutation({
         query: updateFile,
@@ -49,8 +50,8 @@ export function useUpdateFile() {
       return data.storageUpdateFile
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ['appwrite', 'storage', variables.bucketId, 'files'],
+      void queryClient.invalidateQueries({
+        queryKey: Keys.bucket(variables.bucketId).files().key(),
       })
     },
   })

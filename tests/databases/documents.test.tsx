@@ -1,21 +1,25 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
-import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
+import { Channel } from 'appwrite'
+import { afterAll, beforeAll, describe, expect, spyOn, test } from 'bun:test'
 
 import {
   useCreateDocument,
   useDeleteDocument,
   useDocument,
-  useLogin,
+  useQueryClient,
+  useSuspenseDocument,
   useUpdateDocument,
   useUpsertDocument,
 } from '../../src'
 import { ID } from '../../src/types'
+import { triggerRealtimeEvent } from '../__mocks__/Realtime'
 import {
   createTestDocument,
   createTestUser,
   deleteTestDocument,
   deleteTestUser,
   getTestConfig,
+  loginUser,
 } from '../setup/helpers'
 import { createWrapper } from '../setup/wrapper'
 
@@ -23,20 +27,6 @@ interface TestDocumentData {
   name: string
   age?: number
   active?: boolean
-}
-
-async function loginUser(
-  email: string,
-  password: string,
-  wrapper: ReturnType<typeof createWrapper>,
-): Promise<void> {
-  const { result } = renderHook(() => useLogin(), { wrapper })
-
-  await act(async () => {
-    result.current.login.mutateAsync({ email, password })
-  })
-
-  await waitFor(() => expect(result.current.login.isSuccess).toBe(true))
 }
 
 describe('Document CRUD hooks', () => {
@@ -71,7 +61,7 @@ describe('Document CRUD hooks', () => {
       const documentId = ID.unique()
 
       await act(async () => {
-        result.current.mutateAsync({
+        await result.current.mutateAsync({
           databaseId,
           collectionId,
           documentId,
@@ -96,7 +86,7 @@ describe('Document CRUD hooks', () => {
       const documentId = ID.unique()
 
       await act(async () => {
-        result.current.mutateAsync({
+        await result.current.mutateAsync({
           databaseId,
           collectionId,
           documentId,
@@ -192,14 +182,31 @@ describe('Document CRUD hooks', () => {
       createdDocumentIds.push(documentId)
     })
 
-    test('updates a document and returns updated data', async () => {
+    test('updates a document and returns updated data as well as updating the realtime subscription', async () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
 
-      const { result } = renderHook(() => useUpdateDocument<TestDocumentData>(), { wrapper })
+      const { result } = renderHook(() => useUpdateDocument(), { wrapper })
+      const { result: queryClient } = renderHook(() => useQueryClient(), { wrapper })
+
+      const spy = spyOn(queryClient.current, 'setQueryData')
+
+      const { result: readResult } = renderHook(
+        () =>
+          useDocument<TestDocumentData>({
+            databaseId,
+            collectionId,
+            documentId,
+          }),
+        { wrapper },
+      )
+
+      await waitFor(() => expect(readResult.current.isSuccess).toBe(true))
+
+      expect(readResult.current.data?.name).toBe('Update Test')
 
       await act(async () => {
-        result.current.mutateAsync({
+        await result.current.mutateAsync({
           databaseId,
           collectionId,
           documentId,
@@ -209,6 +216,22 @@ describe('Document CRUD hooks', () => {
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
+      triggerRealtimeEvent(
+        Channel.tablesdb(databaseId).table(collectionId).row(documentId).update(),
+        {
+          _id: documentId,
+          name: 'Updated Name',
+          age: 20,
+        },
+      )
+
+      expect(spy).toHaveBeenCalledWith(
+        ['appwrite', 'databases', databaseId, 'collections', collectionId, 'documents', documentId],
+        expect.objectContaining({
+          name: 'Updated Name',
+        }),
+      )
+
       expect(result.current.data).toBeDefined()
     })
 
@@ -216,12 +239,12 @@ describe('Document CRUD hooks', () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
 
-      const { result: updateResult } = renderHook(() => useUpdateDocument<TestDocumentData>(), {
+      const { result: updateResult } = renderHook(() => useUpdateDocument(), {
         wrapper,
       })
 
       await act(async () => {
-        updateResult.current.mutateAsync({
+        await updateResult.current.mutateAsync({
           databaseId,
           collectionId,
           documentId,
@@ -259,7 +282,7 @@ describe('Document CRUD hooks', () => {
       const documentId = ID.unique()
 
       await act(async () => {
-        result.current.mutateAsync({
+        await result.current.mutateAsync({
           databaseId,
           collectionId,
           documentId,
@@ -287,7 +310,7 @@ describe('Document CRUD hooks', () => {
       const { result } = renderHook(() => useUpsertDocument(), { wrapper })
 
       await act(async () => {
-        result.current.mutateAsync({
+        await result.current.mutateAsync({
           databaseId,
           collectionId,
           documentId: existingDocId,
@@ -313,7 +336,7 @@ describe('Document CRUD hooks', () => {
       const { result } = renderHook(() => useDeleteDocument(), { wrapper })
 
       await act(async () => {
-        result.current.mutateAsync({
+        await result.current.mutateAsync({
           databaseId,
           collectionId,
           documentId: doc.$id,
@@ -341,6 +364,97 @@ describe('Document CRUD hooks', () => {
       })
 
       await waitFor(() => expect(result.current.isError).toBe(true))
+    })
+  })
+
+  describe('useSuspenseDocument', () => {
+    let documentId: string
+
+    beforeAll(async () => {
+      const doc = await createTestDocument({ name: 'Suspense Test', age: 99, active: true })
+      documentId = doc.$id
+      createdDocumentIds.push(documentId)
+    })
+
+    test('loads a document with suspense boundary', async () => {
+      const wrapper = createWrapper({ suspense: true })
+      await loginUser(userEmail, userPassword, wrapper)
+
+      const { result } = renderHook(
+        () =>
+          useSuspenseDocument<TestDocumentData>({
+            databaseId,
+            collectionId,
+            documentId,
+          }),
+        { wrapper },
+      )
+
+      await waitFor(() => expect(result.current.data).toBeDefined())
+
+      expect((result.current.data as any)?._id).toBe(documentId)
+      expect(result.current.data?.name).toBe('Suspense Test')
+      expect(result.current.data?.age).toBe(99)
+      expect(result.current.data?.active).toBe(true)
+    })
+
+    test('returns parsed document fields from JSON data through suspense', async () => {
+      const wrapper = createWrapper({ suspense: true })
+      await loginUser(userEmail, userPassword, wrapper)
+
+      const { result } = renderHook(
+        () =>
+          useSuspenseDocument<TestDocumentData>({
+            databaseId,
+            collectionId,
+            documentId,
+          }),
+        { wrapper },
+      )
+
+      await waitFor(() => expect(result.current.data).toBeDefined())
+
+      expect(result.current.data?.name).toEqual('Suspense Test')
+      expect(result.current.data?.age).toEqual(99)
+      expect(result.current.data?.active).toEqual(true)
+    })
+
+    test('is listening for realtime updates', async () => {
+      const wrapper = createWrapper({ suspense: true })
+      await loginUser(userEmail, userPassword, wrapper)
+
+      const { result: queryClient } = renderHook(() => useQueryClient(), { wrapper })
+
+      const spy = spyOn(queryClient.current, 'setQueryData')
+
+      const { result } = renderHook(
+        () =>
+          useSuspenseDocument<TestDocumentData>({
+            databaseId,
+            collectionId,
+            documentId,
+          }),
+        { wrapper },
+      )
+
+      await waitFor(() => expect(result.current.data).toBeDefined())
+
+      triggerRealtimeEvent(
+        Channel.tablesdb(databaseId).table(collectionId).row(documentId).update(),
+        {
+          $id: documentId,
+          name: 'Realtime Updated',
+          age: 100,
+        },
+        [`databases.${databaseId}.collections.${collectionId}.documents.${documentId}.update`],
+      )
+
+      expect(spy).toHaveBeenCalledWith(
+        ['appwrite', 'databases', databaseId, 'collections', collectionId, 'documents', documentId],
+        expect.objectContaining({
+          name: 'Realtime Updated',
+        }),
+      )
     })
   })
 })

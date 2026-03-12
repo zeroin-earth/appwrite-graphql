@@ -3,7 +3,9 @@
  * Creates admin account, project, API key, database, and collections.
  * Run this once before tests: `bun run tests/setup/setup.ts`
  */
-import { Client, Databases, ID, Permission, Role } from 'node-appwrite'
+import { Client, Databases, ID, Permission, Role, Runtime, TablesDB } from 'node-appwrite'
+
+import type { TestConfig } from './helpers'
 
 const ENDPOINT = process.env.APPWRITE_ENDPOINT || 'http://localhost/v1'
 const ADMIN_EMAIL = 'admin@test.local'
@@ -11,23 +13,46 @@ const ADMIN_PASSWORD = 'password123456'
 const PROJECT_ID = 'test-project'
 const DATABASE_ID = 'test-db'
 const COLLECTION_ID = 'test-collection'
+const BUCKET_ID = 'test-bucket'
+const SMTP_PROVIDER_ID = 'test-smtp'
+const TOPIC_ID = 'test-topic'
+const SMS_PROVIDER_ID = 'test-sms'
 
 const ALL_SCOPES = [
-  'users.read', 'users.write',
-  'teams.read', 'teams.write',
-  'databases.read', 'databases.write',
-  'collections.read', 'collections.write',
-  'attributes.read', 'attributes.write',
-  'indexes.read', 'indexes.write',
-  'documents.read', 'documents.write',
-  'files.read', 'files.write',
-  'buckets.read', 'buckets.write',
-  'functions.read', 'functions.write',
-  'execution.read', 'execution.write',
+  'users.read',
+  'users.write',
+  'teams.read',
+  'teams.write',
+  'databases.read',
+  'databases.write',
+  'collections.read',
+  'collections.write',
+  'attributes.read',
+  'attributes.write',
+  'indexes.read',
+  'indexes.write',
+  'documents.read',
+  'documents.write',
+  'files.read',
+  'files.write',
+  'buckets.read',
+  'buckets.write',
+  'functions.read',
+  'functions.write',
+  'execution.read',
+  'execution.write',
   'locale.read',
   'avatars.read',
   'health.read',
   'sessions.write',
+  'providers.read',
+  'providers.write',
+  'topics.write',
+  'subscribers.read',
+  'subscribers.write',
+  'targets.read',
+  'messages.read',
+  'messages.write',
 ]
 
 async function waitForAppwrite(maxRetries = 60) {
@@ -66,7 +91,11 @@ async function createAdminAccount(): Promise<string> {
 
   if (!resp.ok) {
     const body = await resp.text()
-    if (body.includes('already exists') || body.includes('user_already_exists') || body.includes('user_console_count_exceeded')) {
+    if (
+      body.includes('already exists') ||
+      body.includes('user_already_exists') ||
+      body.includes('user_console_count_exceeded')
+    ) {
       console.log('Admin account already exists, logging in...')
       return loginAdmin()
     }
@@ -239,11 +268,12 @@ async function setupDatabase(apiKey: string) {
   console.log('Setting up database and collections...')
   const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID).setKey(apiKey)
 
+  const tablesDb = new TablesDB(client)
   const databases = new Databases(client)
 
   // Create database
   try {
-    await databases.create(DATABASE_ID, 'Test Database')
+    await tablesDb.create({ databaseId: DATABASE_ID, name: 'Test Database' })
     console.log(`Database "${DATABASE_ID}" created`)
   } catch (e: any) {
     if (e?.code === 409) {
@@ -255,31 +285,308 @@ async function setupDatabase(apiKey: string) {
 
   // Create collection with document-level permissions
   try {
-    await databases.createCollection(DATABASE_ID, COLLECTION_ID, 'Test Collection', [
-      Permission.read(Role.any()),
-      Permission.create(Role.users()),
-      Permission.update(Role.users()),
-      Permission.delete(Role.users()),
-    ])
+    await tablesDb.createTable({
+      databaseId: DATABASE_ID,
+      tableId: COLLECTION_ID,
+      name: 'Test Collection',
+      permissions: [
+        Permission.read(Role.any()),
+        Permission.create(Role.users()),
+        Permission.update(Role.users()),
+        Permission.delete(Role.users()),
+      ],
+    })
     console.log(`Collection "${COLLECTION_ID}" created`)
   } catch (e: any) {
     if (e?.code === 409) {
       console.log('Collection already exists')
-      return
+    } else {
+      throw e
     }
-    throw e
   }
 
-  // Create attributes
-  await databases.createStringAttribute(DATABASE_ID, COLLECTION_ID, 'name', 255, true)
-  await databases.createIntegerAttribute(DATABASE_ID, COLLECTION_ID, 'age', false)
-  await databases.createBooleanAttribute(DATABASE_ID, COLLECTION_ID, 'active', false)
+  // Create attributes via Databases API (TablesDB.createTable columns param is not supported)
+  const attributes = [
+    { method: 'createStringAttribute', params: { key: 'name', size: 255, required: true } },
+    { method: 'createIntegerAttribute', params: { key: 'age', required: false } },
+    { method: 'createBooleanAttribute', params: { key: 'active', required: false } },
+  ] as const
+
+  for (const attr of attributes) {
+    try {
+      await (databases[attr.method] as any)({
+        databaseId: DATABASE_ID,
+        collectionId: COLLECTION_ID,
+        ...attr.params,
+      })
+      console.log(`Attribute "${attr.params.key}" created`)
+    } catch (e: any) {
+      if (e?.code === 409) {
+        console.log(`Attribute "${attr.params.key}" already exists`)
+      } else {
+        throw e
+      }
+    }
+  }
 
   // Wait for attributes to be processed
   console.log('Waiting for attributes to be processed...')
   await new Promise((r) => setTimeout(r, 3000))
 
   console.log('Database setup complete!')
+}
+
+async function setupBucket(apiKey: string) {
+  console.log('Setting up storage bucket...')
+
+  const resp = await fetch(`${ENDPOINT}/storage/buckets`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Appwrite-Project': PROJECT_ID,
+      'X-Appwrite-Key': apiKey,
+    },
+    body: JSON.stringify({
+      bucketId: BUCKET_ID,
+      name: 'Test Bucket',
+      fileSecurity: true,
+      permissions: [
+        Permission.read(Role.any()),
+        Permission.create(Role.users()),
+        Permission.update(Role.users()),
+        Permission.delete(Role.users()),
+      ],
+    }),
+  })
+
+  if (!resp.ok) {
+    const body = await resp.text()
+    if (body.includes('already exists') || body.includes('storage_bucket_already_exists')) {
+      console.log('Bucket already exists')
+      return
+    }
+    throw new Error(`Failed to create bucket: ${body}`)
+  }
+
+  console.log(`Bucket "${BUCKET_ID}" created!`)
+}
+
+async function setupMessaging(apiKey: string) {
+  console.log('Setting up messaging topics...')
+
+  const resp = await fetch(`${ENDPOINT}/messaging/providers/smtp`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Appwrite-Project': PROJECT_ID,
+      'X-Appwrite-Key': apiKey,
+    },
+    body: JSON.stringify({
+      providerId: SMTP_PROVIDER_ID,
+      name: 'Test SMTP Provider',
+      host: 'host.docker.internal',
+      port: 1025,
+      secure: false,
+      enabled: true,
+      fromEmail: 'test@test.local',
+      fromName: 'Test Sender',
+    }),
+  })
+
+  if (!resp.ok) {
+    const body = await resp.text()
+    if (body.includes('already exists') || body.includes('messaging_provider_already_exists')) {
+      console.log('Messaging provider already exists, updating...')
+      const updateResp = await fetch(`${ENDPOINT}/messaging/providers/smtp/${SMTP_PROVIDER_ID}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Appwrite-Project': PROJECT_ID,
+          'X-Appwrite-Key': apiKey,
+        },
+        body: JSON.stringify({
+          enabled: true,
+          fromEmail: 'test@test.local',
+          fromName: 'Test Sender',
+          host: 'host.docker.internal',
+          port: 1025,
+        }),
+      })
+      if (!updateResp.ok) {
+        console.warn(`Warning: Failed to update provider: ${await updateResp.text()}`)
+      }
+    } else {
+      throw new Error(`Failed to create messaging provider: ${body}`)
+    }
+  }
+
+  console.log('SMTP provider created!')
+
+  const smsResp = await fetch(`${ENDPOINT}/messaging/providers/twilio`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Appwrite-Project': PROJECT_ID,
+      'X-Appwrite-Key': apiKey,
+    },
+    body: JSON.stringify({
+      providerId: SMS_PROVIDER_ID,
+      name: 'Test Twilio SMS Provider',
+      accountSid: 'test',
+      enabled: true,
+    }),
+  })
+
+  if (!smsResp.ok) {
+    const body = await smsResp.text()
+    if (body.includes('already exists') || body.includes('messaging_provider_already_exists')) {
+      console.log('SMS provider already exists, updating...')
+      const updateResp = await fetch(`${ENDPOINT}/messaging/providers/twilio/${SMS_PROVIDER_ID}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Appwrite-Project': PROJECT_ID,
+          'X-Appwrite-Key': apiKey,
+        },
+        body: JSON.stringify({
+          enabled: true,
+          accountSid: 'test',
+        }),
+      })
+      if (!updateResp.ok) {
+        console.warn(`Warning: Failed to update SMS provider: ${await updateResp.text()}`)
+      }
+    } else {
+      throw new Error(`Failed to create SMS provider: ${body}`)
+    }
+  }
+
+  console.log('SMS provider created!')
+
+  // Create a topic
+  console.log('Creating messaging topic...')
+
+  const topicResp = await fetch(`${ENDPOINT}/messaging/topics`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Appwrite-Project': PROJECT_ID,
+      'X-Appwrite-Key': apiKey,
+    },
+    body: JSON.stringify({
+      topicId: TOPIC_ID,
+      name: 'Test Topic',
+    }),
+  })
+
+  if (!topicResp.ok) {
+    const body = await topicResp.text()
+    if (body.includes('already exists') || body.includes('messaging_topic_already_exists')) {
+      console.log('Messaging topic already exists')
+      return
+    }
+    throw new Error(`Failed to create messaging topic: ${body}`)
+  }
+
+  console.log('Messaging topic created!')
+}
+
+async function deployFunction(apiKey: string) {
+  console.log('Deploying test function...')
+
+  const resp = await fetch(`${ENDPOINT}/functions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Appwrite-Project': PROJECT_ID,
+      'X-Appwrite-Key': apiKey,
+    },
+    body: JSON.stringify({
+      functionId: 'test-function',
+      name: 'Test Function',
+      execute: [Role.any()],
+      runtime: Runtime.Node22,
+      enabled: true,
+      entrypoint: 'index.js',
+      commands: 'npm i',
+    }),
+  })
+
+  if (!resp.ok) {
+    const body = await resp.text()
+    if (body.includes('already exists') || body.includes('function_already_exists')) {
+      console.log('Function already exists, skipping deployment')
+      return
+    } else {
+      const runtimes = await fetch(`${ENDPOINT}/functions/runtimes`, {
+        headers: {
+          'X-Appwrite-Project': PROJECT_ID,
+        },
+      }).then((r) => r.json())
+      console.error('Available runtimes:', runtimes)
+      throw new Error(`Failed to create function: ${body}`)
+    }
+  }
+
+  //@ts-expect-error - FormData types are wrong
+  const codePath = new URL('./code.tar.gz', import.meta.url)
+  const codeFile = Bun.file(codePath)
+  const formData = new FormData()
+  formData.append('functionId', 'test-function')
+  formData.append('code', codeFile, 'code.tar.gz')
+  formData.append('activate', 'true')
+
+  const deployResp = await fetch(`${ENDPOINT}/functions/test-function/deployments`, {
+    method: 'POST',
+    headers: {
+      'X-Appwrite-Project': PROJECT_ID,
+      'X-Appwrite-Key': apiKey,
+    },
+    body: formData,
+  })
+
+  if (!deployResp.ok) {
+    throw new Error(`Failed to deploy function: ${await deployResp.text()}`)
+  }
+
+  const deployment = await deployResp.json()
+
+  const deploymentId = deployment.$id
+  console.log('Waiting for deployment to be ready...')
+  await new Promise((r) => setTimeout(r, 3000))
+
+  console.log(`Deployment "${deploymentId}" created, activating...`)
+
+  const setDeployment = await fetch(`${ENDPOINT}/functions/test-function/deployment`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Appwrite-Project': PROJECT_ID,
+      'X-Appwrite-Key': apiKey,
+    },
+    body: JSON.stringify({
+      functionId: 'test-function',
+      deploymentId,
+    }),
+  })
+
+  if (!setDeployment.ok) {
+    const theDeplymnet = await fetch(
+      `${ENDPOINT}/functions/test-function/deployments/${deploymentId}`,
+      {
+        headers: {
+          'X-Appwrite-Project': PROJECT_ID,
+          'X-Appwrite-Key': apiKey,
+        },
+      },
+    ).then((r) => r.json())
+    console.log('Deployment details:', theDeplymnet)
+
+    console.error(`Failed to set active deployment: ${deploymentId}`)
+    throw new Error(`Failed to set active deployment: ${await setDeployment.text()}`)
+  }
+
+  console.log('Function created!')
 }
 
 async function main() {
@@ -290,6 +597,9 @@ async function main() {
   await createProject(cookies, teamId)
   const apiKey = await createApiKey(cookies)
   await setupDatabase(apiKey)
+  await setupBucket(apiKey)
+  await setupMessaging(apiKey)
+  await deployFunction(apiKey)
 
   // Output env vars for tests
   console.log('\n=== Test Configuration ===')
@@ -302,12 +612,16 @@ async function main() {
   )
 
   // Write config to a file for test consumption
-  const config = {
+  const config: TestConfig = {
     endpoint: ENDPOINT,
     projectId: PROJECT_ID,
     apiKey,
     databaseId: DATABASE_ID,
     collectionId: COLLECTION_ID,
+    bucketId: BUCKET_ID,
+    smtpProviderId: SMTP_PROVIDER_ID,
+    smsProviderId: SMS_PROVIDER_ID,
+    topicId: TOPIC_ID,
   }
 
   await Bun.write('tests/.test-config.json', JSON.stringify(config, null, 2))

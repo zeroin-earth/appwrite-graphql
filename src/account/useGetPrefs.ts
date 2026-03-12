@@ -1,7 +1,8 @@
-import { AppwriteException } from '../types'
+import type { ResultOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import { GetPrefsQuery } from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -13,15 +14,13 @@ const accountGetPrefs = gql(/* GraphQL */ `
   }
 `)
 
-export function useGetPrefs() {
+type Result = ResultOf<typeof accountGetPrefs>['accountGetPrefs']
+
+export function useGetPrefs(opts: QueryOptions = {}) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<
-    GetPrefsQuery['accountGetPrefs'],
-    AppwriteException[],
-    GetPrefsQuery['accountGetPrefs']
-  >({
-    queryKey: ['appwrite', 'account', 'prefs'],
+  const queryResult = useQuery<Result, AppwriteException[], Result>({
+    queryKey: Keys.account().prefs().key(),
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: accountGetPrefs,
@@ -33,6 +32,7 @@ export function useGetPrefs() {
 
       return data.accountGetPrefs
     },
+    ...opts,
   })
 
   return { ...queryResult }

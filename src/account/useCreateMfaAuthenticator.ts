@@ -1,9 +1,8 @@
-import { gql } from '../__generated__'
-import {
-  CreateMfaAuthenticatorMutation,
-  CreateMfaAuthenticatorMutationVariables,
-} from '../__generated__/graphql'
-import { AppwriteException } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
+
+import { Keys } from '../query/Keys'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -17,15 +16,15 @@ const accountCreateMfaAuthenticator = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof accountCreateMfaAuthenticator>
+type Result = ResultOf<typeof accountCreateMfaAuthenticator>['accountCreateMfaAuthenticator']
+
 export function useCreateMfaAuthenticator() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useMutation<
-    CreateMfaAuthenticatorMutation['accountCreateMfaAuthenticator'],
-    AppwriteException[],
-    CreateMfaAuthenticatorMutationVariables
-  >({
+  const queryResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.account().mfaAuthenticator().create(),
     mutationFn: async ({ type = 'totp' }) => {
       const { data, errors } = await graphql.mutation({
         query: accountCreateMfaAuthenticator,
@@ -41,7 +40,7 @@ export function useCreateMfaAuthenticator() {
       return data.accountCreateMfaAuthenticator
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'mfa', 'factors'] })
+      void queryClient.invalidateQueries({ queryKey: Keys.account().mfaAuthenticator().key() })
     },
   })
 

@@ -1,24 +1,20 @@
-import { Models } from 'appwrite'
-import { AppwriteException } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
+import { Keys } from '../query/Keys'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
-import {
-  CreateDocumentMutation,
-  CreateDocumentMutationVariables,
-  InputMaybe,
-  Scalars,
-} from '../__generated__/graphql'
 
-const createDocument = gql(/* GraphQL */ `
+export const createDocument = gql(/* GraphQL */ `
   mutation CreateDocument(
     $databaseId: String!
     $collectionId: String!
     $documentId: String!
     $data: Json!
     $permissions: [String!]
+    $transactionId: String
   ) {
     databasesCreateDocument(
       databaseId: $databaseId
@@ -26,24 +22,36 @@ const createDocument = gql(/* GraphQL */ `
       documentId: $documentId
       data: $data
       permissions: $permissions
+      transactionId: $transactionId
     ) {
       _id
     }
   }
 `)
 
+type Variables = VariablesOf<typeof createDocument>
+type Result = ResultOf<typeof createDocument>['databasesCreateDocument']
+
 export function useCreateDocument() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
   const mutationResult = useMutation<
-    CreateDocumentMutation['databasesCreateDocument'],
+    Result,
     AppwriteException[],
-    Omit<CreateDocumentMutationVariables, 'permissions'> & {
-      permissions?: InputMaybe<Array<Scalars['String']['input']>>
+    Omit<Variables, 'permissions'> & {
+      permissions?: string[] | null
     }
   >({
-    mutationFn: async ({ databaseId, collectionId, documentId, data, permissions }) => {
+    mutationKey: Keys.databases().collections().documents().create(),
+    mutationFn: async ({
+      databaseId,
+      collectionId,
+      documentId,
+      data,
+      permissions,
+      transactionId,
+    }) => {
       const { data: mutationData, errors } = await graphql.mutation({
         query: createDocument,
         variables: {
@@ -52,6 +60,7 @@ export function useCreateDocument() {
           documentId,
           data: JSON.stringify(data),
           permissions,
+          transactionId,
         },
       })
 
@@ -61,8 +70,8 @@ export function useCreateDocument() {
       return mutationData.databasesCreateDocument
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ['appwrite', 'databases', variables.databaseId, variables.collectionId],
+      void queryClient.invalidateQueries({
+        queryKey: Keys.database(variables.databaseId).collection(variables.collectionId).key(),
       })
     },
   })

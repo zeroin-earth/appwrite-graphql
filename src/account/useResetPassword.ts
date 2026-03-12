@@ -1,11 +1,8 @@
-import { AppwriteException } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import {
-  Token,
-  UpdateRecoveryMutation,
-  UpdateRecoveryMutationVariables,
-} from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 
@@ -17,14 +14,14 @@ const updateRecovery = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof updateRecovery>
+type Result = ResultOf<typeof updateRecovery>['accountUpdateRecovery']
+
 export function useResetPassword() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation<
-    UpdateRecoveryMutation['accountUpdateRecovery'],
-    AppwriteException[],
-    UpdateRecoveryMutationVariables
-  >({
+  const queryResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.account().recovery().update(),
     mutationFn: async ({ userId, secret, password }) => {
       const { data, errors } = await graphql.mutation({
         query: updateRecovery,
@@ -39,7 +36,7 @@ export function useResetPassword() {
         throw errors
       }
 
-      return data.accountUpdateRecovery ?? ({} as Token)
+      return data.accountUpdateRecovery
     },
   })
 

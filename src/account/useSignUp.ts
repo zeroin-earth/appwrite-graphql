@@ -1,17 +1,11 @@
-import { AppwriteException, ID } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import {
-  CreateAccountMutation,
-  CreateAccountMutationVariables,
-  VerifyEmailMutation,
-} from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException } from '../types'
+import { ID } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
-
-type VerifyProps = {
-  verifyUrl: string
-}
 
 const createAccount = gql(/* GraphQL */ `
   mutation CreateAccount($userId: String!, $name: String, $email: String!, $password: String!) {
@@ -30,14 +24,19 @@ const verify = gql(/* GraphQL */ `
   }
 `)
 
+type CreateVariables = VariablesOf<typeof createAccount>
+type CreateResult = ResultOf<typeof createAccount>['accountCreate']
+
+type VerifyProps = {
+  verifyUrl: string
+}
+type VerifyResult = ResultOf<typeof verify>['accountCreateVerification']
+
 export function useSignUp() {
   const { graphql } = useAppwrite()
 
-  const signUp = useMutation<
-    CreateAccountMutation['accountCreate'],
-    AppwriteException[],
-    CreateAccountMutationVariables
-  >({
+  const signUp = useMutation<CreateResult, AppwriteException[], CreateVariables>({
+    mutationKey: Keys.account().signUp().create(),
     mutationFn: async ({ userId, email, password, name }) => {
       const { data, errors } = await graphql.mutation({
         query: createAccount,
@@ -57,11 +56,8 @@ export function useSignUp() {
     },
   })
 
-  const verifyEmail = useMutation<
-    VerifyEmailMutation['accountCreateVerification'],
-    Error,
-    VerifyProps
-  >({
+  const verifyEmail = useMutation<VerifyResult, AppwriteException[], VerifyProps>({
+    mutationKey: Keys.account().emailVerification().create(),
     mutationFn: async ({ verifyUrl }) => {
       const { data, errors } = await graphql.mutation({
         query: verify,

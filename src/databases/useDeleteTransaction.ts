@@ -1,10 +1,8 @@
-import { AppwriteException } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import {
-  DeleteTransactionMutation,
-  DeleteTransactionMutationVariables,
-} from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -17,15 +15,15 @@ const deleteTransaction = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof deleteTransaction>
+type Result = ResultOf<typeof deleteTransaction>['databasesDeleteTransaction']
+
 export function useDeleteTransaction() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const mutationResult = useMutation<
-    DeleteTransactionMutation['databasesDeleteTransaction'],
-    AppwriteException[],
-    DeleteTransactionMutationVariables
-  >({
+  const mutationResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.databases().transactions().delete(),
     mutationFn: async ({ transactionId }) => {
       const { data, errors } = await graphql.mutation({
         query: deleteTransaction,
@@ -36,14 +34,14 @@ export function useDeleteTransaction() {
         throw errors
       }
 
-      return data?.databasesDeleteTransaction ?? { status: true }
+      return data?.databasesDeleteTransaction ?? { status: '' }
     },
     onSuccess: (_, variables) => {
       queryClient.removeQueries({
-        queryKey: ['appwrite', 'databases', 'transactions', variables.transactionId],
+        queryKey: Keys.databases().transaction(variables.transactionId).key(),
       })
-      queryClient.invalidateQueries({
-        queryKey: ['appwrite', 'databases', 'transactions'],
+      void queryClient.invalidateQueries({
+        queryKey: Keys.databases().transactions().key(),
       })
     },
   })

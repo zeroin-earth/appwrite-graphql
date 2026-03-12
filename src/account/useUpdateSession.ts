@@ -1,7 +1,8 @@
-import { AppwriteException } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import { UpdateSessionMutation, UpdateSessionMutationVariables } from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -16,15 +17,15 @@ const updateSession = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof updateSession>
+type Result = ResultOf<typeof updateSession>['accountUpdateSession']
+
 export function useUpdateSession() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useMutation<
-    UpdateSessionMutation['accountUpdateSession'],
-    AppwriteException[],
-    UpdateSessionMutationVariables
-  >({
+  const queryResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.account().session().update(),
     mutationFn: async ({ sessionId }) => {
       const { data, errors } = await graphql.mutation({
         query: updateSession,
@@ -40,7 +41,7 @@ export function useUpdateSession() {
       return data.accountUpdateSession
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'sessions'] })
+      void queryClient.invalidateQueries({ queryKey: Keys.account().sessions() })
     },
   })
 

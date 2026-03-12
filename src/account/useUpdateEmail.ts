@@ -1,12 +1,13 @@
-import { AppwriteException } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import { UpdateEmailMutation, UpdateEmailMutationVariables } from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
-const accountUpdateEmail = gql(/* GraphQL */ `
+export const accountUpdateEmail = gql(/* GraphQL */ `
   mutation UpdateEmail($email: String!, $password: String!) {
     accountUpdateEmail(email: $email, password: $password) {
       name
@@ -15,15 +16,15 @@ const accountUpdateEmail = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof accountUpdateEmail>
+type Result = ResultOf<typeof accountUpdateEmail>['accountUpdateEmail']
+
 export function useUpdateEmail() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useMutation<
-    UpdateEmailMutation['accountUpdateEmail'],
-    AppwriteException[],
-    UpdateEmailMutationVariables
-  >({
+  const queryResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.account().email().update(),
     mutationFn: async ({ email, password }) => {
       const { data, errors } = await graphql.mutation({
         query: accountUpdateEmail,
@@ -40,7 +41,7 @@ export function useUpdateEmail() {
       return data.accountUpdateEmail
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      void queryClient.invalidateQueries({ queryKey: Keys.account().key() })
     },
   })
 

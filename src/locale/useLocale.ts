@@ -1,7 +1,8 @@
-import { AppwriteException } from '../types'
+import type { ResultOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import { GetLocaleQuery } from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -19,15 +20,13 @@ const getLocale = gql(/* GraphQL */ `
   }
 `)
 
+type Result = ResultOf<typeof getLocale>['localeGet']
+
 export function useLocale() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<
-    GetLocaleQuery['localeGet'],
-    AppwriteException[],
-    GetLocaleQuery['localeGet']
-  >({
-    queryKey: ['appwrite', 'locale'],
+  const queryResult = useQuery<Result, AppwriteException[], Result>({
+    queryKey: Keys.locale().key(),
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: getLocale,

@@ -1,15 +1,34 @@
+import { act, renderHook, waitFor as waitForTest } from '@testing-library/react'
+import { expect } from 'bun:test'
+import { MailpitClient } from 'mailpit-api'
 import { existsSync, readFileSync } from 'node:fs'
-import { Client, Account, Databases, Users, ID } from 'node-appwrite'
+import { Account, Client, Databases, ID, Messaging, TablesDB, Users } from 'node-appwrite'
+import { TOTP } from 'otpauth'
 
-type TestConfig = {
+import type { createWrapper } from './wrapper'
+import {
+  useCreateMfaAuthenticator,
+  useLogin,
+  useLogout,
+  useUpdateMfa,
+  useUpdateMfaAuthenticator,
+} from '../../src'
+
+export type TestConfig = {
   endpoint: string
   projectId: string
   apiKey: string
   databaseId: string
   collectionId: string
+  bucketId: string
+  smtpProviderId: string
+  smsProviderId: string
+  topicId: string
 }
 
 let _config: TestConfig | null = null
+
+const mailpit = new MailpitClient('http://localhost:8025')
 
 export function getTestConfig(): TestConfig {
   if (_config) return _config
@@ -28,6 +47,10 @@ export function getTestConfig(): TestConfig {
     apiKey: process.env.APPWRITE_API_KEY || '',
     databaseId: process.env.APPWRITE_DATABASE_ID || 'test-db',
     collectionId: process.env.APPWRITE_COLLECTION_ID || 'test-collection',
+    bucketId: 'test-bucket',
+    smtpProviderId: 'test-smtp',
+    smsProviderId: 'test-sms',
+    topicId: 'test-topic',
   }
   return _config
 }
@@ -35,13 +58,18 @@ export function getTestConfig(): TestConfig {
 /** Create a server-side Appwrite client with API key */
 export function createServerClient() {
   const config = getTestConfig()
-  const client = new Client().setEndpoint(config.endpoint).setProject(config.projectId).setKey(config.apiKey)
+  const client = new Client()
+    .setEndpoint(config.endpoint)
+    .setProject(config.projectId)
+    .setKey(config.apiKey)
 
   return {
     client,
     databases: new Databases(client),
     users: new Users(client),
     account: new Account(client),
+    tablesDB: new TablesDB(client),
+    messaging: new Messaging(client),
   }
 }
 
@@ -56,7 +84,7 @@ export async function createTestUser(opts?: { name?: string }) {
   const name = opts?.name || `Test User ${_userCounter}`
 
   const { users } = createServerClient()
-  const user = await users.create(ID.unique(), email, undefined, password, name)
+  const user = await users.create({ userId: ID.unique(), email, password, name })
 
   return { userId: user.$id, email, password, name }
 }
@@ -65,7 +93,7 @@ export async function createTestUser(opts?: { name?: string }) {
 export async function deleteTestUser(userId: string) {
   const { users } = createServerClient()
   try {
-    await users.delete(userId)
+    await users.delete({ userId })
   } catch {
     // User may already be deleted
   }
@@ -74,28 +102,160 @@ export async function deleteTestUser(userId: string) {
 /** Create a test document via server SDK */
 export async function createTestDocument(data: Record<string, unknown>, documentId?: string) {
   const config = getTestConfig()
-  const { databases } = createServerClient()
+  const { tablesDB } = createServerClient()
 
-  return databases.createDocument(config.databaseId, config.collectionId, documentId || ID.unique(), data)
+  return tablesDB.createRow({
+    databaseId: config.databaseId,
+    tableId: config.collectionId,
+    rowId: documentId || ID.unique(),
+    data,
+  })
 }
 
 /** Delete a test document via server SDK */
 export async function deleteTestDocument(documentId: string) {
   const config = getTestConfig()
-  const { databases } = createServerClient()
+  const { tablesDB } = createServerClient()
   try {
-    await databases.deleteDocument(config.databaseId, config.collectionId, documentId)
+    await tablesDB.deleteRow({
+      databaseId: config.databaseId,
+      tableId: config.collectionId,
+      rowId: documentId,
+    })
   } catch {
     // Document may already be deleted
   }
 }
 
 /** Wait for a condition to be true, with timeout */
-export async function waitFor(fn: () => boolean | Promise<boolean>, timeoutMs = 10000, intervalMs = 100) {
+export async function waitFor(
+  fn: () => boolean | Promise<boolean>,
+  timeoutMs = 10000,
+  intervalMs = 100,
+) {
   const start = Date.now()
   while (Date.now() - start < timeoutMs) {
     if (await fn()) return
     await new Promise((r) => setTimeout(r, intervalMs))
   }
   throw new Error(`waitFor timed out after ${timeoutMs}ms`)
+}
+
+/** Get a user's email target ID via server SDK */
+export async function getUserEmailTargetId(userId: string): Promise<string> {
+  const { users } = createServerClient()
+  const user = await users.get({ userId })
+  const emailTarget = user.targets.find((t: any) => t.providerType === 'email')
+  if (!emailTarget) {
+    throw new Error(`No email target found for user ${userId}`)
+  }
+  return emailTarget.$id
+}
+
+/** Send a test email to a topic via server SDK and wait for delivery */
+export async function sendTopicEmail(opts: {
+  topicId: string
+  subject: string
+  content: string
+}): Promise<string> {
+  const { messaging } = createServerClient()
+  const msg = await messaging.createEmail({
+    messageId: ID.unique(),
+    subject: opts.subject,
+    content: opts.content,
+    topics: [opts.topicId],
+  })
+
+  // Poll for delivery (max 10s)
+  for (let i = 0; i < 10; i++) {
+    await new Promise((r) => setTimeout(r, 1000))
+    const status = await messaging.getMessage({ messageId: msg.$id })
+    if (status.status !== 'processing') break
+  }
+
+  return msg.$id
+}
+
+export function generateTOTP(secret: string): string {
+  const totp = new TOTP({ secret, algorithm: 'SHA1', digits: 6, period: 30 })
+  return totp.generate()
+}
+
+export async function setupOTP(wrapper: ReturnType<typeof createWrapper>) {
+  const { result } = renderHook(() => useUpdateMfa(), { wrapper })
+
+  await act(async () => {
+    await result.current.mutateAsync({ mfa: true })
+  })
+
+  await waitForTest(() => expect(result.current.isSuccess).toBe(true))
+
+  const { result: createMfaAuthenticatorResult } = renderHook(() => useCreateMfaAuthenticator(), {
+    wrapper,
+  })
+  await act(async () => {
+    await createMfaAuthenticatorResult.current.mutateAsync({ type: 'totp' })
+  })
+  await waitForTest(() => expect(createMfaAuthenticatorResult.current.isSuccess).toBe(true))
+
+  const totpSecret = createMfaAuthenticatorResult.current.data?.secret || ''
+  const otp = generateTOTP(totpSecret)
+
+  const { result: updateMfaAuthenticatorResult } = renderHook(() => useUpdateMfaAuthenticator(), {
+    wrapper,
+  })
+
+  await act(async () => {
+    await updateMfaAuthenticatorResult.current.mutateAsync({ type: 'totp', otp })
+  })
+
+  await waitForTest(() => expect(updateMfaAuthenticatorResult.current.isSuccess).toBe(true))
+
+  return { totpSecret }
+}
+
+export async function loginUser(
+  email: string,
+  password: string,
+  wrapper: ReturnType<typeof createWrapper>,
+): Promise<void> {
+  const { result } = renderHook(() => useLogin(), { wrapper })
+
+  await act(async () => {
+    await result.current.login.mutateAsync({ email, password })
+  })
+
+  await waitForTest(() => expect(result.current.login.isSuccess).toBe(true))
+}
+
+export async function logoutUser(wrapper: ReturnType<typeof createWrapper>): Promise<void> {
+  const { result } = renderHook(() => useLogout(), { wrapper })
+  await act(async () => {
+    await result.current.mutateAsync({ sessionId: 'current' })
+  })
+  await waitForTest(() => expect(result.current.isSuccess).toBe(true))
+}
+
+export async function checkMail() {
+  const emails = await mailpit.listMessages()
+  return emails
+}
+
+export async function renderMessage(messageId: string) {
+  const content = await mailpit.renderMessageHTML(messageId)
+  document.body.innerHTML = content
+  return content
+}
+
+export async function emptyMail() {
+  await mailpit.deleteMessages()
+}
+
+export async function getSMSMessages() {
+  const messages = await fetch('http://localhost:8888/messages').then((res) => res.json())
+  return messages
+}
+
+export async function clearSMSMessages() {
+  await fetch('http://localhost:8888/messages', { method: 'DELETE' })
 }

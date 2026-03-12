@@ -1,30 +1,31 @@
-import { AppwriteException } from '../types'
+import type { ResultOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
+import { Keys } from '../query/Keys'
+import type { AppwriteException, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
-import { ListIdentitiesQuery } from '../__generated__/graphql'
 
 const accountListIdentities = gql(/* GraphQL */ `
   query ListIdentities {
     accountListIdentities {
       total
       identities {
-        ...Identity_Provider
+        _id
+        userId
+        provider
       }
     }
   }
 `)
 
-export function useListIdentities() {
+type Result = ResultOf<typeof accountListIdentities>['accountListIdentities']
+
+export function useListIdentities(opts: QueryOptions = {}) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<
-    ListIdentitiesQuery['accountListIdentities'],
-    AppwriteException[],
-    ListIdentitiesQuery['accountListIdentities']
-  >({
-    queryKey: ['appwrite', 'account', 'identities'],
+  const queryResult = useQuery<Result, AppwriteException[], Result>({
+    queryKey: Keys.account().identities(),
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: accountListIdentities,
@@ -36,6 +37,7 @@ export function useListIdentities() {
 
       return data.accountListIdentities
     },
+    ...opts,
   })
 
   return { ...queryResult }

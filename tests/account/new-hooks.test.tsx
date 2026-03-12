@@ -1,48 +1,18 @@
-import { act, renderHook, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor, within } from '@testing-library/react'
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 
-import { useAccount, useCreateEmailVerification, useDeleteAccount, useLogin } from '../../src'
-import { createTestUser, deleteTestUser } from '../setup/helpers'
+import { useCreateEmailVerification, useUpdateEmailVerification } from '../../src'
+import {
+  checkMail,
+  createTestUser,
+  deleteTestUser,
+  emptyMail,
+  loginUser,
+  renderMessage,
+} from '../setup/helpers'
 import { createWrapper } from '../setup/wrapper'
 
-type Wrapper = ReturnType<typeof createWrapper>
-
-async function loginUser(email: string, password: string, wrapper: Wrapper) {
-  const { result } = renderHook(() => useLogin(), { wrapper })
-
-  await act(async () => {
-    result.current.login.mutateAsync({ email, password })
-  })
-
-  await waitFor(() => expect(result.current.login.isSuccess).toBe(true))
-}
-
 describe('New account hooks', () => {
-  describe('useDeleteAccount', () => {
-    test('deletes the currently logged-in account', async () => {
-      // Create a throwaway user just for this test
-      const user = await createTestUser({ name: 'Delete Me User' })
-      const wrapper = createWrapper()
-      await loginUser(user.email, user.password, wrapper)
-
-      const { result } = renderHook(() => useDeleteAccount(), { wrapper })
-
-      await act(async () => {
-        result.current.mutateAsync()
-      })
-
-      await waitFor(() => expect(result.current.isSuccess).toBe(true))
-
-      // Verify the account is gone by checking useAccount fails
-      const wrapper2 = createWrapper()
-      const { result: accountResult } = renderHook(() => useAccount(), { wrapper: wrapper2 })
-
-      await waitFor(() =>
-        expect(accountResult.current.isError || accountResult.current.data === null).toBe(true),
-      )
-    })
-  })
-
   describe('useCreateEmailVerification', () => {
     let userId: string
     let userEmail: string
@@ -59,25 +29,59 @@ describe('New account hooks', () => {
       await deleteTestUser(userId)
     })
 
-    test('sends an email verification request', async () => {
+    test('sends and updates an email verification request', async () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
 
       const { result } = renderHook(() => useCreateEmailVerification(), { wrapper })
 
       await act(async () => {
-        // The URL is where the user would be redirected to confirm
-        result.current.mutate({ url: 'http://localhost/verify' })
+        await result.current.mutateAsync({ url: 'http://localhost/verify' })
       })
 
-      // This may fail if SMTP is not configured, which is expected in test environments
-      await waitFor(() => expect(result.current.isSuccess || result.current.isError).toBe(true))
+      await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-      // If it succeeded, it should return a token
-      if (result.current.isSuccess) {
-        expect(result.current.data).toBeDefined()
-        expect(result.current.data?.userId).toBeDefined()
-      }
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 3000))
+      })
+
+      const message = await waitFor(async () => {
+        const emails = await checkMail()
+        expect(emails.messages.length).toBeGreaterThan(0)
+        return emails.messages[0]
+      })
+
+      await renderMessage(message.ID)
+      const emailBody = within(document.body)
+
+      expect(emailBody.getByText(/Confirm email address/)).toBeDefined()
+
+      const button = emailBody.getByText(/Confirm email address/)
+
+      expect(button.getAttribute('href')).toBeDefined()
+
+      const url = new URL(button.getAttribute('href') || '')
+      expect(url.pathname).toBe('/verify')
+
+      const params = new URLSearchParams(url.search)
+
+      expect(params.get('userId')).toBe(userId)
+      expect(params.get('secret')).toBeDefined()
+
+      const secret = params.get('secret') || ''
+
+      const { result: updateResult } = renderHook(() => useUpdateEmailVerification(), { wrapper })
+
+      await act(async () => {
+        await updateResult.current.mutateAsync({
+          userId,
+          secret,
+        })
+      })
+
+      await waitFor(() => expect(updateResult.current.isSuccess).toBe(true))
+
+      await emptyMail()
     })
   })
 })

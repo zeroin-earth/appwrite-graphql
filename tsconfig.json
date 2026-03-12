@@ -5,6 +5,13 @@
     "sourceMap": true,
     "outDir": "./out",
     "skipLibCheck": true,
-    "jsx": "react"
+    "jsx": "react",
+    "plugins": [
+      {
+        "name": "gql.tada/ts-plugin",
+        "schema": "./src/schema.graphql",
+        "tadaOutputLocation": "./src/graphql-env.d.ts"
+      }
+    ]
   }
 }

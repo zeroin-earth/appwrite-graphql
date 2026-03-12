@@ -11,7 +11,7 @@ import {
   useAvatarQR,
   useAvatarScreenshot,
 } from '../../src'
-import { Browser, CreditCard, Flag } from '../../src/types'
+import type { Browser, CreditCard, Flag } from '../../src/types'
 import { createWrapper } from '../setup/wrapper'
 
 /*

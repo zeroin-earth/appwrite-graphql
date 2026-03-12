@@ -131,5 +131,9 @@ react-native
 .yarn/install-state.gz
 .pnp.*
 
-copilot-instructions.md
+.github/
+!.github/workflows/
 tests/.test-config.json
+mailpit*
+
+.DS_Store

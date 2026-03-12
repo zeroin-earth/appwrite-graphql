@@ -1,11 +1,8 @@
-import { AppwriteException } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import {
-  Token,
-  UpdateVerificationMutation,
-  UpdateVerificationMutationVariables,
-} from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -20,15 +17,15 @@ const updateVerification = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof updateVerification>
+type Result = ResultOf<typeof updateVerification>['accountUpdateVerification']
+
 export function useVerification() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useMutation<
-    UpdateVerificationMutation['accountUpdateVerification'],
-    AppwriteException[],
-    UpdateVerificationMutationVariables
-  >({
+  const queryResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.account().verification().update(),
     mutationFn: async ({ userId, secret }) => {
       if (!userId || !secret) {
         throw new Error('Missing userId or secret')
@@ -46,10 +43,10 @@ export function useVerification() {
         throw errors
       }
 
-      return data.accountUpdateVerification ?? ({} as Token)
+      return data.accountUpdateVerification
     },
     onSuccess: async () => {
-      queryClient.setQueryData(['appwrite', 'account'], null)
+      queryClient.setQueryData(Keys.account().key(), null)
     },
   })
 

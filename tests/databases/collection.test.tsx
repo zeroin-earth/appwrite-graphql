@@ -1,13 +1,16 @@
-import { act, renderHook, waitFor } from '@testing-library/react'
-import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
+import { renderHook, waitFor } from '@testing-library/react'
+import { Channel, Query } from 'appwrite'
+import { afterAll, beforeAll, describe, expect, spyOn, test } from 'bun:test'
 
-import { useCollection, useLogin, useSuspenseCollection } from '../../src'
+import { useCollection, useQueryClient, useSuspenseCollection } from '../../src'
+import { triggerRealtimeEvent } from '../__mocks__/Realtime'
 import {
   createTestDocument,
   createTestUser,
   deleteTestDocument,
   deleteTestUser,
   getTestConfig,
+  loginUser,
 } from '../setup/helpers'
 import { createWrapper } from '../setup/wrapper'
 
@@ -15,20 +18,6 @@ interface TestDocumentData {
   name: string
   age?: number
   active?: boolean
-}
-
-async function loginUser(
-  email: string,
-  password: string,
-  wrapper: ReturnType<typeof createWrapper>,
-): Promise<void> {
-  const { result } = renderHook(() => useLogin(), { wrapper })
-
-  await act(async () => {
-    result.current.login.mutateAsync({ email, password })
-  })
-
-  await waitFor(() => expect(result.current.login.isSuccess).toBe(true))
 }
 
 describe('Collection query hooks', () => {
@@ -91,12 +80,14 @@ describe('Collection query hooks', () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
 
+      const knownNames = testDocuments.map((d) => d.name)
+
       const { result } = renderHook(
         () =>
           useCollection<TestDocumentData>({
             databaseId,
             collectionId,
-            queries: [],
+            queries: [Query.equal('name', knownNames)],
           }),
         { wrapper },
       )
@@ -104,10 +95,9 @@ describe('Collection query hooks', () => {
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
       const documents = result.current.documents ?? []
-      expect(documents.length).toBeGreaterThanOrEqual(testDocuments.length)
+      expect(documents.length).toBe(testDocuments.length)
 
       // Verify that the returned documents have parsed fields (not raw JSON strings)
-      const knownNames = testDocuments.map((d) => d.name)
       const matchedDocuments = documents.filter((doc) => knownNames.includes(doc.name))
       expect(matchedDocuments.length).toBe(testDocuments.length)
 
@@ -126,7 +116,7 @@ describe('Collection query hooks', () => {
           useCollection<TestDocumentData>({
             databaseId,
             collectionId,
-            queries: [],
+            queries: [Query.equal('name', ['Alice'])],
           }),
         { wrapper },
       )
@@ -205,6 +195,49 @@ describe('Collection query hooks', () => {
       expect(result.current.documents).toBeDefined()
       expect(result.current.total).toBeGreaterThanOrEqual(testDocuments.length)
     })
+
+    test('is listening for realtime updates', async () => {
+      const wrapper = createWrapper()
+      await loginUser(userEmail, userPassword, wrapper)
+
+      const { result: queryClient } = renderHook(() => useQueryClient(), { wrapper })
+
+      const spy = spyOn(queryClient.current, 'setQueryData')
+
+      const { result } = renderHook(
+        () =>
+          useCollection<TestDocumentData>({
+            databaseId,
+            collectionId,
+            queries: [],
+          }),
+        { wrapper },
+      )
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+      // Standard react-query properties should be present
+      expect(result.current.isLoading).toBe(false)
+      expect(result.current.isError).toBe(false)
+      expect(result.current.data).toBeDefined()
+
+      triggerRealtimeEvent(
+        Channel.tablesdb(databaseId).table(collectionId).row(),
+        {
+          $id: 'some-doc-id',
+          name: 'Updated Name',
+          age: 20,
+        },
+        ['databases.test-db.collections.test-collection.documents.some-doc-id.update'],
+      )
+
+      expect(spy).toHaveBeenCalledWith(
+        ['appwrite', 'databases', databaseId, 'collections', collectionId, 'documents', 'some-doc-id'],
+        expect.objectContaining({
+          name: 'Updated Name',
+        }),
+      )
+    })
   })
 
   describe('useSuspenseCollection', () => {
@@ -218,6 +251,7 @@ describe('Collection query hooks', () => {
             databaseId,
             collectionId,
             queries: [],
+            subscribe: false,
           }),
         { wrapper },
       )
@@ -240,7 +274,7 @@ describe('Collection query hooks', () => {
           useSuspenseCollection<TestDocumentData>({
             databaseId,
             collectionId,
-            queries: [],
+            queries: [Query.equal('name', ['Bob'])],
           }),
         { wrapper },
       )
@@ -274,6 +308,44 @@ describe('Collection query hooks', () => {
 
       expect(typeof result.current.total).toBe('number')
       expect(result.current.total).toBeGreaterThanOrEqual(3)
+    })
+
+    test('is listening for realtime updates', async () => {
+      const wrapper = createWrapper({ suspense: true })
+      await loginUser(userEmail, userPassword, wrapper)
+
+      const { result: queryClient } = renderHook(() => useQueryClient(), { wrapper })
+
+      const spy = spyOn(queryClient.current, 'setQueryData')
+
+      const { result } = renderHook(
+        () =>
+          useSuspenseCollection<TestDocumentData>({
+            databaseId,
+            collectionId,
+            queries: [],
+          }),
+        { wrapper },
+      )
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+      triggerRealtimeEvent(
+        Channel.tablesdb(databaseId).table(collectionId).row(),
+        {
+          $id: 'some-doc-id',
+          name: 'Updated Name',
+          age: 20,
+        },
+        ['databases.test-db.collections.test-collection.documents.some-doc-id.update'],
+      )
+
+      expect(spy).toHaveBeenCalledWith(
+        ['appwrite', 'databases', databaseId, 'collections', collectionId, 'documents', 'some-doc-id'],
+        expect.objectContaining({
+          name: 'Updated Name',
+        }),
+      )
     })
   })
 })

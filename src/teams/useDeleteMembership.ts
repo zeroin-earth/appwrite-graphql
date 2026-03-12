@@ -1,15 +1,13 @@
-import { AppwriteException } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import {
-  DeleteMembershipMutation,
-  DeleteMembershipMutationVariables,
-} from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
 
-const deleteMembership = gql(/* GraphQL */ `
+export const deleteMembership = gql(/* GraphQL */ `
   mutation DeleteMembership($teamId: String!, $membershipId: String!) {
     teamsDeleteMembership(teamId: $teamId, membershipId: $membershipId) {
       status
@@ -17,15 +15,15 @@ const deleteMembership = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof deleteMembership>
+type Result = ResultOf<typeof deleteMembership>['teamsDeleteMembership']
+
 export function useDeleteMembership() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const mutationResult = useMutation<
-    DeleteMembershipMutation['teamsDeleteMembership'],
-    AppwriteException[],
-    DeleteMembershipMutationVariables
-  >({
+  const mutationResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.teams().memberships().delete(),
     mutationFn: async ({ teamId, membershipId }) => {
       const { data, errors } = await graphql.mutation({
         query: deleteMembership,
@@ -36,16 +34,16 @@ export function useDeleteMembership() {
         throw errors
       }
 
-      return data?.teamsDeleteMembership ?? { status: true }
+      return data?.teamsDeleteMembership ?? { status: '' }
     },
     onSuccess: (_, variables) => {
       queryClient.removeQueries({
-        queryKey: ['appwrite', 'teams', variables.teamId, 'memberships', variables.membershipId],
+        queryKey: Keys.team(variables.teamId).membership(variables.membershipId).key(),
       })
-      queryClient.invalidateQueries({
-        queryKey: ['appwrite', 'teams', variables.teamId, 'memberships'],
+      void queryClient.invalidateQueries({
+        queryKey: Keys.team(variables.teamId).memberships().key(),
       })
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'teams', variables.teamId] })
+      void queryClient.invalidateQueries({ queryKey: Keys.team(variables.teamId).key() })
     },
   })
 

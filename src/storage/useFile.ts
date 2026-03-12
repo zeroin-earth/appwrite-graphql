@@ -1,7 +1,8 @@
-import { AppwriteException } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import { GetFileQuery, GetFileQueryVariables } from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -23,15 +24,14 @@ const getFile = gql(/* GraphQL */ `
   }
 `)
 
-export function useFile({ bucketId, fileId }: GetFileQueryVariables) {
+type Variables = VariablesOf<typeof getFile>
+type Result = ResultOf<typeof getFile>['storageGetFile']
+
+export function useFile({ bucketId, fileId }: Variables) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<
-    GetFileQuery['storageGetFile'],
-    AppwriteException[],
-    GetFileQuery['storageGetFile']
-  >({
-    queryKey: ['appwrite', 'storage', bucketId, 'files', fileId],
+  const queryResult = useQuery<Result, AppwriteException[], Result>({
+    queryKey: Keys.bucket(bucketId).file(fileId).key(),
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: getFile,

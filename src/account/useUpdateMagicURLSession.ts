@@ -1,10 +1,8 @@
-import { AppwriteException } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import {
-  UpdateMagicUrlSessionMutation,
-  UpdateMagicUrlSessionMutationVariables,
-} from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -19,15 +17,15 @@ const updateMagicURLSession = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof updateMagicURLSession>
+type Result = ResultOf<typeof updateMagicURLSession>['accountUpdateMagicURLSession']
+
 export function useUpdateMagicURLSession() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useMutation<
-    UpdateMagicUrlSessionMutation['accountUpdateMagicURLSession'],
-    AppwriteException[],
-    UpdateMagicUrlSessionMutationVariables
-  >({
+  const queryResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.account().magicUrl().update(),
     mutationFn: async ({ userId, secret }) => {
       const { data, errors } = await graphql.mutation({
         query: updateMagicURLSession,
@@ -44,8 +42,8 @@ export function useUpdateMagicURLSession() {
       return data.accountUpdateMagicURLSession
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account', 'sessions'] })
+      void queryClient.invalidateQueries({ queryKey: Keys.account().key() })
+      void queryClient.invalidateQueries({ queryKey: Keys.account().sessions() })
     },
   })
 

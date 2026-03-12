@@ -1,7 +1,8 @@
-import { AppwriteException } from '../types'
+import type { ResultOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import { ListMfaFactorsQuery } from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -15,15 +16,13 @@ const listMFAFactors = gql(/* GraphQL */ `
   }
 `)
 
-export function useListMfaFactors() {
+type Result = ResultOf<typeof listMFAFactors>['accountListMfaFactors']
+
+export function useListMfaFactors(opts: QueryOptions = {}) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<
-    ListMfaFactorsQuery['accountListMfaFactors'],
-    AppwriteException[],
-    ListMfaFactorsQuery['accountListMfaFactors']
-  >({
-    queryKey: ['appwrite', 'account', 'mfa', 'factors'],
+  const queryResult = useQuery<Result, AppwriteException[], Result>({
+    queryKey: Keys.account().mfaFactors(),
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: listMFAFactors,
@@ -35,6 +34,7 @@ export function useListMfaFactors() {
 
       return data.accountListMfaFactors
     },
+    ...opts,
   })
 
   return { ...queryResult }

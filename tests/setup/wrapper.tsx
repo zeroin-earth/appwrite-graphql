@@ -1,11 +1,20 @@
-import { QueryClient } from '@tanstack/react-query'
-import { Provider } from 'jotai'
 import * as React from 'react'
-import { AppwriteProvider } from '../../src/AppwriteProvider'
+import { QueryClient } from '@tanstack/react-query'
+
+import ErrorBoundary from './ErrorBoundry'
 import { getTestConfig } from './helpers'
+import type { Persister } from '../../src'
+import { createAppwriteClient } from '../../src'
+import { AppwriteProvider } from '../../src/AppwriteProvider'
+import type { AppwriteClient } from '../../src/client'
 const { Suspense } = React
 
-export function createWrapper(opts?: { queryClient?: QueryClient; suspense?: boolean }) {
+export function createWrapper(opts?: {
+  queryClient?: QueryClient
+  suspense?: boolean
+  client?: AppwriteClient
+  persister?: Persister
+}) {
   const config = getTestConfig()
   const queryClient =
     opts?.queryClient ??
@@ -21,21 +30,30 @@ export function createWrapper(opts?: { queryClient?: QueryClient; suspense?: boo
     globalThis.localStorage.removeItem('cookieFallback')
   }
 
+  const appwriteClient =
+    opts?.client ??
+    createAppwriteClient({
+      endpoint: config.endpoint,
+      projectId: config.projectId,
+    })
+
   return function TestWrapper({ children }: { children: React.ReactNode }) {
     const inner = (
-      <Provider>
-        <AppwriteProvider
-          endpoint={config.endpoint}
-          projectId={config.projectId}
-          queryClient={queryClient}
-        >
-          {children}
-        </AppwriteProvider>
-      </Provider>
+      <AppwriteProvider
+        client={appwriteClient}
+        persister={opts?.persister}
+        queryClient={queryClient}
+      >
+        {children}
+      </AppwriteProvider>
     )
 
     if (opts?.suspense) {
-      return <Suspense fallback={<div>Loading...</div>}>{inner}</Suspense>
+      return (
+        <ErrorBoundary fallback={<div>Error occurred</div>}>
+          <Suspense fallback={<div>Loading...</div>}>{inner}</Suspense>
+        </ErrorBoundary>
+      )
     }
 
     return inner

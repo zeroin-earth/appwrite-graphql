@@ -1,42 +1,36 @@
 import { useEffect, useState } from 'react'
-
+import type { ResultOf } from '@graphql-typed-document-node/core'
+import { Channel } from 'appwrite'
 import { castDraft, produce } from 'immer'
 
-import { gql } from '../__generated__/gql'
-import { AccountGetQuery } from '../__generated__/graphql'
-import type { AppwriteException, Models, Realtime } from '../types'
+import type { getAccount } from './queryOptions'
+import { accountQueryOptions } from './queryOptions'
+import { Keys } from '../query/Keys'
+import type { AppwriteException, Models, QueryOptions, Realtime } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useLazyQuery } from '../useLazyQuery'
 import { useQuery } from '../useQuery'
 import { useQueryClient } from '../useQueryClient'
 
-export const getAccount = gql(/* GraphQL */ `
-  query AccountGet {
-    accountGet {
-      ...Account_User
-    }
-  }
-`)
+type Result = ResultOf<typeof getAccount>['accountGet']
 
 export function useLazyAccount() {
-  const { graphql, realtime } = useAppwrite()
+  const client = useAppwrite()
   const queryClient = useQueryClient()
   const [isActive, setIsActive] = useState(false)
 
-  const queryResult = useLazyQuery<
-    AccountGetQuery['accountGet'],
-    AppwriteException[],
-    AccountGetQuery['accountGet']
-  >(getAccountQueryOptions(graphql))
+  const queryResult = useLazyQuery<Result, AppwriteException[], Result>(
+    getAccountQueryOptions(client),
+  )
 
   useEffect(() => {
     if (!isActive) return
 
-    const subscriptionPromise = subscribe(realtime, queryClient)
+    const subscriptionPromise = subscribe(client.realtime, queryClient)
     return () => {
-      subscriptionPromise.then((sub) => sub.close())
+      void subscriptionPromise.then((sub) => sub.close())
     }
-  }, [isActive, realtime, queryClient])
+  }, [isActive, client.realtime, queryClient])
 
   return {
     ...queryResult,
@@ -47,53 +41,38 @@ export function useLazyAccount() {
   }
 }
 
-export function useAccount() {
-  const { graphql, realtime } = useAppwrite()
+export function useAccount(opts: QueryOptions = {}) {
+  const client = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useQuery<
-    AccountGetQuery['accountGet'],
-    AppwriteException[],
-    AccountGetQuery['accountGet']
-  >(getAccountQueryOptions(graphql))
+  const queryResult = useQuery<Result, AppwriteException[], Result>({
+    ...getAccountQueryOptions(client),
+    ...opts,
+  })
 
   useEffect(() => {
-    const subscriptionPromise = subscribe(realtime, queryClient)
+    const subscriptionPromise = subscribe(client.realtime, queryClient)
     return () => {
-      subscriptionPromise.then((sub) => sub.close())
+      void subscriptionPromise.then((sub) => sub.close())
     }
-  }, [realtime, queryClient])
+  }, [client.realtime, queryClient])
 
   return queryResult
 }
 
-function getAccountQueryOptions(graphql: ReturnType<typeof useAppwrite>['graphql']) {
-  return {
-    queryKey: ['appwrite', 'account'],
-    queryFn: async () => {
-      const { data, errors } = await graphql.query({
-        query: getAccount,
-      })
-
-      if (errors) {
-        throw errors
-      }
-
-      return data.accountGet
-    },
-    retry: false,
-  }
+function getAccountQueryOptions(client: ReturnType<typeof useAppwrite>) {
+  return accountQueryOptions(client)
 }
 
 function subscribe<Preferences extends Models.Preferences>(
   realtime: Realtime,
   queryClient: ReturnType<typeof useQueryClient>,
 ) {
-  return realtime.subscribe<Models.User<Preferences>>('account', (response) => {
+  return realtime.subscribe<Models.User<Preferences>>(Channel.account(), (response) => {
     const isUpdatingPreferences = response.events.some((event) => event.endsWith('prefs'))
 
     if (isUpdatingPreferences) {
-      queryClient.setQueryData<Models.User<Preferences>>(['appwrite', 'account'], (account) =>
+      queryClient.setQueryData<Models.User<Preferences>>(Keys.account().key(), (account) =>
         produce(account, (draft) => {
           if (draft) {
             draft.prefs = castDraft(response.payload.prefs) as typeof draft.prefs
@@ -104,6 +83,6 @@ function subscribe<Preferences extends Models.Preferences>(
       return
     }
 
-    queryClient.setQueryData<Models.User<Preferences>>(['appwrite', 'account'], response.payload)
+    queryClient.setQueryData<Models.User<Preferences>>(Keys.account().key(), response.payload)
   })
 }

@@ -1,10 +1,8 @@
-import { AppwriteException } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import {
-  CreatePushTargetMutation,
-  CreatePushTargetMutationVariables,
-} from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -20,15 +18,15 @@ const accountCreatePushTarget = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof accountCreatePushTarget>
+type Result = ResultOf<typeof accountCreatePushTarget>['accountCreatePushTarget']
+
 export function useCreatePushTarget() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useMutation<
-    CreatePushTargetMutation['accountCreatePushTarget'],
-    AppwriteException[],
-    CreatePushTargetMutationVariables
-  >({
+  const queryResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.account().pushTarget().create(),
     mutationFn: async ({ targetId, identifier, providerId }) => {
       const { data, errors } = await graphql.mutation({
         query: accountCreatePushTarget,
@@ -46,7 +44,7 @@ export function useCreatePushTarget() {
       return data.accountCreatePushTarget
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appwrite', 'account'] })
+      void queryClient.invalidateQueries({ queryKey: Keys.account().key() })
     },
   })
 

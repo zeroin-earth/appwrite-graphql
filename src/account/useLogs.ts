@@ -1,7 +1,8 @@
-import { AppwriteException } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import { ListLogsQuery, ListLogsQueryVariables } from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -36,15 +37,14 @@ const accountListLogs = gql(/* GraphQL */ `
   }
 `)
 
-export function useLogs({ queries }: ListLogsQueryVariables) {
+type Variables = VariablesOf<typeof accountListLogs>
+type Result = ResultOf<typeof accountListLogs>['accountListLogs']
+
+export function useLogs({ queries }: Variables, opts: QueryOptions = {}) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<
-    ListLogsQuery['accountListLogs'],
-    AppwriteException[],
-    ListLogsQuery['accountListLogs']
-  >({
-    queryKey: ['appwrite', 'account', 'logs', queries],
+  const queryResult = useQuery<Result, AppwriteException[], Result>({
+    queryKey: [...Keys.account().logs().key(), ...(queries ?? [])],
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: accountListLogs,
@@ -59,6 +59,7 @@ export function useLogs({ queries }: ListLogsQueryVariables) {
 
       return data.accountListLogs
     },
+    ...opts,
   })
 
   return { ...queryResult }

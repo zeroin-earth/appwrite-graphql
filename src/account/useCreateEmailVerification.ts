@@ -1,10 +1,8 @@
-import { AppwriteException } from '../types'
+import type { ResultOf, VariablesOf } from 'gql.tada'
+import { graphql as gql } from 'gql.tada'
 
-import { gql } from '../__generated__'
-import {
-  CreateEmailVerificationMutation,
-  CreateEmailVerificationMutationVariables,
-} from '../__generated__/graphql'
+import { Keys } from '../query/Keys'
+import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 
@@ -19,14 +17,14 @@ const createEmailVerification = gql(/* GraphQL */ `
   }
 `)
 
+type Variables = VariablesOf<typeof createEmailVerification>
+type Result = ResultOf<typeof createEmailVerification>['accountCreateEmailVerification']
+
 export function useCreateEmailVerification() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation<
-    CreateEmailVerificationMutation['accountCreateEmailVerification'],
-    AppwriteException[],
-    CreateEmailVerificationMutationVariables
-  >({
+  const queryResult = useMutation<Result, AppwriteException[], Variables>({
+    mutationKey: Keys.account().emailVerification().create(),
     mutationFn: async ({ url }) => {
       const { data, errors } = await graphql.mutation({
         query: createEmailVerification,
