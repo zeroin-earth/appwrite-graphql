@@ -21,10 +21,10 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   // This lifecycle method is used for logging error information
-  componentDidCatch(error, info) {
+  componentDidCatch() {
     // Example: Log the error to an error reporting service
     // logErrorToMyService(error, info.componentStack);
-    console.error('Error caught by ErrorBoundary:', error, info)
+    console.log('Error caught by ErrorBoundary')
   }
 
   render() {

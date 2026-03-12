@@ -145,27 +145,21 @@ describe('Function hooks', () => {
         { timeout: 15_000 },
       )
 
-      test.skip(
-        'handles errors and returns the error message',
-        async () => {
-          const wrapper = createWrapper({ suspense: true })
-          await loginUser(userEmail, userPassword, wrapper)
+      test.failing('handles errors and catches them', async () => {
+        const wrapper = createWrapper({ suspense: true })
+        await loginUser(userEmail, userPassword, wrapper)
 
-          const { result } = renderHook(
-            () =>
-              useSuspenseFunction({
-                functionId: 'test-function',
-                path: '/error',
-              }),
-            { wrapper },
-          )
+        const { result } = renderHook(
+          () =>
+            useSuspenseFunction({
+              functionId: 'test-function',
+              path: '/error',
+            }),
+          { wrapper },
+        )
 
-          await waitFor(() => expect(result.current.executeFunction).toBeDefined())
-
-          console.log(result.current.executeFunction)
-        },
-        { timeout: 15_000 },
-      )
+        await waitFor(() => expect(result.current.executeFunction).toBeDefined())
+      })
 
       test(
         'returns parsed JSON from a function response',

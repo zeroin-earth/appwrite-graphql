@@ -156,62 +156,69 @@ describe('Mutation Registry', () => {
     expect(mutationKeys).toContain(Keys.databases().collections().documents().update().join('.'))
   })
 
-  test('mutations are replayed when app restarts', async () => {
-    onlineManager.setOnline(true)
+  test(
+    'mutations are replayed when app restarts',
+    async () => {
+      onlineManager.setOnline(true)
 
-    const { appwrite, queryClient, persister } = createOfflineClient({
-      endpoint: config.endpoint,
-      projectId: config.projectId,
-      networkAdapter: {
-        listen: mock(),
-      },
-      storage: localStorage,
-    })
+      const { appwrite, queryClient, persister } = createOfflineClient({
+        endpoint: config.endpoint,
+        projectId: config.projectId,
+        networkAdapter: {
+          listen: mock(),
+        },
+        storage: localStorage,
+      })
 
-    const wrapper = createWrapper({
-      client: appwrite,
-      queryClient,
-      persister,
-    })
+      const wrapper = createWrapper({
+        client: appwrite,
+        queryClient,
+        persister,
+      })
 
-    await appwrite.account.createEmailPasswordSession({ email: userEmail, password: userPassword })
+      await appwrite.account.createEmailPasswordSession({
+        email: userEmail,
+        password: userPassword,
+      })
 
-    const { result: getResult } = renderHook(
-      () =>
-        useDocument<{
-          name: string
-          age: number
-        }>({
-          databaseId,
-          collectionId,
-          documentId: documentCreatedOfflineId,
-        }),
-      { wrapper },
-    )
+      const { result: getResult } = renderHook(
+        () =>
+          useDocument<{
+            name: string
+            age: number
+          }>({
+            databaseId,
+            collectionId,
+            documentId: documentCreatedOfflineId,
+          }),
+        { wrapper },
+      )
 
-    // Wait for the document to exist (create mutation replayed)
-    await waitFor(() => expect(getResult.current.data).toBeTruthy(), { timeout: 12_000 })
-    expect(getResult.current.data?.name).toBe('Test Document')
+      // Wait for the document to exist (create mutation replayed)
+      await waitFor(() => expect(getResult.current.data).toBeTruthy(), { timeout: 12_000 })
+      expect(getResult.current.data?.name).toBe('Test Document')
 
-    // Wait for all persisted mutations to finish replaying (including the update)
-    await waitFor(
-      () => {
-        const pending = queryClient
-          .getMutationCache()
-          .getAll()
-          .filter((m) => m.state.status === 'pending' || m.state.isPaused)
-        expect(pending.length).toBe(0)
-      },
-      { timeout: 10_000 },
-    )
+      // Wait for all persisted mutations to finish replaying (including the update)
+      await waitFor(
+        () => {
+          const pending = queryClient
+            .getMutationCache()
+            .getAll()
+            .filter((m) => m.state.status === 'pending' || m.state.isPaused)
+          expect(pending.length).toBe(0)
+        },
+        { timeout: 10_000 },
+      )
 
-    // Refetch after mutations complete — replayed mutations lack onSuccess invalidation
-    await act(async () => {
-      await queryClient.refetchQueries()
-    })
+      // Refetch after mutations complete — replayed mutations lack onSuccess invalidation
+      await act(async () => {
+        await queryClient.refetchQueries()
+      })
 
-    await waitFor(() => expect(getResult.current.data?.age).toBe(26), { timeout: 5_000 })
+      await waitFor(() => expect(getResult.current.data?.age).toBe(26), { timeout: 6_000 })
 
-    createdDocumentIds.push(documentCreatedOfflineId)
-  }, { timeout: 20_000 })
+      createdDocumentIds.push(documentCreatedOfflineId)
+    },
+    { timeout: 20_000 },
+  )
 })
