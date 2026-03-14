@@ -3,6 +3,7 @@ import type { AsyncStorage, Persister } from '@tanstack/query-persist-client-cor
 import { persistQueryClient } from '@tanstack/query-persist-client-core'
 import { onlineManager, QueryClient } from '@tanstack/react-query'
 
+import type { ConflictStrategy } from './conflictResolution/types'
 import { hydrateMutationDefaults } from './mutations/registry'
 import type { NetworkAdapter } from './types'
 import type { AppwriteClient } from '../client'
@@ -12,6 +13,7 @@ export type OfflineClient = {
   appwrite: AppwriteClient
   queryClient: QueryClient
   persister: Persister | undefined
+
   /**
    * Start persistence for non-React (imperative) usage.
    * Restores the persisted cache, subscribes to future changes,
@@ -22,6 +24,8 @@ export type OfflineClient = {
    * @throws  If no persister was configured via `storage` or `persister`.
    */
   startPersistence: () => { unsubscribe: () => void; restored: Promise<void> }
+
+  conflictStrategy?: ConflictStrategy
 }
 
 const dehydrateOptions = {
@@ -50,6 +54,7 @@ export function createOfflineClient({
   persister: externalPersister,
   networkAdapter,
   throttleTime = 1000,
+  conflictStrategy = 'last-write-wins',
 }: {
   endpoint: string
   projectId: string
@@ -60,6 +65,7 @@ export function createOfflineClient({
   networkAdapter: NetworkAdapter
   /** Throttle time for network status changes to prevent rapid toggling. Default: 1000ms. */
   throttleTime?: number
+  conflictStrategy?: ConflictStrategy
 }): OfflineClient {
   if (storage && externalPersister) {
     throw new Error('Provide either `storage` or `persister`, not both.')
@@ -69,12 +75,17 @@ export function createOfflineClient({
 
   const queryClient = new QueryClient({
     defaultOptions: {
-      mutations: { networkMode: 'offlineFirst' },
+      mutations: {
+        networkMode: 'offlineFirst',
+        meta: {
+          conflictStrategy,
+        },
+      },
       queries: { networkMode: 'offlineFirst', gcTime: 1000 * 60 * 60 * 24 },
     },
   })
 
-  hydrateMutationDefaults(queryClient, appwrite)
+  hydrateMutationDefaults(queryClient, appwrite, { conflictStrategy })
 
   const persister =
     externalPersister ??

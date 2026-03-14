@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 interface ErrorBoundaryProps {
   children: ReactNode
   fallback: ReactNode
+  onError?: (error: Error) => void
 }
 
 interface ErrorBoundaryState {
@@ -21,10 +22,8 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   // This lifecycle method is used for logging error information
-  componentDidCatch() {
-    // Example: Log the error to an error reporting service
-    // logErrorToMyService(error, info.componentStack);
-    console.log('Error caught by ErrorBoundary')
+  componentDidCatch(error: Error) {
+    this.props.onError?.(error)
   }
 
   render() {

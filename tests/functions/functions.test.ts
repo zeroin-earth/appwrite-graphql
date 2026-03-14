@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
-import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
+import { afterAll, beforeAll, describe, expect, spyOn, test } from 'bun:test'
 
 import { useGetExecution, useListExecutions } from '../../src'
 import { useFunction, useSuspenseFunction } from '../../src/functions/useFunction'
@@ -145,21 +145,35 @@ describe('Function hooks', () => {
         { timeout: 15_000 },
       )
 
-      test.failing('handles errors and catches them', async () => {
-        const wrapper = createWrapper({ suspense: true })
-        await loginUser(userEmail, userPassword, wrapper)
+      test(
+        'handles errors and catches them',
+        async () => {
+          const spy = spyOn(console, 'error').mockImplementation(() => {})
 
-        const { result } = renderHook(
-          () =>
-            useSuspenseFunction({
-              functionId: 'test-function',
-              path: '/error',
-            }),
-          { wrapper },
-        )
+          let caughtError: Error | null = null
+          const wrapper = createWrapper({
+            suspense: true,
+            onError: (error) => {
+              caughtError = error
+            },
+          })
+          await loginUser(userEmail, userPassword, wrapper)
 
-        await waitFor(() => expect(result.current.executeFunction).toBeDefined())
-      })
+          renderHook(
+            () =>
+              useSuspenseFunction({
+                functionId: 'test-function',
+                path: '/error',
+              }),
+            { wrapper },
+          )
+
+          await waitFor(() => expect(caughtError).not.toBeNull(), { timeout: 10_000 })
+
+          spy.mockRestore()
+        },
+        { timeout: 15_000 },
+      )
 
       test(
         'returns parsed JSON from a function response',

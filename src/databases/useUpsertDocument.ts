@@ -1,6 +1,9 @@
+import { onlineManager } from '@tanstack/react-query'
 import type { ResultOf, VariablesOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
+import type { ConflictStrategy } from '../offline'
+import { conflictAwareUpdate } from '../offline/mutations/conflictAwareUpdate'
 import { Keys } from '../query/Keys'
 import type { AppwriteException } from '../types'
 import { useAppwrite } from '../useAppwrite'
@@ -36,29 +39,52 @@ type UpsertDocumentVariables = Omit<Variables, 'permissions'> & {
   permissions?: string[] | null
 }
 
+type MutationContext = {
+  previousEntries: [queryKey: readonly unknown[], data: unknown][]
+  documentKeyPrefix: readonly unknown[]
+  baseSnapshot: Record<string, unknown> | undefined
+  willPerformOfflineMutation: boolean
+}
+
 export function useUpsertDocument() {
-  const { graphql } = useAppwrite()
+  const appwrite = useAppwrite()
   const queryClient = useQueryClient()
 
   const mutationResult = useMutation<
     Result,
     AppwriteException[],
     UpsertDocumentVariables,
-    {
-      previousEntries: [queryKey: readonly unknown[], data: unknown][]
-      documentKeyPrefix: readonly unknown[]
-    }
+    MutationContext
   >({
     mutationKey: Keys.databases().collections().documents().upsert(),
-    mutationFn: async ({
-      databaseId,
-      collectionId,
-      documentId,
-      data,
-      permissions,
-      transactionId,
-    }) => {
-      const { data: mutationData, errors } = await graphql.mutation({
+    mutationFn: async (
+      { databaseId, collectionId, documentId, data, permissions, transactionId },
+      ctx,
+    ) => {
+      const wasOffline = ctx.meta.willPerformOfflineMutation ?? false
+
+      if (ctx.meta.willPerformOfflineMutation != null) {
+        delete ctx.meta.willPerformOfflineMutation
+      }
+
+      if (wasOffline) {
+        try {
+          const updateData = (await conflictAwareUpdate(
+            ctx.meta.conflictStrategy as ConflictStrategy,
+          )(
+            appwrite,
+            { databaseId, collectionId, documentId, data, permissions, transactionId },
+            queryClient,
+          )) as Result
+
+          return updateData
+        } catch (error) {
+          console.error('Conflict-aware update failed:', error)
+          throw error
+        }
+      }
+
+      const { data: mutationData, errors } = await appwrite.graphql.mutation({
         query: upsertDocument,
         variables: {
           databaseId,
@@ -76,7 +102,7 @@ export function useUpsertDocument() {
 
       return mutationData.databasesUpsertDocument
     },
-    onMutate: async (variables) => {
+    onMutate: async (variables, ctx) => {
       const documentKeyPrefix = Keys.database(variables.databaseId)
         .collection(variables.collectionId)
         .document(variables.documentId)
@@ -86,13 +112,26 @@ export function useUpsertDocument() {
 
       const previousEntries = queryClient.getQueriesData({ queryKey: documentKeyPrefix })
 
-      queryClient.setQueriesData(
-        { queryKey: documentKeyPrefix },
-        (old: Record<string, unknown> | undefined) =>
-          old ? { ...old, ...(variables.data as Record<string, unknown>) } : old,
+      const baseSnapshot = previousEntries.find(([, data]) => data != null)?.[1] as
+        | Record<string, unknown>
+        | undefined
+      const baseSnapshotCopy = baseSnapshot
+        ? (JSON.parse(JSON.stringify(baseSnapshot)) as Record<string, unknown>)
+        : undefined
+
+      queryClient.setQueryData<UpsertDocumentVariables>(documentKeyPrefix, (old) =>
+        old ? { ...old, ...(variables.data as Record<string, unknown>) } : old,
       )
 
-      return { previousEntries, documentKeyPrefix }
+      const willPerformOfflineMutation = onlineManager.isOnline() === false
+      ctx.meta = { ...ctx.meta, willPerformOfflineMutation }
+
+      return {
+        previousEntries,
+        documentKeyPrefix,
+        baseSnapshot: baseSnapshotCopy,
+        willPerformOfflineMutation,
+      }
     },
     onError: (_, __, context) => {
       if (context?.previousEntries) {
