@@ -553,7 +553,7 @@ async function deployFunction(apiKey: string) {
 
   const deploymentId = deployment.$id
   console.log('Waiting for deployment to be ready...')
-  await new Promise((r) => setTimeout(r, 3000))
+  await new Promise((r) => setTimeout(r, 5000))
 
   console.log(`Deployment "${deploymentId}" created, activating...`)
 
