@@ -210,14 +210,14 @@ export class QueryBuilder<T extends Record<string, unknown>> {
     return this
   }
 
-  or(...queries: QueryBuilder<T>[]): this {
-    const orQueries = queries.flatMap((q) => q.queries)
+  or(...queries: ((q: QueryBuilder<T>) => QueryBuilder<T>)[]): this {
+    const orQueries = queries.map((fn) => fn(new QueryBuilder<T>()).queries).flat()
     this.queries.push(Query.or(orQueries))
     return this
   }
 
-  and(...queries: QueryBuilder<T>[]): this {
-    const andQueries = queries.flatMap((q) => q.queries)
+  and(...queries: ((q: QueryBuilder<T>) => QueryBuilder<T>)[]): this {
+    const andQueries = queries.map((fn) => fn(new QueryBuilder<T>()).queries).flat()
     this.queries.push(Query.and(andQueries))
     return this
   }

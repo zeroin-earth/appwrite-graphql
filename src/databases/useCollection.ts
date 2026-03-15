@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Channel } from 'appwrite'
 
-import { collectionQueryOptions } from './queryOptions'
+import { getCollectionQuery } from './queryOptions'
 import type { Collection, Document } from './types'
 import { Keys } from '../query/Keys'
 import type { AppwriteException, QueryOptions } from '../types'
@@ -15,7 +15,7 @@ type DocumentOperation = 'create' | 'update' | 'delete'
 type CollectionParams<TDocument = Record<string, string | number | boolean | null>> = {
   databaseId: string
   collectionId: string
-  queries: string[]
+  queries?: string[]
   transactionId?: string
   subscribe?: boolean
   fields?: (keyof TDocument & string)[]
@@ -30,7 +30,7 @@ function useCollectionQueryConfig<TDocument>({
 }: Omit<CollectionParams<TDocument>, 'subscribe'>) {
   const client = useAppwrite()
 
-  return collectionQueryOptions<TDocument>(client, {
+  return getCollectionQuery<TDocument>(client, {
     databaseId,
     collectionId,
     queries,
@@ -88,7 +88,7 @@ export function useCollection<TDocument>(
   {
     databaseId,
     collectionId,
-    queries,
+    queries = [],
     transactionId,
     subscribe = true,
     fields,

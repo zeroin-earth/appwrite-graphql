@@ -16,7 +16,7 @@ export const getAccount = gql(/* GraphQL */ `
   }
 `)
 
-export function accountQueryOptions(client: AppwriteClient) {
+export function getAccountQuery(client: AppwriteClient) {
   return {
     queryKey: Keys.account().key(),
     queryFn: async () => {

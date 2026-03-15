@@ -280,7 +280,10 @@ describe('QueryBuilder', () => {
   describe('logical composition', () => {
     test('or with two sub-builders', () => {
       const result = q<User>()
-        .or(q<User>().equal('name', 'Alice'), q<User>().equal('name', 'Bob'))
+        .or(
+          (q) => q.equal('name', 'Alice'),
+          (q) => q.equal('name', 'Bob'),
+        )
         .build()
 
       expect(result).toEqual([Query.or([Query.equal('name', 'Alice'), Query.equal('name', 'Bob')])])
@@ -288,7 +291,10 @@ describe('QueryBuilder', () => {
 
     test('and with two sub-builders', () => {
       const result = q<User>()
-        .and(q<User>().equal('name', 'Alice'), q<User>().greaterThan('age', 18))
+        .and(
+          (q) => q.equal('name', 'Alice'),
+          (q) => q.greaterThan('age', 18),
+        )
         .build()
 
       expect(result).toEqual([
@@ -299,8 +305,8 @@ describe('QueryBuilder', () => {
     test('or with multiple conditions per sub-builder', () => {
       const result = q<User>()
         .or(
-          q<User>().equal('name', 'Alice').greaterThan('age', 30),
-          q<User>().equal('name', 'Bob').lessThan('age', 20),
+          (q) => q.equal('name', 'Alice').greaterThan('age', 30),
+          (q) => q.equal('name', 'Bob').lessThan('age', 20),
         )
         .build()
 
@@ -317,8 +323,12 @@ describe('QueryBuilder', () => {
     test('nested or inside and', () => {
       const result = q<User>()
         .and(
-          q<User>().greaterThan('age', 18),
-          q<User>().or(q<User>().equal('name', 'Alice'), q<User>().equal('name', 'Bob')),
+          (q) => q.greaterThan('age', 18),
+          (q) =>
+            q.or(
+              (q) => q.equal('name', 'Alice'),
+              (q) => q.equal('name', 'Bob'),
+            ),
         )
         .build()
 
@@ -333,9 +343,7 @@ describe('QueryBuilder', () => {
 
   describe('elemMatch', () => {
     test('elemMatch with sub-query', () => {
-      const result = q<User>()
-        .elemMatch('scores', q<User>().greaterThan('age', 90))
-        .build()
+      const result = q<User>().elemMatch('scores', q<User>().greaterThan('age', 90)).build()
 
       expect(result).toEqual([Query.elemMatch('scores', [Query.greaterThan('age', 90)])])
     })

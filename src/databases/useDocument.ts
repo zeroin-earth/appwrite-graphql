@@ -3,7 +3,7 @@ import { Channel } from 'appwrite'
 import type { VariablesOf } from 'gql.tada'
 
 import type { getDocument } from './queryOptions'
-import { documentQueryOptions } from './queryOptions'
+import { getDocumentQuery } from './queryOptions'
 import type { Document } from './types'
 import { Keys } from '../query/Keys'
 import type { AppwriteException, QueryOptions } from '../types'
@@ -28,7 +28,7 @@ function useDocumentQueryConfig<TDocument>({
 }: DocumentParams<TDocument>) {
   const client = useAppwrite()
 
-  return documentQueryOptions<TDocument>(client, {
+  return getDocumentQuery<TDocument>(client, {
     databaseId,
     collectionId,
     documentId,
