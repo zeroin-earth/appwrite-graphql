@@ -1,11 +1,18 @@
 # Appwrite GraphQL
+![Static Badge](https://img.shields.io/badge/coverage-95%25-brightgreen) ![NPM Version](https://img.shields.io/npm/v/%40zeroin.earth%2Fappwrite-graphql) ![Static Badge](https://img.shields.io/badge/appwrite-v1.8.1-%23FD366E)
 
-This is a fully featured GraphQL library built with [@tanstack/react-query](https://github.com/TanStack/query) on top of the Appwrite web SDK.
+Appwrite is an open source, BaaS in the same vein as Supabase and Firebase, but geared more toward self-hosting.
 
-What this project handles for you:
+This is a fully featured GraphQL library built with [@tanstack/react-query](https://github.com/TanStack/query) on top of the Appwrite web SDK and is fully typed. Think of this library as the abstract wrapper you would have made yourself, but we already did it for you.
+
+## Getting Started
+  - [Installation](#installation)
+  - [Basic Usage](#usage)
+
+## Features
 
 - Dual build for both React and React Native
-- Full Appwrite SDK v22 parity via React hooks
+- Full Appwrite SDK v23 parity using React hooks
 - [Optimistic Mutations](#optimistic-mutations)
 	- Documents only
 - [Query Caching](#query-caching)
@@ -35,8 +42,8 @@ bun add @zeroin.earth/appwrite-graphql
 
 ### Peer Dependencies
 
-- `react` - `19.1.0`
-- `appwrite` - `22.4.1`
+- `react` - `^19.1.0`
+- `appwrite` - `^23.0.0`
 - `@tanstack/react-query` - `^5.70.0`
 
 **React Native:**
@@ -51,7 +58,7 @@ bun add @zeroin.earth/appwrite-graphql
 
 The library is designed to use a single wrapper, `<AppwriteProvider>`. There are multiple ways you can configure the wrapper based on your app's needs:
 
-1. Basic (no offline) - React
+1. Basic (no offline-first support) - React
 
 ```tsx
 import { 
