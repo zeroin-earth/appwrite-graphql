@@ -356,6 +356,8 @@ services:
     stop_signal: SIGINT
     image: openruntimes/executor:0.11.4
     restart: unless-stopped
+    ports:
+      - 8080:80
     networks:
       - appwrite
       - runtimes
