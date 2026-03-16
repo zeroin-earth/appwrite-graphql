@@ -46,11 +46,49 @@ jobs:
           docker compose -f tests/docker-compose.yml logs appwrite
           exit 1
 
+      - name: Wait for executor
+        run: |
+          echo "Waiting for executor to be healthy..."
+          for i in $(seq 1 30); do
+            HEALTH=$(docker inspect --format='{{.State.Health.Status}}' openruntimes-executor 2>/dev/null || echo "not_found")
+            if [ "$HEALTH" = "healthy" ]; then
+              echo "Executor is healthy!"
+              exit 0
+            fi
+            echo "Attempt $i/30 - executor status: $HEALTH - waiting 5s..."
+            sleep 5
+          done
+          echo "Executor failed to become healthy"
+          docker compose -f tests/docker-compose.yml logs openruntimes-executor
+          docker compose -f tests/docker-compose.yml logs appwrite-worker-builds
+          exit 1
+
       - name: Setup test environment
         run: bun run test:setup
 
       - name: Run integration tests
         run: bun test --timeout 30000
+
+      - name: Dump logs on failure
+        if: failure()
+        run: |
+          echo "=== Docker container status ==="
+          docker compose -f tests/docker-compose.yml ps
+          echo ""
+          echo "=== Executor logs ==="
+          docker compose -f tests/docker-compose.yml logs openruntimes-executor --tail=50
+          echo ""
+          echo "=== Builds worker logs ==="
+          docker compose -f tests/docker-compose.yml logs appwrite-worker-builds --tail=50
+          echo ""
+          echo "=== Appwrite API logs ==="
+          docker compose -f tests/docker-compose.yml logs appwrite --tail=50
+          echo ""
+          echo "=== Docker networks ==="
+          docker network ls
+          echo ""
+          echo "=== Appwrite network inspect ==="
+          docker network inspect appwrite 2>/dev/null || echo "Network not found"
 
       - name: Teardown
         if: always()
