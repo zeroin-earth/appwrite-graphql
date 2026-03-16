@@ -58,7 +58,7 @@
     "@tanstack/react-query": "^5.70.0",
     "appwrite": "^23.0.0",
     "react": "19.1.0",
-    "react-native-appwrite": "^0.24.1"
+    "react-native-appwrite": "^0.25.0"
   },
   "peerDependenciesMeta": {
     "react-native-appwrite": {
@@ -73,7 +73,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@happy-dom/global-registrator": "^20.8.3",
+    "@happy-dom/global-registrator": "^20.8.4",
     "@react-native-async-storage/async-storage": "^3.0.1",
     "@react-native-community/netinfo": "^12.0.1",
     "@tanstack/react-query": "^5.70.0",
@@ -85,7 +85,7 @@
     "appwrite": "^23.0.0",
     "eslint": "^10.0.3",
     "eslint-plugin-simple-import-sort": "^12.1.1",
-    "happy-dom": "^20.8.3",
+    "happy-dom": "^20.8.4",
     "identity-obj-proxy": "^3.0.0",
     "mailpit-api": "^1.7.2",
     "node-appwrite": "^22.1.3",
