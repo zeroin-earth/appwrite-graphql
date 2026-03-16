@@ -1,5 +1,7 @@
 export { createOfflineClient } from './createOfflineClient'
 export type { OfflineClient } from './createOfflineClient'
+export { resolveConflict } from './conflictResolution/resolve'
+export type { ConflictContext, ConflictStrategy } from './conflictResolution/types'
 export { hydrateMutationDefaults, mutationRegistry } from './mutations/registry'
 export { webNetworkAdapter } from './network/web'
 export type { NetworkAdapter } from './types'

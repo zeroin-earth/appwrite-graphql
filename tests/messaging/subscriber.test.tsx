@@ -22,6 +22,7 @@ describe('Subscriber hooks', () => {
   let userEmail: string
   let userPassword: string
   let targetId: string
+  const subscriberIdsToCleanup: string[] = []
 
   beforeAll(async () => {
     const user = await createTestUser({ name: 'Subscriber Test User' })
@@ -32,6 +33,15 @@ describe('Subscriber hooks', () => {
   })
 
   afterAll(async () => {
+    // Clean up any leftover subscribers
+    const { messaging } = createServerClient()
+    for (const subscriberId of subscriberIdsToCleanup) {
+      try {
+        await messaging.deleteSubscriber({ topicId: TOPIC_ID, subscriberId })
+      } catch {
+        // Already deleted or doesn't exist
+      }
+    }
     await deleteTestUser(userId)
   })
 
@@ -47,6 +57,7 @@ describe('Subscriber hooks', () => {
       const { result } = renderHook(() => useCreateSubscriber(), { wrapper })
 
       const subscriberId = ID.unique()
+      subscriberIdsToCleanup.push(subscriberId)
 
       await act(async () => {
         await result.current.mutateAsync({
@@ -76,6 +87,7 @@ describe('Subscriber hooks', () => {
       const { result } = renderHook(() => useCreateSubscriber(), { wrapper })
 
       const subscriberId = ID.unique()
+      subscriberIdsToCleanup.push(subscriberId)
 
       await act(async () => {
         await result.current.mutateAsync({
@@ -120,6 +132,7 @@ describe('Subscriber hooks', () => {
       const { result: createResult } = renderHook(() => useCreateSubscriber(), { wrapper })
 
       const subscriberId = ID.unique()
+      subscriberIdsToCleanup.push(subscriberId)
 
       await act(async () => {
         await createResult.current.mutateAsync({
@@ -155,6 +168,7 @@ describe('Subscriber hooks', () => {
       const { result: createResult } = renderHook(() => useCreateSubscriber(), { wrapper })
 
       const subscriberId = ID.unique()
+      subscriberIdsToCleanup.push(subscriberId)
 
       await act(async () => {
         await createResult.current.mutateAsync({

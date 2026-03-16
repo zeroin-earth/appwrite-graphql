@@ -69,9 +69,19 @@ export function useCreateDocument() {
       }
       return mutationData.databasesCreateDocument
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (result, variables) => {
+      const documentKeyPrefix = Keys.database(variables.databaseId)
+        .collection(variables.collectionId)
+        .document(result._id)
+        .key()
+
       void queryClient.invalidateQueries({
         queryKey: Keys.database(variables.databaseId).collection(variables.collectionId).key(),
+      })
+
+      queryClient.setQueryData<Variables>(documentKeyPrefix, {
+        ...variables,
+        ...(variables.data as Record<string, unknown>),
       })
     },
   })

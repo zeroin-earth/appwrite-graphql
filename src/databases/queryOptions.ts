@@ -35,7 +35,7 @@ export const getDocument = gql(/* GraphQL */ `
   }
 `)
 
-export function documentQueryOptions<TDocument>(
+export function getDocumentQuery<TDocument>(
   client: AppwriteClient,
   {
     databaseId,
@@ -104,7 +104,7 @@ export const listDocuments = gql(/* GraphQL */ `
   }
 `)
 
-export function collectionQueryOptions<TDocument>(
+export function getCollectionQuery<TDocument>(
   client: AppwriteClient,
   {
     databaseId,

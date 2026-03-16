@@ -79,20 +79,15 @@ export function useDecrementAttribute() {
 
       const previousEntries = queryClient.getQueriesData({ queryKey: documentKeyPrefix })
 
-      queryClient.setQueriesData(
-        { queryKey: documentKeyPrefix },
-        (old: Record<string, unknown> | undefined) => {
-          if (!old) return old
-          const current = (old[variables.attribute] as number) ?? 0
-          const decrement = variables.value ?? 1
-          const newValue =
-            variables.min != null
-              ? Math.max(current - decrement, variables.min)
-              : current - decrement
+      queryClient.setQueryData<Variables>(documentKeyPrefix, (old) => {
+        if (!old) return old
+        const current = (old[variables.attribute] as number) ?? 0
+        const decrement = variables.value ?? 1
+        const newValue =
+          variables.min != null ? Math.max(current - decrement, variables.min) : current - decrement
 
-          return { ...old, [variables.attribute]: newValue }
-        },
-      )
+        return { ...old, [variables.attribute]: newValue }
+      })
 
       return { previousEntries, documentKeyPrefix }
     },

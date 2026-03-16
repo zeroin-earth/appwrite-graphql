@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
-import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
+import { afterAll, beforeAll, describe, expect, spyOn, test } from 'bun:test'
 
 import { useGetExecution, useListExecutions } from '../../src'
 import { useFunction, useSuspenseFunction } from '../../src/functions/useFunction'
@@ -145,13 +145,21 @@ describe('Function hooks', () => {
         { timeout: 15_000 },
       )
 
-      test.skip(
-        'handles errors and returns the error message',
+      test(
+        'handles errors and catches them',
         async () => {
-          const wrapper = createWrapper({ suspense: true })
+          const spy = spyOn(console, 'error').mockImplementation(() => {})
+
+          let caughtError: Error | null = null
+          const wrapper = createWrapper({
+            suspense: true,
+            onError: (error) => {
+              caughtError = error
+            },
+          })
           await loginUser(userEmail, userPassword, wrapper)
 
-          const { result } = renderHook(
+          renderHook(
             () =>
               useSuspenseFunction({
                 functionId: 'test-function',
@@ -160,9 +168,9 @@ describe('Function hooks', () => {
             { wrapper },
           )
 
-          await waitFor(() => expect(result.current.executeFunction).toBeDefined())
+          await waitFor(() => expect(caughtError).not.toBeNull(), { timeout: 10_000 })
 
-          console.log(result.current.executeFunction)
+          spy.mockRestore()
         },
         { timeout: 15_000 },
       )

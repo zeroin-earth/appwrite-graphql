@@ -553,7 +553,29 @@ async function deployFunction(apiKey: string) {
 
   const deploymentId = deployment.$id
   console.log('Waiting for deployment to be ready...')
-  await new Promise((r) => setTimeout(r, 3000))
+
+  for (let i = 0; i < 30; i++) {
+    const checkDeploymentStatus = await fetch(
+      `${ENDPOINT}/functions/test-function/deployments/${deploymentId}`,
+      {
+        headers: {
+          'X-Appwrite-Project': PROJECT_ID,
+          'X-Appwrite-Key': apiKey,
+        },
+      },
+    ).then((r) => r.json())
+
+    if (checkDeploymentStatus.status === 'ready') {
+      console.log('Deployment is ready!')
+      break
+    } else if (checkDeploymentStatus.status === 'failed') {
+      console.error('Deployment failed:', checkDeploymentStatus)
+      throw new Error(`Deployment failed: ${checkDeploymentStatus.buildLogs}`)
+    } else {
+      console.log(`Attempt ${i + 1}/30 - status: ${checkDeploymentStatus.status}`)
+      await new Promise((r) => setTimeout(r, 5000))
+    }
+  }
 
   console.log(`Deployment "${deploymentId}" created, activating...`)
 

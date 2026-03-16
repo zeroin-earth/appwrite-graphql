@@ -14,6 +14,7 @@ export function createWrapper(opts?: {
   suspense?: boolean
   client?: AppwriteClient
   persister?: Persister
+  onError?: (error: Error) => void
 }) {
   const config = getTestConfig()
   const queryClient =
@@ -50,7 +51,7 @@ export function createWrapper(opts?: {
 
     if (opts?.suspense) {
       return (
-        <ErrorBoundary fallback={<div>Error occurred</div>}>
+        <ErrorBoundary fallback={<div>Error occurred</div>} onError={opts?.onError}>
           <Suspense fallback={<div>Loading...</div>}>{inner}</Suspense>
         </ErrorBoundary>
       )

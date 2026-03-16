@@ -1,4 +1,4 @@
-export { documentQueryOptions, collectionQueryOptions } from './queryOptions'
+export { getDocumentQuery, getCollectionQuery } from './queryOptions'
 export { useCollection, useSuspenseCollection } from './useCollection'
 export {
   useCollectionWithPagination,

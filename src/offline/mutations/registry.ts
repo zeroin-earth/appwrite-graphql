@@ -1,6 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query'
 import type { TadaDocumentNode } from 'gql.tada'
 
+import { conflictAwareUpdate } from './conflictAwareUpdate'
 import { accountUpdateEmail } from '../../account/useUpdateEmail'
 import { accountUpdateName } from '../../account/useUpdateName'
 import { updatePassword } from '../../account/useUpdatePassword'
@@ -11,7 +12,6 @@ import { createDocument } from '../../databases/useCreateDocument'
 import { decrementDocumentAttribute } from '../../databases/useDecrementAttribute'
 import { deleteDocument } from '../../databases/useDeleteDocument'
 import { incrementDocumentAttribute } from '../../databases/useIncrementAttribute'
-import { updateDocument } from '../../databases/useUpdateDocument'
 import { upsertDocument } from '../../databases/useUpsertDocument'
 import { createSubscriber } from '../../messaging/useCreateSubscriber'
 import { deleteSubscriber } from '../../messaging/useDeleteSubscriber'
@@ -23,9 +23,8 @@ import { deleteTeam } from '../../teams/useDeleteTeam'
 import { updateMembership } from '../../teams/useUpdateMembership'
 import { updateTeamName } from '../../teams/useUpdateTeamName'
 import { updateTeamPrefs } from '../../teams/useUpdateTeamPrefs'
-
-type Vars = Record<string, unknown>
-type MutationFn = (client: AppwriteClient, variables: Vars) => Promise<unknown>
+import type { ConflictStrategy } from '../conflictResolution/types'
+import type { MutationFn, Vars } from '../types'
 
 /**
  * Creates a mutationFn that executes a GraphQL mutation and returns the
@@ -59,10 +58,8 @@ export const mutationRegistry: MutationEntry[] = [
     mutationKey: Keys.databases().collections().documents().create(),
     mutationFn: gqlMutation(createDocument, 'databasesCreateDocument', { serializeData: true }),
   },
-  {
-    mutationKey: Keys.databases().collections().documents().update(),
-    mutationFn: gqlMutation(updateDocument, 'databasesUpdateDocument', { serializeData: true }),
-  },
+  // The update document entry is registered separately by hydrateMutationDefaults
+  // so it can be configured with the user's conflict resolution strategy.
   {
     mutationKey: Keys.databases().collections().documents().delete(),
     mutationFn: gqlMutation(deleteDocument, 'databasesDeleteDocument'),
@@ -71,7 +68,6 @@ export const mutationRegistry: MutationEntry[] = [
     mutationKey: Keys.databases().collections().documents().upsert(),
     mutationFn: gqlMutation(upsertDocument, 'databasesUpsertDocument', { serializeData: true }),
   },
-
   {
     mutationKey: [...Keys.databases().transactions().operations().key(), 'incrementAttribute'],
     mutationFn: gqlMutation(incrementDocumentAttribute, 'databasesIncrementDocumentAttribute'),
@@ -143,10 +139,22 @@ export const mutationRegistry: MutationEntry[] = [
  * Call once during app initialization, before rehydrating the persisted
  * mutation cache.
  */
-export function hydrateMutationDefaults(queryClient: QueryClient, client: AppwriteClient) {
+export function hydrateMutationDefaults(
+  queryClient: QueryClient,
+  client: AppwriteClient,
+  options?: { conflictStrategy?: ConflictStrategy },
+) {
   for (const entry of mutationRegistry) {
     queryClient.setMutationDefaults(entry.mutationKey, {
-      mutationFn: (variables: Vars) => entry.mutationFn(client, variables),
+      mutationFn: (variables: Vars) => entry.mutationFn(client, variables, queryClient),
+      scope: { id: 'appwrite' },
     })
   }
+
+  // Register the update document mutation with conflict resolution awareness
+  const strategy = options?.conflictStrategy ?? 'last-write-wins'
+  queryClient.setMutationDefaults(Keys.databases().collections().documents().update(), {
+    mutationFn: (variables: Vars) => conflictAwareUpdate(strategy)(client, variables, queryClient),
+    scope: { id: 'appwrite' },
+  })
 }

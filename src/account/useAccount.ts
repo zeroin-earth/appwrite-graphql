@@ -4,7 +4,7 @@ import { Channel } from 'appwrite'
 import { castDraft, produce } from 'immer'
 
 import type { getAccount } from './queryOptions'
-import { accountQueryOptions } from './queryOptions'
+import { getAccountQuery } from './queryOptions'
 import { Keys } from '../query/Keys'
 import type { AppwriteException, Models, QueryOptions, Realtime } from '../types'
 import { useAppwrite } from '../useAppwrite'
@@ -61,7 +61,7 @@ export function useAccount(opts: QueryOptions = {}) {
 }
 
 function getAccountQueryOptions(client: ReturnType<typeof useAppwrite>) {
-  return accountQueryOptions(client)
+  return getAccountQuery(client)
 }
 
 function subscribe<Preferences extends Models.Preferences>(

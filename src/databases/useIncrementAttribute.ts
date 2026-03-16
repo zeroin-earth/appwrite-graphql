@@ -79,20 +79,15 @@ export function useIncrementAttribute() {
 
       const previousEntries = queryClient.getQueriesData({ queryKey: documentKeyPrefix })
 
-      queryClient.setQueriesData(
-        { queryKey: documentKeyPrefix },
-        (old: Record<string, unknown> | undefined) => {
-          if (!old) return old
-          const current = (old[variables.attribute] as number) ?? 0
-          const increment = variables.value ?? 1
-          const newValue =
-            variables.max != null
-              ? Math.min(current + increment, variables.max)
-              : current + increment
+      queryClient.setQueryData<Variables>(documentKeyPrefix, (old) => {
+        if (!old) return old
+        const current = (old[variables.attribute] as number) ?? 0
+        const increment = variables.value ?? 1
+        const newValue =
+          variables.max != null ? Math.min(current + increment, variables.max) : current + increment
 
-          return { ...old, [variables.attribute]: newValue }
-        },
-      )
+        return { ...old, [variables.attribute]: newValue }
+      })
 
       return { previousEntries, documentKeyPrefix }
     },
