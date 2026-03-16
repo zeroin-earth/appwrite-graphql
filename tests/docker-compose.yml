@@ -139,6 +139,8 @@ services:
     depends_on:
       - redis
       - mariadb
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   openruntimes-executor:
     container_name: openruntimes-executor
