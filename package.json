@@ -1,6 +1,6 @@
 {
   "name": "@zeroin.earth/appwrite-graphql",
-  "version": "23.0.0",
+  "version": "23.0.1",
   "description": "Appwrite Graphql library, utilizing @tanstack/react-query",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
