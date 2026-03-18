@@ -17,6 +17,10 @@
       }
     },
     "./react-native": {
+      "import": {
+        "types": "./react-native/index.d.ts",
+        "default": "./react-native/index.js"
+      },
       "require": {
         "types": "./react-native/index.d.cts",
         "default": "./react-native/index.cjs"
