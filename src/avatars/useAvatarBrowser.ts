@@ -3,6 +3,10 @@ import type { Browser } from 'appwrite'
 
 import { useAppwrite } from '../useAppwrite'
 
+/**
+ * Returns a URL for a browser logo avatar image. Memoized.
+ * @param params - The browser code and optional width, height, and quality.
+ */
 export function useAvatarBrowser({
   code,
   width,

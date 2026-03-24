@@ -2,7 +2,7 @@ import type { ResultOf, VariablesOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException, QueryOptions } from '../types'
+import type { AppwriteException, Prettify, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -14,13 +14,33 @@ const getTeamPrefs = gql(/* GraphQL */ `
   }
 `)
 
-type Variables = VariablesOf<typeof getTeamPrefs>
-type Result = ResultOf<typeof getTeamPrefs>['teamsGetPrefs']
+/** The variables accepted by the {@link useTeamPrefs} hook. */
+export type TeamPrefsVariables = Prettify<VariablesOf<typeof getTeamPrefs>>
 
-export function useTeamPrefs({ teamId }: Variables, opts: QueryOptions = {}) {
+/** The result returned by the {@link useTeamPrefs} hook. */
+export type TeamPrefsResult = Prettify<ResultOf<typeof getTeamPrefs>['teamsGetPrefs']>
+
+/**
+ * Fetches the preferences for a specific team.
+ *
+ * @example
+ * ```tsx
+ * const { data, isLoading } = useTeamPrefs({
+ *   teamId: 'engineering',
+ * })
+ *
+ * // data.data — the team's preference payload
+ * ```
+ *
+ * **Parameters** ({@link TeamPrefsVariables}):
+ * - `teamId` — The unique team identifier.
+ *
+ * @returns A `UseQueryResult` with the team preferences ({@link TeamPrefsResult}).
+ */
+export function useTeamPrefs({ teamId }: TeamPrefsVariables, opts: QueryOptions = {}) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<Result, AppwriteException[], Result>({
+  const queryResult = useQuery<TeamPrefsResult, AppwriteException[], TeamPrefsResult>({
     queryKey: Keys.team(teamId).teamPrefs().key(),
     queryFn: async () => {
       const { data, errors } = await graphql.query({
@@ -37,5 +57,5 @@ export function useTeamPrefs({ teamId }: Variables, opts: QueryOptions = {}) {
     ...opts,
   })
 
-  return { ...queryResult }
+  return queryResult
 }

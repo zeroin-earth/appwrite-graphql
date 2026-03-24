@@ -77,7 +77,9 @@ describe('useSignUp', () => {
 
     // Request email verification
     await act(async () => {
-      result.current.verifyEmail.mutate({ verifyUrl: 'http://localhost/verify' })
+      result.current.verifyEmail.mutate({
+        verifyUrl: 'http://localhost/verify',
+      })
     })
 
     await waitFor(() => {
@@ -268,7 +270,9 @@ describe('useAccount', () => {
     })
 
     // Step 2: Fetch account data
-    const { result: accountResult } = renderHook(() => useAccount(), { wrapper })
+    const { result: accountResult } = renderHook(() => useAccount(), {
+      wrapper,
+    })
 
     await waitFor(() => {
       expect(accountResult.current.isSuccess).toBe(true)
@@ -367,7 +371,9 @@ describe('useCreateAnonymousSession', () => {
     const queryClient = createQueryClient()
     const wrapper = createWrapper({ queryClient })
 
-    const { result } = renderHook(() => useCreateAnonymousSession(), { wrapper })
+    const { result } = renderHook(() => useCreateAnonymousSession(), {
+      wrapper,
+    })
 
     expect(result.current.isIdle).toBe(true)
 
@@ -391,7 +397,9 @@ describe('useCreateAnonymousSession', () => {
     const queryClient = createQueryClient()
     const wrapper = createWrapper({ queryClient })
 
-    const { result } = renderHook(() => useCreateAnonymousSession(), { wrapper })
+    const { result } = renderHook(() => useCreateAnonymousSession(), {
+      wrapper,
+    })
 
     expect(typeof result.current.mutate).toBe('function')
     expect(typeof result.current.mutateAsync).toBe('function')
@@ -423,7 +431,9 @@ describe('auth lifecycle', () => {
     })
 
     // 2. Fetch account
-    const { result: accountResult } = renderHook(() => useAccount(), { wrapper })
+    const { result: accountResult } = renderHook(() => useAccount(), {
+      wrapper,
+    })
 
     await waitFor(() => {
       expect(accountResult.current.isSuccess).toBe(true)

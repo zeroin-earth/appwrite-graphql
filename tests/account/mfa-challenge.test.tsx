@@ -3,6 +3,8 @@ import { act, renderHook, waitFor } from '@testing-library/react'
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 
 import {
+  AuthenticationFactor,
+  AuthenticatorType,
   useCreateMfaChallenge,
   useCreateMfaRecoveryCodes,
   useDeleteMfaAuthenticator,
@@ -46,7 +48,9 @@ describe('MFA (Multi-Factor Authentication) Challenge', () => {
   afterAll(async () => {
     try {
       // Attempt to disable MFA in case a test failed mid-flow
-      const { result: mfaResult } = renderHook(() => useUpdateMfa(), { wrapper })
+      const { result: mfaResult } = renderHook(() => useUpdateMfa(), {
+        wrapper,
+      })
       await act(async () => {
         await mfaResult.current.mutateAsync({ mfa: false })
       })
@@ -64,7 +68,7 @@ describe('MFA (Multi-Factor Authentication) Challenge', () => {
     })
 
     await act(async () => {
-      await createMfaChallengeResult.current.mutateAsync({ factor: 'totp' })
+      await createMfaChallengeResult.current.mutateAsync({ factor: AuthenticationFactor.Totp })
     })
 
     await waitFor(() => expect(createMfaChallengeResult.current.isSuccess).toBe(true))
@@ -95,7 +99,9 @@ describe('MFA (Multi-Factor Authentication) Challenge', () => {
   })
 
   test('useGetMfaRecoveryCodes', async () => {
-    const { result: codes } = renderHook(() => useCreateMfaRecoveryCodes(), { wrapper })
+    const { result: codes } = renderHook(() => useCreateMfaRecoveryCodes(), {
+      wrapper,
+    })
 
     await act(async () => {
       await codes.current.mutateAsync()
@@ -133,7 +139,7 @@ describe('MFA (Multi-Factor Authentication) Challenge', () => {
     )
 
     await act(async () => {
-      await createResult.current.mutateAsync({ factor: 'recoveryCode' })
+      await createResult.current.mutateAsync({ factor: AuthenticationFactor.Recoverycode })
     })
 
     await waitFor(() => expect(createResult.current.isSuccess).toBe(true))
@@ -157,7 +163,9 @@ describe('MFA (Multi-Factor Authentication) Challenge', () => {
   })
 
   test('useUpdateMfaRecoveryCodes', async () => {
-    const { result } = renderHook(() => useUpdateMfaRecoveryCodes(), { wrapper })
+    const { result } = renderHook(() => useUpdateMfaRecoveryCodes(), {
+      wrapper,
+    })
 
     await act(async () => {
       await result.current.mutateAsync()
@@ -177,10 +185,12 @@ describe('MFA (Multi-Factor Authentication) Challenge', () => {
   })
 
   test('useDeleteMfaAuthenticator', async () => {
-    const { result } = renderHook(() => useDeleteMfaAuthenticator(), { wrapper })
+    const { result } = renderHook(() => useDeleteMfaAuthenticator(), {
+      wrapper,
+    })
 
     await act(async () => {
-      await result.current.mutateAsync({ type: 'totp' })
+      await result.current.mutateAsync({ type: AuthenticatorType.Totp })
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))

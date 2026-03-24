@@ -125,7 +125,10 @@ describe('useUpdatePassword', () => {
     const { result } = renderHook(() => useUpdatePassword(), { wrapper })
 
     await act(async () => {
-      await result.current.mutateAsync({ password: newPassword, oldPassword: password })
+      await result.current.mutateAsync({
+        password: newPassword,
+        oldPassword: password,
+      })
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -164,7 +167,9 @@ describe('useUpdatePrefs', () => {
     const { result } = renderHook(() => useUpdatePrefs(), { wrapper })
 
     await act(async () => {
-      await result.current.mutateAsync({ prefs: { theme: 'dark', fontSize: 14 } })
+      await result.current.mutateAsync({
+        prefs: { theme: 'dark', fontSize: 14 },
+      })
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -176,16 +181,22 @@ describe('useUpdatePrefs', () => {
     await loginUser(email, password, wrapper)
 
     // First, set prefs so there is something to read back
-    const { result: updateResult } = renderHook(() => useUpdatePrefs(), { wrapper })
+    const { result: updateResult } = renderHook(() => useUpdatePrefs(), {
+      wrapper,
+    })
 
     await act(async () => {
-      await updateResult.current.mutateAsync({ prefs: { theme: 'light', notifications: true } })
+      await updateResult.current.mutateAsync({
+        prefs: { theme: 'light', notifications: true },
+      })
     })
 
     await waitFor(() => expect(updateResult.current.isSuccess).toBe(true))
 
     // Now query prefs
-    const { result: prefsResult } = renderHook(() => useGetPrefs(), { wrapper })
+    const { result: prefsResult } = renderHook(() => useGetPrefs(), {
+      wrapper,
+    })
 
     await waitFor(() => expect(prefsResult.current.isSuccess).toBe(true))
 

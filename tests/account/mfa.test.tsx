@@ -3,6 +3,7 @@ import { act, renderHook, waitFor } from '@testing-library/react'
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 
 import {
+  AuthenticatorType,
   useCreateMfaAuthenticator,
   useCreateMfaRecoveryCodes,
   useListMfaFactors,
@@ -39,7 +40,9 @@ describe('MFA (Multi-Factor Authentication)', () => {
   afterAll(async () => {
     try {
       // Attempt to disable MFA in case a test failed mid-flow
-      const { result: mfaResult } = renderHook(() => useUpdateMfa(), { wrapper })
+      const { result: mfaResult } = renderHook(() => useUpdateMfa(), {
+        wrapper,
+      })
       await act(async () => {
         await mfaResult.current.mutateAsync({ mfa: false })
       })
@@ -65,10 +68,12 @@ describe('MFA (Multi-Factor Authentication)', () => {
   })
 
   test('useCreateMfaAuthenticator – creates a TOTP authenticator', async () => {
-    const { result } = renderHook(() => useCreateMfaAuthenticator(), { wrapper })
+    const { result } = renderHook(() => useCreateMfaAuthenticator(), {
+      wrapper,
+    })
 
     await act(async () => {
-      await result.current.mutateAsync({ type: 'totp' })
+      await result.current.mutateAsync({ type: AuthenticatorType.Totp })
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -86,10 +91,12 @@ describe('MFA (Multi-Factor Authentication)', () => {
   test('useUpdateMfaAuthenticator – verifies the TOTP authenticator', async () => {
     const otp = generateTOTP(totpSecret)
 
-    const { result } = renderHook(() => useUpdateMfaAuthenticator(), { wrapper })
+    const { result } = renderHook(() => useUpdateMfaAuthenticator(), {
+      wrapper,
+    })
 
     await act(async () => {
-      await result.current.mutateAsync({ type: 'totp', otp })
+      await result.current.mutateAsync({ type: AuthenticatorType.Totp, otp })
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -108,7 +115,9 @@ describe('MFA (Multi-Factor Authentication)', () => {
   })
 
   test('useCreateMfaRecoveryCodes – generates recovery codes', async () => {
-    const { result } = renderHook(() => useCreateMfaRecoveryCodes(), { wrapper })
+    const { result } = renderHook(() => useCreateMfaRecoveryCodes(), {
+      wrapper,
+    })
 
     await act(async () => {
       await result.current.mutateAsync()

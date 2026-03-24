@@ -2,6 +2,11 @@ import { useMemo } from 'react'
 
 import { useAppwrite } from '../useAppwrite'
 
+/**
+ * Returns a URL for viewing a file in the browser.
+ * Memoized to avoid unnecessary recomputation.
+ * @param params - The bucket ID, file ID, and optional access token.
+ */
 export function useFileView({
   bucketId,
   fileId,

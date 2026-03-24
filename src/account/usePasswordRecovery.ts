@@ -2,7 +2,7 @@ import type { ResultOf, VariablesOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException } from '../types'
+import type { AppwriteException, Prettify } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 
@@ -14,16 +14,46 @@ const createRecovery = gql(/* GraphQL */ `
   }
 `)
 
-type Variables = VariablesOf<typeof createRecovery>
-type Result = ResultOf<typeof createRecovery>['accountCreateRecovery']
+/** The variables accepted by the {@link usePasswordRecovery} mutation. */
+export type PasswordRecoveryVariables = Prettify<VariablesOf<typeof createRecovery>>
+/** The result returned by the {@link usePasswordRecovery} mutation. */
+export type PasswordRecoveryResult = Prettify<
+  ResultOf<typeof createRecovery>['accountCreateRecovery']
+>
 
 /**
- * Send the recovery email to the address supplied
+ * Sends a password recovery email to the supplied address.
+ *
+ * Mutation hook to send a password recovery email. On success, stores
+ * the email in `localStorage` for convenience during the reset flow
+ * (silently skipped in React Native environments). The recovery URL
+ * receives `userId` and `secret` query parameters for use with
+ * {@link useResetPassword}.
+ *
+ * @example
+ * ```tsx
+ * const { mutate, isPending } = usePasswordRecovery()
+ *
+ * mutate({
+ *   email: 'user@example.com',
+ *   url: 'https://example.com/reset-password',
+ * })
+ * ```
+ *
+ * **Variables** ({@link PasswordRecoveryVariables}):
+ * - `email` — The email address to send the recovery link to
+ * - `url` — The URL of the password reset page in your application
+ *
+ * @returns A `UseMutationResult` with the recovery token's `expire` timestamp.
  */
 export function usePasswordRecovery() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useMutation<Result, AppwriteException[], Variables>({
+  const queryResult = useMutation<
+    PasswordRecoveryResult,
+    AppwriteException[],
+    PasswordRecoveryVariables
+  >({
     mutationKey: Keys.account().recovery().create(),
     mutationFn: async ({ email, url: resetUrl }) => {
       const { data, errors } = await graphql.mutation({
@@ -52,5 +82,5 @@ export function usePasswordRecovery() {
     },
   })
 
-  return { ...queryResult }
+  return queryResult
 }

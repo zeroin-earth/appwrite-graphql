@@ -7,6 +7,7 @@ import { TOTP } from 'otpauth'
 
 import type { createWrapper } from './wrapper'
 import {
+  AuthenticatorType,
   useCreateMfaAuthenticator,
   useLogin,
   useLogout,
@@ -84,7 +85,12 @@ export async function createTestUser(opts?: { name?: string }) {
   const name = opts?.name || `Test User ${_userCounter}`
 
   const { users } = createServerClient()
-  const user = await users.create({ userId: ID.unique(), email, password, name })
+  const user = await users.create({
+    userId: ID.unique(),
+    email,
+    password,
+    name,
+  })
 
   return { userId: user.$id, email, password, name }
 }
@@ -194,7 +200,9 @@ export async function setupOTP(wrapper: ReturnType<typeof createWrapper>) {
     wrapper,
   })
   await act(async () => {
-    await createMfaAuthenticatorResult.current.mutateAsync({ type: 'totp' })
+    await createMfaAuthenticatorResult.current.mutateAsync({
+      type: AuthenticatorType.Totp,
+    })
   })
   await waitForTest(() => expect(createMfaAuthenticatorResult.current.isSuccess).toBe(true))
 
@@ -206,7 +214,10 @@ export async function setupOTP(wrapper: ReturnType<typeof createWrapper>) {
   })
 
   await act(async () => {
-    await updateMfaAuthenticatorResult.current.mutateAsync({ type: 'totp', otp })
+    await updateMfaAuthenticatorResult.current.mutateAsync({
+      type: AuthenticatorType.Totp,
+      otp,
+    })
   })
 
   await waitForTest(() => expect(updateMfaAuthenticatorResult.current.isSuccess).toBe(true))

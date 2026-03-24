@@ -2,7 +2,7 @@ import type { ResultOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException } from '../types'
+import type { AppwriteException, Prettify } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -27,8 +27,29 @@ const listFiles = gql(/* GraphQL */ `
   }
 `)
 
-type Result = ResultOf<typeof listFiles>['storageListFiles']
+/** The result returned by the {@link useFiles} hook. */
+export type FilesResult = Prettify<ResultOf<typeof listFiles>['storageListFiles']>
 
+/**
+ * Fetches a list of files from a storage bucket with optional query filters and search.
+ *
+ * @example
+ * ```tsx
+ * const { data, isLoading } = useFiles({
+ *   bucketId: 'images',
+ *   queries: ['limit(25)'],
+ * })
+ *
+ * // data.total, data.files
+ * ```
+ *
+ * **Parameters:**
+ * - `bucketId` — The storage bucket identifier.
+ * - `queries` *(optional)* — Appwrite query strings for filtering and pagination.
+ * - `search` *(optional)* — A search term to filter files by name.
+ *
+ * @returns A `UseQueryResult` with the paginated file list ({@link FilesResult}).
+ */
 export function useFiles({
   bucketId,
   queries,
@@ -40,8 +61,12 @@ export function useFiles({
 }) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<Result, AppwriteException[], Result>({
-    queryKey: [...Keys.bucket(bucketId).files().key(), ...(queries ?? []), ...(search ? [search] : [])],
+  const queryResult = useQuery<FilesResult, AppwriteException[], FilesResult>({
+    queryKey: [
+      ...Keys.bucket(bucketId).files().key(),
+      ...(queries ?? []),
+      ...(search ? [search] : []),
+    ],
     queryFn: async () => {
       const { data, errors } = await graphql.query({
         query: listFiles,
@@ -56,5 +81,5 @@ export function useFiles({
     },
   })
 
-  return { ...queryResult }
+  return queryResult
 }

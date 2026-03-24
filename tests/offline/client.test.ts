@@ -11,7 +11,11 @@ describe('Offline Client', () => {
         projectId: 'projectId',
         networkAdapter: { listen: mock() },
         storage: localStorage,
-        persister: { persistClient: mock(), restoreClient: mock(), removeClient: mock() },
+        persister: {
+          persistClient: mock(),
+          restoreClient: mock(),
+          removeClient: mock(),
+        },
       }),
     ).toThrow('Provide either `storage` or `persister`, not both.')
   })

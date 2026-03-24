@@ -4,7 +4,7 @@ import { Channel } from 'appwrite'
 import { getCollectionQuery } from './queryOptions'
 import type { Collection, Document } from './types'
 import { Keys } from '../query/Keys'
-import type { AppwriteException, QueryOptions } from '../types'
+import type { AppwriteException, Prettify, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 import { useQueryClient } from '../useQueryClient'
@@ -12,14 +12,14 @@ import { useSuspenseQuery } from '../useSuspenseQuery'
 
 type DocumentOperation = 'create' | 'update' | 'delete'
 
-type CollectionParams<TDocument = Record<string, string | number | boolean | null>> = {
+type CollectionParams<TDocument = Record<string, string | number | boolean | null>> = Prettify<{
   databaseId: string
   collectionId: string
   queries?: string[]
   transactionId?: string
   subscribe?: boolean
   fields?: (keyof TDocument & string)[]
-}
+}>
 
 function useCollectionQueryConfig<TDocument>({
   databaseId,
@@ -84,6 +84,32 @@ function useCollectionRealtime<TDocument>(
   }, [databaseId, collectionId, realtime, queryClient, queriesKey, subscribe])
 }
 
+/**
+ * Fetches a collection of documents with optional real-time subscription (enabled by default).
+ * Returns `documents` and `total` alongside the standard query result.
+ *
+ * @typeParam TDocument - The shape of each document's custom attributes.
+ *
+ * @example
+ * ```tsx
+ * const { documents, total, isLoading } = useCollection({
+ *   databaseId: 'my-db',
+ *   collectionId: 'my-collection',
+ *   queries: [Query.equal('status', 'active')],
+ * })
+ * ```
+ *
+ * **Parameters** (`CollectionParams`):
+ * - `databaseId` — The database ID
+ * - `collectionId` — The collection ID
+ * - `queries` — Optional query filters (defaults to `[]`)
+ * - `transactionId` — Optional transaction ID for atomic reads
+ * - `subscribe` — Whether to subscribe to real-time updates (defaults to `true`)
+ * - `fields` — Optional array of document fields to select
+ *
+ * @returns A `UseQueryResult` with the collection data as `Collection<TDocument>`, plus
+ *   convenience accessors `documents` and `total`.
+ */
 export function useCollection<TDocument>(
   {
     databaseId,
@@ -117,6 +143,30 @@ export function useCollection<TDocument>(
   }
 }
 
+/**
+ * Suspense variant of {@link useCollection}. Suspends the component while loading.
+ *
+ * @typeParam TDocument - The shape of each document's custom attributes.
+ *
+ * @example
+ * ```tsx
+ * const { documents, total } = useSuspenseCollection({
+ *   databaseId: 'my-db',
+ *   collectionId: 'my-collection',
+ * })
+ * ```
+ *
+ * **Parameters** (`CollectionParams`):
+ * - `databaseId` — The database ID
+ * - `collectionId` — The collection ID
+ * - `queries` — Optional query filters
+ * - `transactionId` — Optional transaction ID for atomic reads
+ * - `subscribe` — Whether to subscribe to real-time updates (defaults to `true`)
+ * - `fields` — Optional array of document fields to select
+ *
+ * @returns A `UseSuspenseQueryResult` with the collection data as `Collection<TDocument>`, plus
+ *   convenience accessors `documents` and `total`.
+ */
 export function useSuspenseCollection<TDocument>(
   {
     databaseId,

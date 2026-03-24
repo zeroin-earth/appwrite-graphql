@@ -2,7 +2,7 @@ import type { ResultOf, VariablesOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException } from '../types'
+import type { AppwriteException, Prettify } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -18,14 +18,44 @@ const accountUpdatePushTarget = gql(/* GraphQL */ `
   }
 `)
 
-type Variables = VariablesOf<typeof accountUpdatePushTarget>
-type Result = ResultOf<typeof accountUpdatePushTarget>['accountUpdatePushTarget']
+/** The variables accepted by the {@link useUpdatePushTarget} mutation. */
+export type UpdatePushTargetVariables = Prettify<VariablesOf<typeof accountUpdatePushTarget>>
+/** The result returned by the {@link useUpdatePushTarget} mutation. */
+export type UpdatePushTargetResult = Prettify<
+  ResultOf<typeof accountUpdatePushTarget>['accountUpdatePushTarget']
+>
 
+/**
+ * Mutation hook to update a push notification target's identifier.
+ *
+ * Replaces the device token on an existing push target. Invalidates
+ * account queries on success.
+ *
+ * @example
+ * ```tsx
+ * const { mutate, isPending } = useUpdatePushTarget()
+ *
+ * mutate({
+ *   targetId: 'target-123',
+ *   identifier: 'new-fcm-device-token',
+ * })
+ * ```
+ *
+ * **Variables** ({@link UpdatePushTargetVariables}):
+ * - `targetId` — The ID of the push target to update
+ * - `identifier` — The new device token or registration ID
+ *
+ * @returns A `UseMutationResult` with the push target's `_id`, `userId`, `providerType`, and `identifier`.
+ */
 export function useUpdatePushTarget() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useMutation<Result, AppwriteException[], Variables>({
+  const queryResult = useMutation<
+    UpdatePushTargetResult,
+    AppwriteException[],
+    UpdatePushTargetVariables
+  >({
     mutationKey: Keys.account().pushTarget().update(),
     mutationFn: async ({ targetId, identifier }) => {
       const { data, errors } = await graphql.mutation({
@@ -47,5 +77,5 @@ export function useUpdatePushTarget() {
     },
   })
 
-  return { ...queryResult }
+  return queryResult
 }

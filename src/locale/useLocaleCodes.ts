@@ -2,7 +2,7 @@ import type { ResultOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException } from '../types'
+import type { AppwriteException, Prettify } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -18,12 +18,25 @@ const listLocaleCodes = gql(/* GraphQL */ `
   }
 `)
 
-type Result = ResultOf<typeof listLocaleCodes>['localeListCodes']
+/** The result returned by the {@link useLocaleCodes} hook. */
+export type LocaleCodesResult = Prettify<ResultOf<typeof listLocaleCodes>['localeListCodes']>
 
+/**
+ * Fetches the list of available locale codes.
+ *
+ * @example
+ * ```tsx
+ * const { data, isLoading } = useLocaleCodes()
+ *
+ * // data.localeCodes — array of { code, name }
+ * ```
+ *
+ * @returns A `UseQueryResult` with the available locale codes ({@link LocaleCodesResult}).
+ */
 export function useLocaleCodes() {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<Result, AppwriteException[], Result>({
+  const queryResult = useQuery<LocaleCodesResult, AppwriteException[], LocaleCodesResult>({
     queryKey: Keys.locale().codes(),
     queryFn: async () => {
       const { data, errors } = await graphql.query({
@@ -38,5 +51,5 @@ export function useLocaleCodes() {
     },
   })
 
-  return { ...queryResult }
+  return queryResult
 }

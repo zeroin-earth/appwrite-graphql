@@ -5,7 +5,7 @@ import { graphql as gql } from 'gql.tada'
 import type { ConflictStrategy } from '../offline'
 import { conflictAwareUpdate } from '../offline/mutations/conflictAwareUpdate'
 import { Keys } from '../query/Keys'
-import type { AppwriteException } from '../types'
+import type { AppwriteException, Prettify } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -33,28 +33,70 @@ export const upsertDocument = gql(/* GraphQL */ `
 `)
 
 type Variables = VariablesOf<typeof upsertDocument>
-type Result = ResultOf<typeof upsertDocument>['databasesUpsertDocument']
+/** The result returned by the {@link useUpsertDocument} mutation. */
+export type UpsertDocumentResult = Prettify<
+  ResultOf<typeof upsertDocument>['databasesUpsertDocument']
+>
 
-type UpsertDocumentVariables = Omit<Variables, 'permissions'> & {
-  permissions?: string[] | null
-}
+/** The variables accepted by the {@link useUpsertDocument} mutation. */
+export type UpsertDocumentVariables = Prettify<
+  Omit<Variables, 'permissions'> & {
+    permissions?: string[] | null
+  }
+>
 
-type MutationContext = {
+/** The optimistic-update context used by the {@link useUpsertDocument} mutation. */
+export type UpsertDocumentMutationContext = {
   previousEntries: [queryKey: readonly unknown[], data: unknown][]
   documentKeyPrefix: readonly unknown[]
   baseSnapshot: Record<string, unknown> | undefined
   willPerformOfflineMutation: boolean
 }
 
+/**
+ * Mutation hook to create or update a document (upsert) with optimistic updates.
+ *
+ * Supports offline conflict resolution and rolls back on error. When the device is
+ * offline, mutations are queued and replayed when connectivity returns. A
+ * `conflictStrategy` (configured via the offline client) controls how conflicts
+ * between the optimistic base snapshot and the server state are resolved.
+ *
+ * @example
+ * ```tsx
+ * const { mutate, isPending } = useUpsertDocument()
+ *
+ * mutate({
+ *   databaseId: 'my-db',
+ *   collectionId: 'my-collection',
+ *   documentId: 'doc-456',
+ *   data: { name: 'Alice', score: 100 },
+ *   permissions: ['read("any")'],
+ * })
+ * ```
+ *
+ * **Variables** ({@link UpsertDocumentVariables}):
+ * - `databaseId` — The target database ID
+ * - `collectionId` — The target collection ID
+ * - `documentId` — Unique document ID — creates the document if it doesn't exist, updates it otherwise
+ * - `data` — The document data as a JSON-serializable object
+ * - `permissions` — Optional array of permission strings, or `null`
+ * - `transactionId` — Optional transaction ID for atomic operations
+ *
+ * An optional `conflictStrategy` can be configured through the offline client to
+ * control conflict resolution (e.g. `'last-write-wins'`, `'server-wins'`, or a
+ * custom three-way merge function).
+ *
+ * @returns A `UseMutationResult` with the upserted document's `_id`.
+ */
 export function useUpsertDocument() {
   const appwrite = useAppwrite()
   const queryClient = useQueryClient()
 
   const mutationResult = useMutation<
-    Result,
+    UpsertDocumentResult,
     AppwriteException[],
     UpsertDocumentVariables,
-    MutationContext
+    UpsertDocumentMutationContext
   >({
     mutationKey: Keys.databases().collections().documents().upsert(),
     mutationFn: async (
@@ -73,9 +115,16 @@ export function useUpsertDocument() {
             ctx.meta.conflictStrategy as ConflictStrategy,
           )(
             appwrite,
-            { databaseId, collectionId, documentId, data, permissions, transactionId },
+            {
+              databaseId,
+              collectionId,
+              documentId,
+              data,
+              permissions,
+              transactionId,
+            },
             queryClient,
-          )) as Result
+          )) as UpsertDocumentResult
 
           return updateData
         } catch (error) {
@@ -110,7 +159,9 @@ export function useUpsertDocument() {
 
       await queryClient.cancelQueries({ queryKey: documentKeyPrefix })
 
-      const previousEntries = queryClient.getQueriesData({ queryKey: documentKeyPrefix })
+      const previousEntries = queryClient.getQueriesData({
+        queryKey: documentKeyPrefix,
+      })
 
       const baseSnapshot = previousEntries.find(([, data]) => data != null)?.[1] as
         | Record<string, unknown>
@@ -147,5 +198,5 @@ export function useUpsertDocument() {
     },
   })
 
-  return { ...mutationResult }
+  return mutationResult
 }

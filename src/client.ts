@@ -46,6 +46,20 @@ const graphqlObject = (graphqlAppwrite: Graphql) => ({
   },
 })
 
+/**
+ * Creates and configures an Appwrite client with all service instances.
+ *
+ * @param config - The Appwrite connection config with `endpoint` and `projectId`.
+ * @returns An object containing `client`, `account`, `avatars`, `realtime`, `storage`, `graphql`, `databases`, `functions`, `locale`, `messaging`, `tablesDB`, and `teams`.
+ *
+ * @example
+ * ```ts
+ * const client = createAppwriteClient({
+ *   endpoint: 'https://cloud.appwrite.io/v1',
+ *   projectId: 'my-project',
+ * })
+ * ```
+ */
 export function createAppwriteClient({
   endpoint,
   projectId,

@@ -12,3 +12,20 @@ export { useCreateMembership } from './useCreateMembership'
 export { useUpdateMembership } from './useUpdateMembership'
 export { useUpdateMembershipStatus } from './useUpdateMembershipStatus'
 export { useDeleteMembership } from './useDeleteMembership'
+
+export type { TeamVariables, TeamResult } from './useTeam'
+export type { TeamsResult } from './useTeams'
+export type { TeamPrefsVariables, TeamPrefsResult } from './useTeamPrefs'
+export type { TeamMembershipVariables, TeamMembershipResult } from './useTeamMembership'
+export type { TeamMembershipsResult } from './useTeamMemberships'
+export type { CreateTeamVariables, CreateTeamResult } from './useCreateTeam'
+export type { UpdateTeamNameVariables, UpdateTeamNameResult } from './useUpdateTeamName'
+export type { UpdateTeamPrefsVariables, UpdateTeamPrefsResult } from './useUpdateTeamPrefs'
+export type { DeleteTeamVariables, DeleteTeamResult } from './useDeleteTeam'
+export type { CreateMembershipVariables, CreateMembershipResult } from './useCreateMembership'
+export type { UpdateMembershipVariables, UpdateMembershipResult } from './useUpdateMembership'
+export type {
+  UpdateMembershipStatusVariables,
+  UpdateMembershipStatusResult,
+} from './useUpdateMembershipStatus'
+export type { DeleteMembershipVariables, DeleteMembershipResult } from './useDeleteMembership'

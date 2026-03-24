@@ -6,20 +6,36 @@ import { castDraft, produce } from 'immer'
 import type { getAccount } from './queryOptions'
 import { getAccountQuery } from './queryOptions'
 import { Keys } from '../query/Keys'
-import type { AppwriteException, Models, QueryOptions, Realtime } from '../types'
+import type { AppwriteException, Models, Prettify, QueryOptions, Realtime } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useLazyQuery } from '../useLazyQuery'
 import { useQuery } from '../useQuery'
 import { useQueryClient } from '../useQueryClient'
 
-type Result = ResultOf<typeof getAccount>['accountGet']
+/** The result returned by the {@link useAccount} query. */
+export type AccountResult = Prettify<ResultOf<typeof getAccount>['accountGet']>
 
+/**
+ * Lazily fetches the current authenticated user's account. The query is
+ * disabled until `run()` is called. Subscribes to real-time account updates
+ * once activated.
+ *
+ * @example
+ * ```tsx
+ * const { data, run, isLoading } = useLazyAccount()
+ *
+ * // Call run() to trigger the query
+ * run()
+ * ```
+ *
+ * @returns A lazy query result with a `run()` function to trigger fetching ({@link AccountResult}).
+ */
 export function useLazyAccount() {
   const client = useAppwrite()
   const queryClient = useQueryClient()
   const [isActive, setIsActive] = useState(false)
 
-  const queryResult = useLazyQuery<Result, AppwriteException[], Result>(
+  const queryResult = useLazyQuery<AccountResult, AppwriteException[], AccountResult>(
     getAccountQueryOptions(client),
   )
 
@@ -41,11 +57,23 @@ export function useLazyAccount() {
   }
 }
 
+/**
+ * Fetches the current authenticated user's account and subscribes to
+ * real-time updates.
+ *
+ * @example
+ * ```tsx
+ * const { data, isLoading } = useAccount()
+ * ```
+ *
+ * @param opts - Optional query options to customize caching, refetching, etc.
+ * @returns A `UseQueryResult` with the authenticated user's account ({@link AccountResult}).
+ */
 export function useAccount(opts: QueryOptions = {}) {
   const client = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useQuery<Result, AppwriteException[], Result>({
+  const queryResult = useQuery<AccountResult, AppwriteException[], AccountResult>({
     ...getAccountQueryOptions(client),
     ...opts,
   })

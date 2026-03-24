@@ -5,7 +5,7 @@ import { graphql as gql } from 'gql.tada'
 import type { ConflictStrategy } from '../offline/conflictResolution/types'
 import { conflictAwareUpdate } from '../offline/mutations/conflictAwareUpdate'
 import { Keys } from '../query/Keys'
-import type { AppwriteException } from '../types'
+import type { AppwriteException, Prettify } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -33,28 +33,70 @@ export const updateDocument = gql(/* GraphQL */ `
 `)
 
 type Variables = VariablesOf<typeof updateDocument>
-type Result = ResultOf<typeof updateDocument>['databasesUpdateDocument']
+/** The result returned by the {@link useUpdateDocument} mutation. */
+export type UpdateDocumentResult = Prettify<
+  ResultOf<typeof updateDocument>['databasesUpdateDocument']
+>
 
-type UpdateDocumentVariables = Omit<Variables, 'permissions'> & {
-  permissions?: string[] | null
-}
+/** The variables accepted by the {@link useUpdateDocument} mutation. */
+export type UpdateDocumentVariables = Prettify<
+  Omit<Variables, 'permissions'> & {
+    permissions?: string[] | null
+  }
+>
 
-type MutationContext = {
+/** The optimistic-update context used by the {@link useUpdateDocument} mutation. */
+export type UpdateDocumentMutationContext = {
   previousEntries: [queryKey: readonly unknown[], data: unknown][]
   documentKeyPrefix: readonly unknown[]
   baseSnapshot: Record<string, unknown> | undefined
   willPerformOfflineMutation: boolean
 }
 
+/**
+ * Mutation hook to update an existing document with optimistic updates.
+ *
+ * Supports offline conflict resolution and rolls back optimistic updates on error.
+ * When the device is offline, mutations are queued and replayed when connectivity
+ * returns. A `conflictStrategy` (configured via the offline client) controls how
+ * conflicts between the optimistic base snapshot and the server state are resolved.
+ *
+ * @example
+ * ```tsx
+ * const { mutate, isPending } = useUpdateDocument()
+ *
+ * mutate({
+ *   databaseId: 'my-db',
+ *   collectionId: 'my-collection',
+ *   documentId: 'doc-123',
+ *   data: { name: 'Jane', age: 31 },
+ *   permissions: ['read("any")', 'write("user:alice")'],
+ * })
+ * ```
+ *
+ * **Variables** ({@link UpdateDocumentVariables}):
+ * - `databaseId` — The target database ID
+ * - `collectionId` — The target collection ID
+ * - `documentId` — The ID of the document to update
+ * - `data` — Optional partial document data to merge into the existing document
+ * - `permissions` — Optional array of permission strings, or `null`
+ * - `transactionId` — Optional transaction ID for atomic operations
+ *
+ * An optional `conflictStrategy` can be configured through the offline client to
+ * control conflict resolution (e.g. `'last-write-wins'`, `'server-wins'`, or a
+ * custom three-way merge function).
+ *
+ * @returns A `UseMutationResult` with the updated document's `_id`.
+ */
 export function useUpdateDocument() {
   const appwrite = useAppwrite()
   const queryClient = useQueryClient()
 
   const mutationResult = useMutation<
-    Result,
+    UpdateDocumentResult,
     AppwriteException[],
     UpdateDocumentVariables,
-    MutationContext
+    UpdateDocumentMutationContext
   >({
     mutationKey: Keys.databases().collections().documents().update(),
     mutationFn: async (
@@ -73,9 +115,16 @@ export function useUpdateDocument() {
             ctx.meta.conflictStrategy as ConflictStrategy,
           )(
             appwrite,
-            { databaseId, collectionId, documentId, data, permissions, transactionId },
+            {
+              databaseId,
+              collectionId,
+              documentId,
+              data,
+              permissions,
+              transactionId,
+            },
             queryClient,
-          )) as Result
+          )) as UpdateDocumentResult
 
           return updateData
         } catch (error) {
@@ -110,7 +159,9 @@ export function useUpdateDocument() {
 
       await queryClient.cancelQueries({ queryKey: documentKeyPrefix })
 
-      const previousEntries = queryClient.getQueriesData({ queryKey: documentKeyPrefix })
+      const previousEntries = queryClient.getQueriesData({
+        queryKey: documentKeyPrefix,
+      })
 
       // Capture a deep copy of the document before optimistic update.
       // This snapshot is persisted in MutationState.context through
@@ -151,5 +202,5 @@ export function useUpdateDocument() {
     },
   })
 
-  return { ...mutationResult }
+  return mutationResult
 }

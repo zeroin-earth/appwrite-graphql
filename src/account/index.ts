@@ -1,49 +1,168 @@
 export { getAccountQuery } from './queryOptions'
-export { useAccount, useLazyAccount } from './useAccount'
-export { useCreateAnonymousSession } from './useCreateAnonymousSession'
-export { useCreateEmailToken } from './useCreateEmailToken'
-export { useCreateJWT, useSuspenseCreateJWT } from './useCreateJWT'
-export { useCreateMagicURLToken } from './useCreateMagicURLToken'
-export { useCreateMfaAuthenticator } from './useCreateMfaAuthenticator'
-export { useCreateMfaChallenge } from './useCreateMfaChallenge'
-export { useCreateMfaRecoveryCodes } from './useCreateMfaRecoveryCodes'
-export { useCreateOAuth2Token } from './useCreateOAuth2Token'
-export { useCreatePhoneToken } from './useCreatePhoneToken'
-export { useCreatePhoneVerification } from './useCreatePhoneVerification'
-export { useCreatePushTarget } from './useCreatePushTarget'
-export { useCreateSession } from './useCreateSession'
-export { useCreateEmailVerification } from './useCreateEmailVerification'
-export { useDeleteIdentity } from './useDeleteIdentity'
-export { useDeleteMfaAuthenticator } from './useDeleteMfaAuthenticator'
-export { useDeletePushTarget } from './useDeletePushTarget'
-export { useDeleteSession } from './useDeleteSession'
-export { useDeleteSessions } from './useDeleteSessions'
-export { useGetMfaRecoveryCodes } from './useGetMfaRecoveryCodes'
-export { useGetPrefs } from './useGetPrefs'
-export { useGetSession } from './useGetSession'
-export { useListIdentities } from './useListIdentities'
-export { useListMfaFactors } from './useListMfaFactors'
-export { useListSessions } from './useListSessions'
-export { useLogin } from './useLogin'
-export { useLogout } from './useLogout'
-export { useLogs } from './useLogs'
-export { usePasswordRecovery } from './usePasswordRecovery'
-export { useResetPassword } from './useResetPassword'
-export { useSignUp } from './useSignUp'
-export { useUpdateEmail } from './useUpdateEmail'
-export { useUpdateEmailVerification } from './useUpdateEmailVerification'
-export { useUpdateMagicURLSession } from './useUpdateMagicURLSession'
-export { useUpdateMfa } from './useUpdateMfa'
-export { useUpdateMfaAuthenticator } from './useUpdateMfaAuthenticator'
-export { useUpdateMfaChallenge } from './useUpdateMfaChallenge'
-export { useUpdateMfaRecoveryCodes } from './useUpdateMfaRecoveryCodes'
-export { useUpdateName } from './useUpdateName'
-export { useUpdatePassword } from './useUpdatePassword'
-export { useUpdatePhone } from './useUpdatePhone'
-export { useUpdatePhoneSession } from './useUpdatePhoneSession'
-export { useUpdatePhoneVerification } from './useUpdatePhoneVerification'
-export { useUpdatePrefs } from './useUpdatePrefs'
-export { useUpdatePushTarget } from './useUpdatePushTarget'
-export { useUpdateSession } from './useUpdateSession'
-export { useUpdateStatus } from './useUpdateStatus'
-export { useVerification } from './useVerification'
+export { useAccount, useLazyAccount, type AccountResult } from './useAccount'
+export {
+  useCreateAnonymousSession,
+  type CreateAnonymousSessionResult,
+} from './useCreateAnonymousSession'
+export {
+  useCreateEmailToken,
+  type CreateEmailTokenVariables,
+  type CreateEmailTokenResult,
+} from './useCreateEmailToken'
+export { useCreateJWT, useSuspenseCreateJWT, type CreateJWTResult } from './useCreateJWT'
+export {
+  useCreateMagicURLToken,
+  type CreateMagicURLTokenVariables,
+  type CreateMagicURLTokenResult,
+} from './useCreateMagicURLToken'
+export {
+  useCreateMfaAuthenticator,
+  type CreateMfaAuthenticatorVariables,
+  type CreateMfaAuthenticatorResult,
+} from './useCreateMfaAuthenticator'
+export {
+  useCreateMfaChallenge,
+  type CreateMfaChallengeVariables,
+  type CreateMfaChallengeResult,
+} from './useCreateMfaChallenge'
+export {
+  useCreateMfaRecoveryCodes,
+  type CreateMfaRecoveryCodesResult,
+} from './useCreateMfaRecoveryCodes'
+export { useCreateOAuth2Token, type CreateOAuth2TokenVariables } from './useCreateOAuth2Token'
+export {
+  useCreatePhoneToken,
+  type CreatePhoneTokenVariables,
+  type CreatePhoneTokenResult,
+} from './useCreatePhoneToken'
+export {
+  useCreatePhoneVerification,
+  type CreatePhoneVerificationResult,
+} from './useCreatePhoneVerification'
+export {
+  useCreatePushTarget,
+  type CreatePushTargetVariables,
+  type CreatePushTargetResult,
+} from './useCreatePushTarget'
+export {
+  useCreateSession,
+  type CreateSessionVariables,
+  type CreateSessionResult,
+} from './useCreateSession'
+export {
+  useCreateEmailVerification,
+  type CreateEmailVerificationVariables,
+  type CreateEmailVerificationResult,
+} from './useCreateEmailVerification'
+export {
+  useDeleteIdentity,
+  type DeleteIdentityVariables,
+  type DeleteIdentityResult,
+} from './useDeleteIdentity'
+export {
+  useDeleteMfaAuthenticator,
+  type DeleteMfaAuthenticatorVariables,
+  type DeleteMfaAuthenticatorResult,
+} from './useDeleteMfaAuthenticator'
+export {
+  useDeletePushTarget,
+  type DeletePushTargetVariables,
+  type DeletePushTargetResult,
+} from './useDeletePushTarget'
+export {
+  useDeleteSession,
+  type DeleteSessionVariables,
+  type DeleteSessionResult,
+} from './useDeleteSession'
+export { useDeleteSessions, type DeleteSessionsResult } from './useDeleteSessions'
+export { useGetMfaRecoveryCodes, type GetMfaRecoveryCodesResult } from './useGetMfaRecoveryCodes'
+export { useGetPrefs, type GetPrefsResult } from './useGetPrefs'
+export { useGetSession, type GetSessionVariables, type GetSessionResult } from './useGetSession'
+export { useListIdentities, type ListIdentitiesResult } from './useListIdentities'
+export { useListMfaFactors, type ListMfaFactorsResult } from './useListMfaFactors'
+export { useListSessions, type ListSessionsResult } from './useListSessions'
+export {
+  useLogin,
+  type LoginVariables,
+  type LoginResult,
+  type OAuthLoginVariables,
+} from './useLogin'
+export { useLogout, type LogoutVariables, type LogoutResult } from './useLogout'
+export { useLogs, type LogsVariables, type LogsResult } from './useLogs'
+export {
+  usePasswordRecovery,
+  type PasswordRecoveryVariables,
+  type PasswordRecoveryResult,
+} from './usePasswordRecovery'
+export {
+  useResetPassword,
+  type ResetPasswordVariables,
+  type ResetPasswordResult,
+} from './useResetPassword'
+export {
+  useSignUp,
+  type SignUpVariables,
+  type SignUpResult,
+  type VerifyEmailVariables,
+  type VerifyEmailResult,
+} from './useSignUp'
+export { useUpdateEmail, type UpdateEmailVariables, type UpdateEmailResult } from './useUpdateEmail'
+export {
+  useUpdateEmailVerification,
+  type UpdateEmailVerificationVariables,
+  type UpdateEmailVerificationResult,
+} from './useUpdateEmailVerification'
+export {
+  useUpdateMagicURLSession,
+  type UpdateMagicURLSessionVariables,
+  type UpdateMagicURLSessionResult,
+} from './useUpdateMagicURLSession'
+export { useUpdateMfa, type UpdateMfaVariables, type UpdateMfaResult } from './useUpdateMfa'
+export {
+  useUpdateMfaAuthenticator,
+  type UpdateMfaAuthenticatorVariables,
+  type UpdateMfaAuthenticatorResult,
+} from './useUpdateMfaAuthenticator'
+export {
+  useUpdateMfaChallenge,
+  type UpdateMfaChallengeVariables,
+  type UpdateMfaChallengeResult,
+} from './useUpdateMfaChallenge'
+export {
+  useUpdateMfaRecoveryCodes,
+  type UpdateMfaRecoveryCodesResult,
+} from './useUpdateMfaRecoveryCodes'
+export { useUpdateName, type UpdateNameVariables, type UpdateNameResult } from './useUpdateName'
+export {
+  useUpdatePassword,
+  type UpdatePasswordVariables,
+  type UpdatePasswordResult,
+} from './useUpdatePassword'
+export { useUpdatePhone, type UpdatePhoneVariables, type UpdatePhoneResult } from './useUpdatePhone'
+export {
+  useUpdatePhoneSession,
+  type UpdatePhoneSessionVariables,
+  type UpdatePhoneSessionResult,
+} from './useUpdatePhoneSession'
+export {
+  useUpdatePhoneVerification,
+  type UpdatePhoneVerificationVariables,
+  type UpdatePhoneVerificationResult,
+} from './useUpdatePhoneVerification'
+export { useUpdatePrefs, type UpdatePrefsVariables, type UpdatePrefsResult } from './useUpdatePrefs'
+export {
+  useUpdatePushTarget,
+  type UpdatePushTargetVariables,
+  type UpdatePushTargetResult,
+} from './useUpdatePushTarget'
+export {
+  useUpdateSession,
+  type UpdateSessionVariables,
+  type UpdateSessionResult,
+} from './useUpdateSession'
+export { useUpdateStatus, type UpdateStatusResult } from './useUpdateStatus'
+export {
+  useVerification,
+  type VerificationVariables,
+  type VerificationResult,
+} from './useVerification'

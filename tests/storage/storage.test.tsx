@@ -36,12 +36,16 @@ describe('Storage content URL hooks', () => {
     test('useCreateFile', async () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
-      const { result: createResult } = renderHook(() => useCreateFile(), { wrapper })
+      const { result: createResult } = renderHook(() => useCreateFile(), {
+        wrapper,
+      })
 
       expect(createResult.current).toBeDefined()
 
       await act(async () => {
-        const file = new File(['This is a test file.'], 'test-file.txt', { type: 'text/plain' })
+        const file = new File(['This is a test file.'], 'test-file.txt', {
+          type: 'text/plain',
+        })
         await createResult.current.mutateAsync({
           bucketId: 'test-bucket',
           fileId: 'test-file',
@@ -82,7 +86,9 @@ describe('Storage content URL hooks', () => {
     test('useUpdateFile', async () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
-      const { result: updateResult } = renderHook(() => useUpdateFile(), { wrapper })
+      const { result: updateResult } = renderHook(() => useUpdateFile(), {
+        wrapper,
+      })
 
       expect(updateResult.current).toBeDefined()
 
@@ -127,7 +133,9 @@ describe('Storage content URL hooks', () => {
     test('useDeleteFile', async () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
-      const { result: deleteResult } = renderHook(() => useDeleteFile(), { wrapper })
+      const { result: deleteResult } = renderHook(() => useDeleteFile(), {
+        wrapper,
+      })
 
       expect(deleteResult.current).toBeDefined()
 

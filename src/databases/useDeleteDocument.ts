@@ -2,7 +2,7 @@ import type { ResultOf, VariablesOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException } from '../types'
+import type { AppwriteException, Prettify } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -25,17 +25,48 @@ export const deleteDocument = gql(/* GraphQL */ `
   }
 `)
 
-type Variables = VariablesOf<typeof deleteDocument>
-type Result = ResultOf<typeof deleteDocument>['databasesDeleteDocument']
+/** The variables accepted by the {@link useDeleteDocument} mutation. */
+export type DeleteDocumentVariables = Prettify<VariablesOf<typeof deleteDocument>>
 
+/** The result returned by the {@link useDeleteDocument} mutation. */
+export type DeleteDocumentResult = Prettify<
+  ResultOf<typeof deleteDocument>['databasesDeleteDocument']
+>
+
+/**
+ * Mutation hook to delete a document with optimistic removal.
+ *
+ * Removes the document from cache immediately and rolls back on error.
+ * On settlement, the document queries are removed and the parent collection
+ * queries are invalidated.
+ *
+ * @example
+ * ```tsx
+ * const { mutate, isPending } = useDeleteDocument()
+ *
+ * mutate({
+ *   databaseId: 'my-db',
+ *   collectionId: 'my-collection',
+ *   documentId: 'doc-123',
+ * })
+ * ```
+ *
+ * **Variables** ({@link DeleteDocumentVariables}):
+ * - `databaseId` — The target database ID
+ * - `collectionId` — The target collection ID
+ * - `documentId` — The ID of the document to delete
+ * - `transactionId` — Optional transaction ID for atomic operations
+ *
+ * @returns A `UseMutationResult` with a `status` string indicating the deletion result.
+ */
 export function useDeleteDocument() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
   const mutationResult = useMutation<
-    Result,
+    DeleteDocumentResult,
     AppwriteException[],
-    Variables,
+    DeleteDocumentVariables,
     {
       previousEntries: [queryKey: readonly unknown[], data: unknown][]
       documentKeyPrefix: readonly unknown[]
@@ -67,7 +98,9 @@ export function useDeleteDocument() {
 
       await queryClient.cancelQueries({ queryKey: documentKeyPrefix })
 
-      const previousEntries = queryClient.getQueriesData({ queryKey: documentKeyPrefix })
+      const previousEntries = queryClient.getQueriesData({
+        queryKey: documentKeyPrefix,
+      })
 
       queryClient.removeQueries({ queryKey: documentKeyPrefix })
 
@@ -93,5 +126,5 @@ export function useDeleteDocument() {
     },
   })
 
-  return { ...mutationResult }
+  return mutationResult
 }

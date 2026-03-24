@@ -2,6 +2,10 @@ import { useMemo } from 'react'
 
 import { useAppwrite } from '../useAppwrite'
 
+/**
+ * Returns a URL for a remote image cropped to a specified size. Memoized.
+ * @param params - The image URL and optional width and height.
+ */
 export function useAvatarImage({
   url,
   width,

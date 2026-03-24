@@ -37,7 +37,9 @@ describe('Cache invalidation', () => {
 
     await loginUser(user.email, user.password, wrapper)
 
-    const { result: accountResult } = renderHook(() => useAccount(), { wrapper })
+    const { result: accountResult } = renderHook(() => useAccount(), {
+      wrapper,
+    })
 
     const originalName = await waitFor(() => {
       expect(accountResult.current.isSuccess).toBe(true)
@@ -45,7 +47,9 @@ describe('Cache invalidation', () => {
     })
 
     const newName = `Updated ${Date.now()}`
-    const { result: updateNameResult } = renderHook(() => useUpdateName(), { wrapper })
+    const { result: updateNameResult } = renderHook(() => useUpdateName(), {
+      wrapper,
+    })
 
     await act(async () => {
       await updateNameResult.current.mutateAsync({ name: newName })
@@ -62,12 +66,16 @@ describe('Cache invalidation', () => {
 
     await loginUser(user.email, user.password, wrapper)
 
-    const { result: accountResult } = renderHook(() => useAccount(), { wrapper })
+    const { result: accountResult } = renderHook(() => useAccount(), {
+      wrapper,
+    })
 
     await waitFor(() => expect(accountResult.current.isSuccess).toBe(true))
 
     const newPrefs = { theme: `dark-${Date.now()}` }
-    const { result: updatePrefsResult } = renderHook(() => useUpdatePrefs(), { wrapper })
+    const { result: updatePrefsResult } = renderHook(() => useUpdatePrefs(), {
+      wrapper,
+    })
 
     await act(async () => {
       await updatePrefsResult.current.mutateAsync({ prefs: newPrefs })
@@ -101,7 +109,9 @@ describe('Cache invalidation', () => {
 
     const initialTotal = collectionResult.current.total ?? 0
 
-    const { result: createDocResult } = renderHook(() => useCreateDocument(), { wrapper })
+    const { result: createDocResult } = renderHook(() => useCreateDocument(), {
+      wrapper,
+    })
 
     await act(async () => {
       await createDocResult.current.mutateAsync({
@@ -122,7 +132,11 @@ describe('Cache invalidation', () => {
     const wrapper = createWrapper({ queryClient })
     const config = getTestConfig()
 
-    const doc = await createTestDocument({ name: 'to-delete', age: 99, active: false })
+    const doc = await createTestDocument({
+      name: 'to-delete',
+      age: 99,
+      active: false,
+    })
 
     await loginUser(user.email, user.password, wrapper)
 
@@ -140,7 +154,9 @@ describe('Cache invalidation', () => {
 
     const initialTotal = collectionResult.current.total ?? 0
 
-    const { result: deleteDocResult } = renderHook(() => useDeleteDocument(), { wrapper })
+    const { result: deleteDocResult } = renderHook(() => useDeleteDocument(), {
+      wrapper,
+    })
 
     await act(async () => {
       await deleteDocResult.current.mutateAsync({
@@ -164,7 +180,9 @@ describe('Cache invalidation', () => {
     try {
       await loginUser(freshUser.email, freshUser.password, wrapper)
 
-      const { result: accountResult } = renderHook(() => useAccount(), { wrapper })
+      const { result: accountResult } = renderHook(() => useAccount(), {
+        wrapper,
+      })
 
       await waitFor(() => expect(accountResult.current.isSuccess).toBe(true))
 
@@ -182,7 +200,9 @@ describe('Cache invalidation', () => {
 
     await loginUser(user.email, user.password, wrapper)
 
-    const { result: accountResult } = renderHook(() => useAccount(), { wrapper })
+    const { result: accountResult } = renderHook(() => useAccount(), {
+      wrapper,
+    })
 
     await waitFor(() => expect(accountResult.current.isSuccess).toBe(true))
     expect(accountResult.current.data).toBeDefined()

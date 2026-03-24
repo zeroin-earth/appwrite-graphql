@@ -52,7 +52,10 @@ describe('Optimistic update hooks', () => {
 
   describe('useUpdateDocument optimistic', () => {
     test('optimistically updates the document cache before server responds', async () => {
-      const doc = await createTestDocument({ name: 'Optimistic Update', age: 25 })
+      const doc = await createTestDocument({
+        name: 'Optimistic Update',
+        age: 25,
+      })
       createdDocumentIds.push(doc.$id)
 
       const wrapper = createWrapper()
@@ -72,10 +75,14 @@ describe('Optimistic update hooks', () => {
       await waitFor(() => expect(readResult.current.isSuccess).toBe(true))
       expect(readResult.current.data?.name).toBe('Optimistic Update')
 
-      const { result: queryClient } = renderHook(() => useQueryClient(), { wrapper })
+      const { result: queryClient } = renderHook(() => useQueryClient(), {
+        wrapper,
+      })
 
       // Perform the mutation
-      const { result: mutation } = renderHook(() => useUpdateDocument(), { wrapper })
+      const { result: mutation } = renderHook(() => useUpdateDocument(), {
+        wrapper,
+      })
 
       await act(async () => {
         mutation.current.mutate({
@@ -102,7 +109,11 @@ describe('Optimistic update hooks', () => {
     })
 
     test('preserves unmodified fields during optimistic update', async () => {
-      const doc = await createTestDocument({ name: 'Partial Update', age: 40, active: true })
+      const doc = await createTestDocument({
+        name: 'Partial Update',
+        age: 40,
+        active: true,
+      })
       createdDocumentIds.push(doc.$id)
 
       const wrapper = createWrapper()
@@ -120,8 +131,12 @@ describe('Optimistic update hooks', () => {
 
       await waitFor(() => expect(readResult.current.isSuccess).toBe(true))
 
-      const { result: queryClient } = renderHook(() => useQueryClient(), { wrapper })
-      const { result: mutation } = renderHook(() => useUpdateDocument(), { wrapper })
+      const { result: queryClient } = renderHook(() => useQueryClient(), {
+        wrapper,
+      })
+      const { result: mutation } = renderHook(() => useUpdateDocument(), {
+        wrapper,
+      })
 
       // Only update name, leave age and active untouched
       await act(async () => {
@@ -169,7 +184,9 @@ describe('Optimistic update hooks', () => {
 
       await waitFor(() => expect(readResult.current.isSuccess).toBe(true))
 
-      const { result: queryClient } = renderHook(() => useQueryClient(), { wrapper })
+      const { result: queryClient } = renderHook(() => useQueryClient(), {
+        wrapper,
+      })
 
       const documentKeyPrefix = [
         'appwrite',
@@ -182,10 +199,14 @@ describe('Optimistic update hooks', () => {
       ]
 
       // Verify cache is populated
-      const beforeEntries = queryClient.current.getQueriesData({ queryKey: documentKeyPrefix })
+      const beforeEntries = queryClient.current.getQueriesData({
+        queryKey: documentKeyPrefix,
+      })
       expect(beforeEntries.length).toBeGreaterThan(0)
 
-      const { result: mutation } = renderHook(() => useDeleteDocument(), { wrapper })
+      const { result: mutation } = renderHook(() => useDeleteDocument(), {
+        wrapper,
+      })
 
       await act(async () => {
         mutation.current.mutate({
@@ -196,7 +217,9 @@ describe('Optimistic update hooks', () => {
       })
 
       // Cache should be immediately cleared
-      const afterEntries = queryClient.current.getQueriesData({ queryKey: documentKeyPrefix })
+      const afterEntries = queryClient.current.getQueriesData({
+        queryKey: documentKeyPrefix,
+      })
       const hasData = afterEntries.some(([, data]) => data !== undefined)
       expect(hasData).toBe(false)
 
@@ -210,7 +233,10 @@ describe('Optimistic update hooks', () => {
 
   describe('useUpsertDocument optimistic', () => {
     test('optimistically updates existing document cache', async () => {
-      const doc = await createTestDocument({ name: 'Optimistic Upsert', age: 50 })
+      const doc = await createTestDocument({
+        name: 'Optimistic Upsert',
+        age: 50,
+      })
       createdDocumentIds.push(doc.$id)
 
       const wrapper = createWrapper()
@@ -229,9 +255,13 @@ describe('Optimistic update hooks', () => {
 
       await waitFor(() => expect(readResult.current.isSuccess).toBe(true))
 
-      const { result: queryClient } = renderHook(() => useQueryClient(), { wrapper })
+      const { result: queryClient } = renderHook(() => useQueryClient(), {
+        wrapper,
+      })
 
-      const { result: mutation } = renderHook(() => useUpsertDocument(), { wrapper })
+      const { result: mutation } = renderHook(() => useUpsertDocument(), {
+        wrapper,
+      })
 
       await act(async () => {
         mutation.current.mutate({
@@ -278,9 +308,13 @@ describe('Optimistic update hooks', () => {
       await waitFor(() => expect(readResult.current.isSuccess).toBe(true))
       expect(readResult.current.data?.age).toBe(10)
 
-      const { result: queryClient } = renderHook(() => useQueryClient(), { wrapper })
+      const { result: queryClient } = renderHook(() => useQueryClient(), {
+        wrapper,
+      })
 
-      const { result: mutation } = renderHook(() => useIncrementAttribute(), { wrapper })
+      const { result: mutation } = renderHook(() => useIncrementAttribute(), {
+        wrapper,
+      })
 
       await act(async () => {
         mutation.current.mutate({
@@ -323,8 +357,12 @@ describe('Optimistic update hooks', () => {
 
       await waitFor(() => expect(readResult.current.isSuccess).toBe(true))
 
-      const { result: queryClient } = renderHook(() => useQueryClient(), { wrapper })
-      const { result: mutation } = renderHook(() => useIncrementAttribute(), { wrapper })
+      const { result: queryClient } = renderHook(() => useQueryClient(), {
+        wrapper,
+      })
+      const { result: mutation } = renderHook(() => useIncrementAttribute(), {
+        wrapper,
+      })
 
       await act(async () => {
         mutation.current.mutate({
@@ -372,8 +410,12 @@ describe('Optimistic update hooks', () => {
       await waitFor(() => expect(readResult.current.isSuccess).toBe(true))
       expect(readResult.current.data?.age).toBe(20)
 
-      const { result: queryClient } = renderHook(() => useQueryClient(), { wrapper })
-      const { result: mutation } = renderHook(() => useDecrementAttribute(), { wrapper })
+      const { result: queryClient } = renderHook(() => useQueryClient(), {
+        wrapper,
+      })
+      const { result: mutation } = renderHook(() => useDecrementAttribute(), {
+        wrapper,
+      })
 
       await act(async () => {
         mutation.current.mutate({
@@ -416,8 +458,12 @@ describe('Optimistic update hooks', () => {
 
       await waitFor(() => expect(readResult.current.isSuccess).toBe(true))
 
-      const { result: queryClient } = renderHook(() => useQueryClient(), { wrapper })
-      const { result: mutation } = renderHook(() => useDecrementAttribute(), { wrapper })
+      const { result: queryClient } = renderHook(() => useQueryClient(), {
+        wrapper,
+      })
+      const { result: mutation } = renderHook(() => useDecrementAttribute(), {
+        wrapper,
+      })
 
       await act(async () => {
         mutation.current.mutate({

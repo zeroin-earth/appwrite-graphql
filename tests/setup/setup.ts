@@ -307,9 +307,18 @@ async function setupDatabase(apiKey: string) {
 
   // Create attributes via Databases API (TablesDB.createTable columns param is not supported)
   const attributes = [
-    { method: 'createStringAttribute', params: { key: 'name', size: 255, required: true } },
-    { method: 'createIntegerAttribute', params: { key: 'age', required: false } },
-    { method: 'createBooleanAttribute', params: { key: 'active', required: false } },
+    {
+      method: 'createStringAttribute',
+      params: { key: 'name', size: 255, required: true },
+    },
+    {
+      method: 'createIntegerAttribute',
+      params: { key: 'age', required: false },
+    },
+    {
+      method: 'createBooleanAttribute',
+      params: { key: 'active', required: false },
+    },
   ] as const
 
   for (const attr of attributes) {

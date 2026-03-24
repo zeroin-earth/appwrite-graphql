@@ -67,7 +67,9 @@ describe('Mutation Registry', () => {
     await loginUser(userEmail, userPassword, wrapper)
     onlineManager.setOnline(false)
 
-    const { result: createResult } = renderHook(() => useCreateDocument(), { wrapper })
+    const { result: createResult } = renderHook(() => useCreateDocument(), {
+      wrapper,
+    })
 
     const documentId = ID.unique()
 
@@ -123,7 +125,9 @@ describe('Mutation Registry', () => {
     await loginUser(userEmail, userPassword, wrapper)
     onlineManager.setOnline(false)
 
-    const { result: createResult } = renderHook(() => useCreateDocument(), { wrapper })
+    const { result: createResult } = renderHook(() => useCreateDocument(), {
+      wrapper,
+    })
 
     const documentId = ID.unique()
     documentCreatedOfflineId = documentId
@@ -139,7 +143,9 @@ describe('Mutation Registry', () => {
 
     await waitFor(() => expect(createResult.current.isPaused).toBe(true))
 
-    const { result: updateResult } = renderHook(() => useUpdateDocument(), { wrapper })
+    const { result: updateResult } = renderHook(() => useUpdateDocument(), {
+      wrapper,
+    })
 
     await act(async () => {
       updateResult.current.mutate({
@@ -173,7 +179,10 @@ describe('Mutation Registry', () => {
     // retryer's internal onlineManager subscription fires later, the zombie
     // mutations complete harmlessly instead of making real HTTP requests.
     for (const m of queryClient.getMutationCache().getAll()) {
-      m.setOptions({ ...m.options, mutationFn: () => Promise.resolve(undefined) as any })
+      m.setOptions({
+        ...m.options,
+        mutationFn: () => Promise.resolve(undefined) as any,
+      })
     }
     queryClient.getMutationCache().clear()
   })
@@ -237,7 +246,9 @@ describe('Mutation Registry', () => {
         { wrapper },
       )
 
-      await waitFor(() => expect(getResult.current.data).toBeTruthy(), { timeout: 6_000 })
+      await waitFor(() => expect(getResult.current.data).toBeTruthy(), {
+        timeout: 6_000,
+      })
       expect(getResult.current.data?.name).toBe('Test Document')
       expect(getResult.current.data?.age).toBe(26)
 
@@ -279,7 +290,9 @@ describe('Mutation Registry', () => {
     // Create a document online to have a base snapshot
     const documentId = ID.unique()
 
-    const { result: createResult } = renderHook(() => useCreateDocument(), { wrapper })
+    const { result: createResult } = renderHook(() => useCreateDocument(), {
+      wrapper,
+    })
 
     act(() => {
       createResult.current.mutate({
@@ -297,7 +310,9 @@ describe('Mutation Registry', () => {
     // Start an update mutation while offline
     onlineManager.setOnline(false)
 
-    const { result: updateResult } = renderHook(() => useUpdateDocument(), { wrapper })
+    const { result: updateResult } = renderHook(() => useUpdateDocument(), {
+      wrapper,
+    })
 
     await act(async () => {
       updateResult.current.mutate({
@@ -384,7 +399,9 @@ describe('Mutation Registry', () => {
     // Create a document online to have a base snapshot
     const documentId = ID.unique()
 
-    const { result: createResult } = renderHook(() => useCreateDocument(), { wrapper })
+    const { result: createResult } = renderHook(() => useCreateDocument(), {
+      wrapper,
+    })
 
     act(() => {
       createResult.current.mutate({
@@ -402,7 +419,9 @@ describe('Mutation Registry', () => {
     // Start an update mutation while offline
     onlineManager.setOnline(false)
 
-    const { result: updateResult } = renderHook(() => useUpdateDocument(), { wrapper })
+    const { result: updateResult } = renderHook(() => useUpdateDocument(), {
+      wrapper,
+    })
 
     await act(async () => {
       updateResult.current.mutate({
@@ -488,7 +507,9 @@ describe('Mutation Registry', () => {
     // Create a document online to have a base snapshot
     const documentId = ID.unique()
 
-    const { result: createResult } = renderHook(() => useCreateDocument(), { wrapper })
+    const { result: createResult } = renderHook(() => useCreateDocument(), {
+      wrapper,
+    })
 
     act(() => {
       createResult.current.mutate({
@@ -506,7 +527,9 @@ describe('Mutation Registry', () => {
     // Start an update mutation while offline
     onlineManager.setOnline(false)
 
-    const { result: updateResult } = renderHook(() => useUpdateDocument(), { wrapper })
+    const { result: updateResult } = renderHook(() => useUpdateDocument(), {
+      wrapper,
+    })
 
     await act(async () => {
       updateResult.current.mutate({

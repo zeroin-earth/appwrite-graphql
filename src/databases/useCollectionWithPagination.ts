@@ -44,6 +44,35 @@ function usePaginationState(limit: number) {
   return { page, offset, totalRef, nextPage, previousPage, handlePageChange }
 }
 
+/**
+ * Fetches a paginated collection of documents. Returns pagination helpers
+ * (`page`, `hasNextPage`, `hasPreviousPage`, `nextPage`, `previousPage`, `handlePageChange`).
+ * Default page limit is 25.
+ *
+ * @typeParam TDocument - The shape of each document's custom attributes.
+ *
+ * @example
+ * ```tsx
+ * const { documents, page, nextPage, previousPage, hasNextPage } =
+ *   useCollectionWithPagination({
+ *     databaseId: 'my-db',
+ *     collectionId: 'my-collection',
+ *     queries: [Query.equal('status', 'active')],
+ *     limit: 10,
+ *   })
+ * ```
+ *
+ * **Parameters** (`PaginationParams`):
+ * - `databaseId` — The database ID
+ * - `collectionId` — The collection ID
+ * - `queries` — Query filters applied to the collection
+ * - `transactionId` — Optional transaction ID for atomic reads
+ * - `limit` — Number of documents per page (defaults to `25`)
+ * - `fields` — Optional array of document fields to select
+ *
+ * @returns An object with `documents`, `total`, `page`, `hasNextPage`, `hasPreviousPage`,
+ *   `nextPage()`, `previousPage()`, `handlePageChange(page)`, and standard query status flags.
+ */
 export function useCollectionWithPagination<TDocument>(
   {
     databaseId,
@@ -88,6 +117,32 @@ export function useCollectionWithPagination<TDocument>(
   }
 }
 
+/**
+ * Suspense variant of {@link useCollectionWithPagination}. Suspends the component while loading.
+ *
+ * @typeParam TDocument - The shape of each document's custom attributes.
+ *
+ * @example
+ * ```tsx
+ * const { documents, page, nextPage, hasNextPage } =
+ *   useSuspenseCollectionWithPagination({
+ *     databaseId: 'my-db',
+ *     collectionId: 'my-collection',
+ *     queries: [Query.equal('status', 'active')],
+ *   })
+ * ```
+ *
+ * **Parameters** (`PaginationParams`):
+ * - `databaseId` — The database ID
+ * - `collectionId` — The collection ID
+ * - `queries` — Query filters applied to the collection
+ * - `transactionId` — Optional transaction ID for atomic reads
+ * - `limit` — Number of documents per page (defaults to `25`)
+ * - `fields` — Optional array of document fields to select
+ *
+ * @returns An object with `documents`, `total`, `page`, `hasNextPage`, `hasPreviousPage`,
+ *   `nextPage()`, `previousPage()`, `handlePageChange(page)`, and standard query status flags.
+ */
 export function useSuspenseCollectionWithPagination<TDocument>(
   {
     databaseId,

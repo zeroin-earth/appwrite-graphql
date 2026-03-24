@@ -129,7 +129,9 @@ describe('Subscriber hooks', () => {
       await loginUser(userEmail, userPassword, wrapper)
 
       // First create a subscription
-      const { result: createResult } = renderHook(() => useCreateSubscriber(), { wrapper })
+      const { result: createResult } = renderHook(() => useCreateSubscriber(), {
+        wrapper,
+      })
 
       const subscriberId = ID.unique()
       subscriberIdsToCleanup.push(subscriberId)
@@ -145,7 +147,9 @@ describe('Subscriber hooks', () => {
       await waitFor(() => expect(createResult.current.isSuccess).toBe(true))
 
       // Now delete the subscription
-      const { result: deleteResult } = renderHook(() => useDeleteSubscriber(), { wrapper })
+      const { result: deleteResult } = renderHook(() => useDeleteSubscriber(), {
+        wrapper,
+      })
 
       await act(async () => {
         await deleteResult.current.mutateAsync({
@@ -165,7 +169,9 @@ describe('Subscriber hooks', () => {
       await loginUser(userEmail, userPassword, wrapper)
 
       // Subscribe
-      const { result: createResult } = renderHook(() => useCreateSubscriber(), { wrapper })
+      const { result: createResult } = renderHook(() => useCreateSubscriber(), {
+        wrapper,
+      })
 
       const subscriberId = ID.unique()
       subscriberIdsToCleanup.push(subscriberId)
@@ -181,7 +187,9 @@ describe('Subscriber hooks', () => {
       await waitFor(() => expect(createResult.current.isSuccess).toBe(true))
 
       // Unsubscribe
-      const { result: deleteResult } = renderHook(() => useDeleteSubscriber(), { wrapper })
+      const { result: deleteResult } = renderHook(() => useDeleteSubscriber(), {
+        wrapper,
+      })
 
       await act(async () => {
         await deleteResult.current.mutateAsync({

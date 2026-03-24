@@ -2,6 +2,11 @@ import { useMemo } from 'react'
 
 import { useAppwrite } from '../useAppwrite'
 
+/**
+ * Returns a URL for an avatar with user initials.
+ * Uses the current user's name if none provided. Memoized.
+ * @param params - Optional name, width, height, and background color.
+ */
 export function useAvatarInitials({
   name,
   width,

@@ -35,7 +35,9 @@ describe('Database transaction hooks', () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
 
-      const { result, unmount } = renderHook(() => useCreateTransaction(), { wrapper })
+      const { result, unmount } = renderHook(() => useCreateTransaction(), {
+        wrapper,
+      })
 
       await act(async () => {
         await result.current.mutateAsync({})
@@ -51,7 +53,10 @@ describe('Database transaction hooks', () => {
       unmount()
 
       // Clean up: delete the transaction
-      const { result: deleteResult, unmount: unmountDelete } = renderHook(() => useDeleteTransaction(), { wrapper })
+      const { result: deleteResult, unmount: unmountDelete } = renderHook(
+        () => useDeleteTransaction(),
+        { wrapper },
+      )
       await act(async () => {
         await deleteResult.current.mutateAsync({ transactionId })
       })
@@ -62,7 +67,9 @@ describe('Database transaction hooks', () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
 
-      const { result, unmount } = renderHook(() => useCreateTransaction(), { wrapper })
+      const { result, unmount } = renderHook(() => useCreateTransaction(), {
+        wrapper,
+      })
 
       await act(async () => {
         await result.current.mutateAsync({ ttl: 60 })
@@ -78,7 +85,10 @@ describe('Database transaction hooks', () => {
       unmount()
 
       // Clean up
-      const { result: deleteResult, unmount: unmountDelete } = renderHook(() => useDeleteTransaction(), { wrapper })
+      const { result: deleteResult, unmount: unmountDelete } = renderHook(
+        () => useDeleteTransaction(),
+        { wrapper },
+      )
       await act(async () => {
         await deleteResult.current.mutateAsync({ transactionId })
       })
@@ -92,7 +102,10 @@ describe('Database transaction hooks', () => {
       await loginUser(userEmail, userPassword, wrapper)
 
       // First create a transaction
-      const { result: createResult, unmount: unmountCreate } = renderHook(() => useCreateTransaction(), { wrapper })
+      const { result: createResult, unmount: unmountCreate } = renderHook(
+        () => useCreateTransaction(),
+        { wrapper },
+      )
 
       await act(async () => {
         await createResult.current.mutateAsync({})
@@ -103,10 +116,9 @@ describe('Database transaction hooks', () => {
       unmountCreate()
 
       // Now get it
-      const { result, unmount } = renderHook(
-        () => useGetTransaction({ transactionId }),
-        { wrapper },
-      )
+      const { result, unmount } = renderHook(() => useGetTransaction({ transactionId }), {
+        wrapper,
+      })
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
@@ -116,7 +128,10 @@ describe('Database transaction hooks', () => {
       unmount()
 
       // Clean up
-      const { result: deleteResult, unmount: unmountDelete } = renderHook(() => useDeleteTransaction(), { wrapper })
+      const { result: deleteResult, unmount: unmountDelete } = renderHook(
+        () => useDeleteTransaction(),
+        { wrapper },
+      )
       await act(async () => {
         await deleteResult.current.mutateAsync({ transactionId })
       })
@@ -130,7 +145,10 @@ describe('Database transaction hooks', () => {
       await loginUser(userEmail, userPassword, wrapper)
 
       // Create a transaction so there's at least one
-      const { result: createResult, unmount: unmountCreate } = renderHook(() => useCreateTransaction(), { wrapper })
+      const { result: createResult, unmount: unmountCreate } = renderHook(
+        () => useCreateTransaction(),
+        { wrapper },
+      )
 
       await act(async () => {
         await createResult.current.mutateAsync({})
@@ -140,10 +158,9 @@ describe('Database transaction hooks', () => {
       const transactionId = createResult.current.data!._id!
       unmountCreate()
 
-      const { result, unmount } = renderHook(
-        () => useListTransactions(),
-        { wrapper },
-      )
+      const { result, unmount } = renderHook(() => useListTransactions(), {
+        wrapper,
+      })
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
@@ -154,7 +171,10 @@ describe('Database transaction hooks', () => {
       unmount()
 
       // Clean up
-      const { result: deleteResult, unmount: unmountDelete } = renderHook(() => useDeleteTransaction(), { wrapper })
+      const { result: deleteResult, unmount: unmountDelete } = renderHook(
+        () => useDeleteTransaction(),
+        { wrapper },
+      )
       await act(async () => {
         await deleteResult.current.mutateAsync({ transactionId })
       })
@@ -168,7 +188,10 @@ describe('Database transaction hooks', () => {
       await loginUser(userEmail, userPassword, wrapper)
 
       // Create a transaction
-      const { result: createResult, unmount: unmountCreate } = renderHook(() => useCreateTransaction(), { wrapper })
+      const { result: createResult, unmount: unmountCreate } = renderHook(
+        () => useCreateTransaction(),
+        { wrapper },
+      )
 
       await act(async () => {
         await createResult.current.mutateAsync({})
@@ -179,7 +202,9 @@ describe('Database transaction hooks', () => {
       unmountCreate()
 
       // Add a create-document operation
-      const { result, unmount } = renderHook(() => useCreateOperations(), { wrapper })
+      const { result, unmount } = renderHook(() => useCreateOperations(), {
+        wrapper,
+      })
 
       // Appwrite transaction operations are JSON-encoded operation descriptors
       const operation = JSON.stringify({
@@ -197,13 +222,14 @@ describe('Database transaction hooks', () => {
       })
 
       // The hook should complete (success or error depending on Appwrite's operation format)
-      await waitFor(() =>
-        expect(result.current.isSuccess || result.current.isError).toBe(true),
-      )
+      await waitFor(() => expect(result.current.isSuccess || result.current.isError).toBe(true))
       unmount()
 
       // Clean up
-      const { result: deleteResult, unmount: unmountDelete } = renderHook(() => useDeleteTransaction(), { wrapper })
+      const { result: deleteResult, unmount: unmountDelete } = renderHook(
+        () => useDeleteTransaction(),
+        { wrapper },
+      )
       await act(async () => {
         await deleteResult.current.mutateAsync({ transactionId })
       })
@@ -214,7 +240,9 @@ describe('Database transaction hooks', () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
 
-      const { result, unmount } = renderHook(() => useCreateOperations(), { wrapper })
+      const { result, unmount } = renderHook(() => useCreateOperations(), {
+        wrapper,
+      })
 
       await act(async () => {
         result.current.mutate({
@@ -234,7 +262,10 @@ describe('Database transaction hooks', () => {
       await loginUser(userEmail, userPassword, wrapper)
 
       // Create a transaction
-      const { result: createResult, unmount: unmountCreate } = renderHook(() => useCreateTransaction(), { wrapper })
+      const { result: createResult, unmount: unmountCreate } = renderHook(
+        () => useCreateTransaction(),
+        { wrapper },
+      )
 
       await act(async () => {
         await createResult.current.mutateAsync({})
@@ -245,7 +276,9 @@ describe('Database transaction hooks', () => {
       unmountCreate()
 
       // Commit it
-      const { result, unmount } = renderHook(() => useUpdateTransaction(), { wrapper })
+      const { result, unmount } = renderHook(() => useUpdateTransaction(), {
+        wrapper,
+      })
 
       await act(async () => {
         await result.current.mutateAsync({
@@ -266,7 +299,10 @@ describe('Database transaction hooks', () => {
       await loginUser(userEmail, userPassword, wrapper)
 
       // Create a transaction
-      const { result: createResult, unmount: unmountCreate } = renderHook(() => useCreateTransaction(), { wrapper })
+      const { result: createResult, unmount: unmountCreate } = renderHook(
+        () => useCreateTransaction(),
+        { wrapper },
+      )
 
       await act(async () => {
         await createResult.current.mutateAsync({})
@@ -277,7 +313,9 @@ describe('Database transaction hooks', () => {
       unmountCreate()
 
       // Rollback
-      const { result, unmount } = renderHook(() => useUpdateTransaction(), { wrapper })
+      const { result, unmount } = renderHook(() => useUpdateTransaction(), {
+        wrapper,
+      })
 
       await act(async () => {
         await result.current.mutateAsync({
@@ -300,7 +338,10 @@ describe('Database transaction hooks', () => {
       await loginUser(userEmail, userPassword, wrapper)
 
       // Create a transaction to delete
-      const { result: createResult, unmount: unmountCreate } = renderHook(() => useCreateTransaction(), { wrapper })
+      const { result: createResult, unmount: unmountCreate } = renderHook(
+        () => useCreateTransaction(),
+        { wrapper },
+      )
 
       await act(async () => {
         await createResult.current.mutateAsync({})
@@ -311,7 +352,9 @@ describe('Database transaction hooks', () => {
       unmountCreate()
 
       // Delete it
-      const { result, unmount } = renderHook(() => useDeleteTransaction(), { wrapper })
+      const { result, unmount } = renderHook(() => useDeleteTransaction(), {
+        wrapper,
+      })
 
       await act(async () => {
         await result.current.mutateAsync({ transactionId })
@@ -328,7 +371,9 @@ describe('Database transaction hooks', () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
 
-      const { result, unmount } = renderHook(() => useDeleteTransaction(), { wrapper })
+      const { result, unmount } = renderHook(() => useDeleteTransaction(), {
+        wrapper,
+      })
 
       await act(async () => {
         result.current.mutate({ transactionId: 'non-existent-id' })

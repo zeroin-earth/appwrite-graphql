@@ -2,7 +2,7 @@ import type { ResultOf, VariablesOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException, QueryOptions } from '../types'
+import type { AppwriteException, Prettify, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -25,13 +25,38 @@ const getExecution = gql(/* GraphQL */ `
   }
 `)
 
-type Variables = VariablesOf<typeof getExecution>
-type Result = ResultOf<typeof getExecution>['functionsGetExecution']
+/** The variables accepted by the {@link useGetExecution} hook. */
+export type GetExecutionVariables = Prettify<VariablesOf<typeof getExecution>>
 
-export function useGetExecution({ functionId, executionId }: Variables, opts: QueryOptions = {}) {
+/** The result returned by the {@link useGetExecution} hook. */
+export type GetExecutionResult = Prettify<ResultOf<typeof getExecution>['functionsGetExecution']>
+
+/**
+ * Fetches the details of a specific function execution.
+ *
+ * @example
+ * ```tsx
+ * const { data, isLoading } = useGetExecution({
+ *   functionId: 'send-email',
+ *   executionId: '9b2c…',
+ * })
+ *
+ * // data.status, data.responseBody, data.duration
+ * ```
+ *
+ * **Parameters** ({@link GetExecutionVariables}):
+ * - `functionId` — The unique function identifier.
+ * - `executionId` — The unique execution identifier.
+ *
+ * @returns A `UseQueryResult` with the execution details ({@link GetExecutionResult}).
+ */
+export function useGetExecution(
+  { functionId, executionId }: GetExecutionVariables,
+  opts: QueryOptions = {},
+) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<Result, AppwriteException[], Result>({
+  const queryResult = useQuery<GetExecutionResult, AppwriteException[], GetExecutionResult>({
     queryKey: Keys.function(functionId).execution(executionId).key(),
     queryFn: async () => {
       const { data, errors } = await graphql.query({
@@ -48,5 +73,5 @@ export function useGetExecution({ functionId, executionId }: Variables, opts: Qu
     ...opts,
   })
 
-  return { ...queryResult }
+  return queryResult
 }

@@ -2,7 +2,7 @@ import type { ResultOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException, QueryOptions } from '../types'
+import type { AppwriteException, Prettify, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -19,12 +19,25 @@ const accountListSessions = gql(/* GraphQL */ `
   }
 `)
 
-type Result = ResultOf<typeof accountListSessions>['accountListSessions']
+/** The result returned by the {@link useListSessions} query. */
+export type ListSessionsResult = Prettify<
+  ResultOf<typeof accountListSessions>['accountListSessions']
+>
 
+/**
+ * Fetches all active sessions for the current user.
+ *
+ * @example
+ * ```tsx
+ * const { data, isLoading } = useListSessions()
+ * ```
+ *
+ * @returns A `UseQueryResult` with the user's active sessions ({@link ListSessionsResult}).
+ */
 export function useListSessions(opts: QueryOptions = {}) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<Result, AppwriteException[], Result>({
+  const queryResult = useQuery<ListSessionsResult, AppwriteException[], ListSessionsResult>({
     queryKey: Keys.account().sessions(),
     queryFn: async () => {
       const { data, errors } = await graphql.query({
@@ -40,5 +53,5 @@ export function useListSessions(opts: QueryOptions = {}) {
     ...opts,
   })
 
-  return { ...queryResult }
+  return queryResult
 }

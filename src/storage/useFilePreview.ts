@@ -3,6 +3,11 @@ import type { ImageFormat, ImageGravity } from 'appwrite'
 
 import { useAppwrite } from '../useAppwrite'
 
+/**
+ * Returns a URL for a file preview image with optional transformations
+ * (resize, crop, border, opacity, rotation, format). Memoized to avoid unnecessary recomputation.
+ * @param params - The bucket ID, file ID, and optional image transformation options.
+ */
 export function useFilePreview({
   bucketId,
   fileId,

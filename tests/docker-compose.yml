@@ -1,9 +1,9 @@
 x-logging: &x-logging
   logging:
-    driver: "json-file"
+    driver: 'json-file'
     options:
-      max-file: "5"
-      max-size: "10m"
+      max-file: '5'
+      max-size: '10m'
 
 x-appwrite-service: &appwrite-service
   image: appwrite/appwrite:1.8.1
@@ -68,7 +68,7 @@ services:
       - mariadb
       - redis
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'
 
   appwrite-realtime:
     <<: *appwrite-service
@@ -90,7 +90,7 @@ services:
       - mariadb
       - redis
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'
 
   appwrite-worker-audits:
     <<: *appwrite-service
@@ -130,7 +130,7 @@ services:
     depends_on:
       - redis
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'
 
   appwrite-worker-messaging:
     <<: *appwrite-service
@@ -140,7 +140,7 @@ services:
       - redis
       - mariadb
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'
 
   openruntimes-executor:
     container_name: openruntimes-executor
@@ -161,7 +161,7 @@ services:
       # It's not possible to share mount file between 2 containers without host mount (copying is too slow)
       - /tmp:/tmp:rw
     healthcheck:
-      test: ["CMD-SHELL", "curl -so /dev/null http://localhost/v1/health || exit 1"]
+      test: ['CMD-SHELL', 'curl -so /dev/null http://localhost/v1/health || exit 1']
       interval: 5s
       timeout: 3s
       retries: 10
@@ -220,7 +220,7 @@ services:
       openruntimes-executor:
         condition: service_healthy
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'
 
   appwrite-worker-functions:
     entrypoint: worker-functions
@@ -249,7 +249,7 @@ services:
       - MYSQL_USER=${_APP_DB_USER}
       - MYSQL_PASSWORD=${_APP_DB_PASS}
       - MARIADB_AUTO_UPGRADE=1
-    command: "mysqld --innodb-flush-method=fsync"
+    command: 'mysqld --innodb-flush-method=fsync'
 
   redis:
     image: redis:7.2.4-alpine
@@ -284,14 +284,14 @@ services:
       - appwrite
 
   sms-mock:
-    image: "node:22-alpine"
+    image: 'node:22-alpine'
     container_name: request-catcher-sms
     working_dir: /app
     volumes:
       - ./sms-mock:/app:ro
     ports:
-      - "8888:5000"
-    command: "node server.js"
+      - '8888:5000'
+    command: 'node server.js'
     networks:
       - appwrite
 

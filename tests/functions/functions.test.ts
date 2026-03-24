@@ -168,7 +168,9 @@ describe('Function hooks', () => {
             { wrapper },
           )
 
-          await waitFor(() => expect(caughtError).not.toBeNull(), { timeout: 10_000 })
+          await waitFor(() => expect(caughtError).not.toBeNull(), {
+            timeout: 10_000,
+          })
 
           spy.mockRestore()
         },

@@ -3,7 +3,7 @@ import type { ResultOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException } from '../types'
+import type { AppwriteException, Prettify } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQuery } from '../useQuery'
@@ -60,7 +60,10 @@ const getFunctionExecution = gql(/* GraphQL */ `
   }
 `)
 
-type GetExecutionResult = ResultOf<typeof getFunctionExecution>['functionsGetExecution']
+/** The result of polling the current execution in the {@link useFunction} hook. */
+export type FunctionResult = Prettify<
+  ResultOf<typeof getFunctionExecution>['functionsGetExecution']
+>
 
 type ResponseBody = string | null | undefined | Record<string, string | number | boolean | null>
 
@@ -74,41 +77,87 @@ function useCurrentExecution({
   const { graphql } = useAppwrite()
   const enabled = !!currentFunction && !!currentExecution
 
-  const query = useQuery<GetExecutionResult | null, AppwriteException[], GetExecutionResult | null>(
-    {
-      queryKey: enabled
-        ? Keys.function(currentFunction).execution(currentExecution).key()
-        : Keys.functions().key(),
-      queryFn: async () => {
-        if (!currentExecution || !currentFunction) {
-          return null
-        }
-        const { data } = await graphql.query({
-          query: getFunctionExecution,
-          variables: {
-            functionId: currentFunction,
-            executionId: currentExecution,
-          },
-        })
+  const query = useQuery<FunctionResult | null, AppwriteException[], FunctionResult | null>({
+    queryKey: enabled
+      ? Keys.function(currentFunction).execution(currentExecution).key()
+      : Keys.functions().key(),
+    queryFn: async () => {
+      if (!currentExecution || !currentFunction) {
+        return null
+      }
+      const { data } = await graphql.query({
+        query: getFunctionExecution,
+        variables: {
+          functionId: currentFunction,
+          executionId: currentExecution,
+        },
+      })
 
-        if (!data?.functionsGetExecution) {
-          throw new Error('Execution not found')
-        }
+      if (!data?.functionsGetExecution) {
+        throw new Error('Execution not found')
+      }
 
-        return data.functionsGetExecution ?? null
-      },
-      enabled,
+      return data.functionsGetExecution ?? null
     },
-  )
+    enabled,
+  })
 
   return { ...query }
 }
 
+/**
+ * Returns `{ executeFunction, currentExecution }` for triggering Appwrite function executions.
+ *
+ * **`executeFunction`** is a mutation that sends the `CreateExecution` GraphQL mutation.
+ * It serialises `body` and `headers` to JSON strings before sending, and automatically
+ * parses JSON response bodies back into objects. If the execution status is `"failed"`,
+ * the mutation throws with the error details.
+ *
+ * **`currentExecution`** is a query that polls the latest execution's status via the
+ * `GetFunctionExecution` GraphQL query. It is enabled automatically once an execution
+ * has been triggered and exposes standard `useQuery` fields (`data`, `isLoading`, etc.).
+ *
+ * @example
+ * ```tsx
+ * const { executeFunction, currentExecution } = useFunction()
+ *
+ * // Trigger a function execution
+ * executeFunction.mutate({
+ *   functionId: 'send-welcome-email',
+ *   body: { userId: 'user_123' },
+ *   method: 'POST',
+ *   path: '/send',
+ * })
+ *
+ * // Poll the result
+ * if (currentExecution.data) {
+ *   console.log(currentExecution.data.status)
+ *   console.log(currentExecution.data.responseBody)
+ * }
+ * ```
+ *
+ * **Variables** (`Props`):
+ * - `functionId` — The ID of the Appwrite function to execute
+ * - `body` — Optional. A key-value object sent as the request body (serialised to JSON)
+ * - `async` — Optional. When `true`, the function runs asynchronously (defaults to `false`)
+ * - `path` — Optional. The execution path (defaults to `'/'`)
+ * - `method` — Optional. The HTTP method (defaults to `'POST'`)
+ * - `headers` — Optional. A key-value object of custom headers (serialised to JSON)
+ * - `scheduledAt` — Optional. An ISO 8601 date string to schedule the execution
+ *
+ * @returns An object with `executeFunction` (a `UseMutationResult` whose `data` is the
+ * parsed response body or raw string) and `currentExecution` (a `UseQueryResult` whose
+ * `data` is the {@link FunctionResult} with `status`, `errors`, `duration`, `responseBody`,
+ * and `requestPath`).
+ */
 export function useFunction() {
   const { graphql } = useAppwrite()
   const [currentExecution, setCurrentExecution] = useState<string | null>(null)
   const [currentFunction, setCurrentFunction] = useState<string | null>(null)
-  const getExecution = useCurrentExecution({ currentExecution, currentFunction })
+  const getExecution = useCurrentExecution({
+    currentExecution,
+    currentFunction,
+  })
 
   const executeFunction = useMutation<ResponseBody, AppwriteException[], Props>({
     mutationKey: Keys.functions().executions().create(),
@@ -164,6 +213,39 @@ export function useFunction() {
   }
 }
 
+/**
+ * Suspense variant that executes an Appwrite function and suspends until the result is available.
+ *
+ * Uses `useSuspenseQuery` under the hood so the component tree suspends while the function
+ * executes. The query is cached with `staleTime: Infinity` so re-renders do not re-trigger
+ * the execution. JSON response bodies are automatically parsed into objects.
+ *
+ * @example
+ * ```tsx
+ * function WelcomeMessage() {
+ *   const { executeFunction } = useSuspenseFunction({
+ *     functionId: 'get-greeting',
+ *     body: { locale: 'en' },
+ *     path: '/greet',
+ *     method: 'GET',
+ *   })
+ *
+ *   return <p>{executeFunction.data}</p>
+ * }
+ * ```
+ *
+ * **Variables** (`Props`):
+ * - `functionId` — The ID of the Appwrite function to execute
+ * - `body` — Optional. A key-value object sent as the request body (serialised to JSON)
+ * - `async` — Optional. When `true`, the function runs asynchronously (defaults to `false`)
+ * - `path` — Optional. The execution path (defaults to `'/'`)
+ * - `method` — Optional. The HTTP method (defaults to `'POST'`)
+ * - `headers` — Optional. A key-value object of custom headers (serialised to JSON)
+ * - `scheduledAt` — Optional. An ISO 8601 date string to schedule the execution
+ *
+ * @returns An object with `executeFunction` (a `UseSuspenseQueryResult` whose `data` is
+ * the parsed response body or raw string).
+ */
 export function useSuspenseFunction({
   functionId,
   body = {},

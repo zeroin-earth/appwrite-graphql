@@ -2,7 +2,7 @@ import type { ResultOf, VariablesOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException, QueryOptions } from '../types'
+import type { AppwriteException, Prettify, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -26,13 +26,38 @@ const getMembership = gql(/* GraphQL */ `
   }
 `)
 
-type Variables = VariablesOf<typeof getMembership>
-type Result = ResultOf<typeof getMembership>['teamsGetMembership']
+/** The variables accepted by the {@link useTeamMembership} hook. */
+export type TeamMembershipVariables = Prettify<VariablesOf<typeof getMembership>>
 
-export function useTeamMembership({ teamId, membershipId }: Variables, opts: QueryOptions = {}) {
+/** The result returned by the {@link useTeamMembership} hook. */
+export type TeamMembershipResult = Prettify<ResultOf<typeof getMembership>['teamsGetMembership']>
+
+/**
+ * Fetches a specific team membership by team and membership ID.
+ *
+ * @example
+ * ```tsx
+ * const { data, isLoading } = useTeamMembership({
+ *   teamId: 'engineering',
+ *   membershipId: '7a3f…',
+ * })
+ *
+ * // data.userName, data.userEmail, data.roles
+ * ```
+ *
+ * **Parameters** ({@link TeamMembershipVariables}):
+ * - `teamId` — The unique team identifier.
+ * - `membershipId` — The unique membership identifier.
+ *
+ * @returns A `UseQueryResult` with the membership details ({@link TeamMembershipResult}).
+ */
+export function useTeamMembership(
+  { teamId, membershipId }: TeamMembershipVariables,
+  opts: QueryOptions = {},
+) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<Result, AppwriteException[], Result>({
+  const queryResult = useQuery<TeamMembershipResult, AppwriteException[], TeamMembershipResult>({
     queryKey: Keys.team(teamId).membership(membershipId).key(),
     queryFn: async () => {
       const { data, errors } = await graphql.query({
@@ -49,5 +74,5 @@ export function useTeamMembership({ teamId, membershipId }: Variables, opts: Que
     ...opts,
   })
 
-  return { ...queryResult }
+  return queryResult
 }

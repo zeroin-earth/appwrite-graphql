@@ -94,10 +94,15 @@ describe('Teams hooks', () => {
       await loginUser(userEmail, userPassword, wrapper)
 
       // Ensure at least one team exists
-      const { result: createResult } = renderHook(() => useCreateTeam(), { wrapper })
+      const { result: createResult } = renderHook(() => useCreateTeam(), {
+        wrapper,
+      })
       const teamId = ID.unique()
       await act(async () => {
-        await createResult.current.mutateAsync({ teamId, name: 'List Test Team' })
+        await createResult.current.mutateAsync({
+          teamId,
+          name: 'List Test Team',
+        })
       })
       await waitFor(() => expect(createResult.current.isSuccess).toBe(true))
       createdTeamIds.push(teamId)
@@ -118,7 +123,10 @@ describe('Teams hooks', () => {
     beforeAll(async () => {
       // Create a team via server SDK for reading
       const teams = createServerTeams()
-      const team = await teams.create({ teamId: ServerID.unique(), name: 'Get Team Test' })
+      const team = await teams.create({
+        teamId: ServerID.unique(),
+        name: 'Get Team Test',
+      })
       teamId = team.$id
       createdTeamIds.push(teamId)
 
@@ -146,7 +154,9 @@ describe('Teams hooks', () => {
       await loginUser(userEmail, userPassword, wrapper)
 
       // Create a team first
-      const { result: createResult } = renderHook(() => useCreateTeam(), { wrapper })
+      const { result: createResult } = renderHook(() => useCreateTeam(), {
+        wrapper,
+      })
       const teamId = ID.unique()
       await act(async () => {
         await createResult.current.mutateAsync({ teamId, name: 'Old Name' })
@@ -173,22 +183,34 @@ describe('Teams hooks', () => {
     beforeAll(async () => {
       // Create a team via server SDK
       const teams = createServerTeams()
-      const team = await teams.create({ teamId: ServerID.unique(), name: 'Prefs Team Test' })
+      const team = await teams.create({
+        teamId: ServerID.unique(),
+        name: 'Prefs Team Test',
+      })
       teamId = team.$id
       createdTeamIds.push(teamId)
 
       // Add user as owner so they can update prefs
-      await teams.createMembership({ teamId, roles: ['owner'], email: userEmail })
+      await teams.createMembership({
+        teamId,
+        roles: ['owner'],
+        email: userEmail,
+      })
     })
 
     test('updates and reads team preferences', async () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
 
-      const { result: updateResult } = renderHook(() => useUpdateTeamPrefs(), { wrapper })
+      const { result: updateResult } = renderHook(() => useUpdateTeamPrefs(), {
+        wrapper,
+      })
 
       await act(async () => {
-        await updateResult.current.mutateAsync({ teamId, prefs: { color: 'blue' } })
+        await updateResult.current.mutateAsync({
+          teamId,
+          prefs: { color: 'blue' },
+        })
       })
 
       await waitFor(() => expect(updateResult.current.isSuccess).toBe(true))
@@ -207,7 +229,9 @@ describe('Teams hooks', () => {
       await loginUser(userEmail, userPassword, wrapper)
 
       // Create a team to delete
-      const { result: createResult } = renderHook(() => useCreateTeam(), { wrapper })
+      const { result: createResult } = renderHook(() => useCreateTeam(), {
+        wrapper,
+      })
       const teamId = ID.unique()
       await act(async () => {
         await createResult.current.mutateAsync({ teamId, name: 'Delete Me' })
@@ -231,12 +255,19 @@ describe('Teams hooks', () => {
 
     beforeAll(async () => {
       const teams = createServerTeams()
-      const team = await teams.create({ teamId: ServerID.unique(), name: 'Membership Team Test' })
+      const team = await teams.create({
+        teamId: ServerID.unique(),
+        name: 'Membership Team Test',
+      })
       teamId = team.$id
       createdTeamIds.push(teamId)
 
       // Add the test user as owner
-      await teams.createMembership({ teamId, roles: ['owner'], email: userEmail })
+      await teams.createMembership({
+        teamId,
+        roles: ['owner'],
+        email: userEmail,
+      })
     })
 
     afterEach(async () => {
@@ -248,7 +279,9 @@ describe('Teams hooks', () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
 
-      const { result } = renderHook(() => useTeamMemberships({ teamId }), { wrapper })
+      const { result } = renderHook(() => useTeamMemberships({ teamId }), {
+        wrapper,
+      })
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
@@ -290,7 +323,9 @@ describe('Teams hooks', () => {
       await loginUser(userEmail, userPassword, wrapper)
 
       // Create another user to invite
-      const invited = await createTestUser({ name: 'Membership Update Test User' })
+      const invited = await createTestUser({
+        name: 'Membership Update Test User',
+      })
 
       const { result } = renderHook(() => useCreateMembership(), { wrapper })
 
@@ -326,7 +361,9 @@ describe('Teams hooks', () => {
       await loginUser(userEmail, userPassword, wrapper)
 
       // Create another user to invite
-      const invited = await createTestUser({ name: 'Membership Update Test User' })
+      const invited = await createTestUser({
+        name: 'Membership Update Test User',
+      })
 
       const { result } = renderHook(() => useCreateMembership(), { wrapper })
 
@@ -394,7 +431,11 @@ describe('Teams hooks', () => {
       )
 
       const { result: teamMembershipResult } = renderHook(
-        () => useTeamMembership({ teamId, membershipId: result.current.data?._id || '' }),
+        () =>
+          useTeamMembership({
+            teamId,
+            membershipId: result.current.data?._id || '',
+          }),
         { wrapper },
       )
 

@@ -94,7 +94,9 @@ describe('Locale hooks', () => {
   describe('useLocaleCountriesPhones', () => {
     test('returns a list of countries with phone codes', async () => {
       const wrapper = createWrapper()
-      const { result } = renderHook(() => useLocaleCountriesPhones(), { wrapper })
+      const { result } = renderHook(() => useLocaleCountriesPhones(), {
+        wrapper,
+      })
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
 

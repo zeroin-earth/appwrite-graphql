@@ -33,7 +33,9 @@ describe('New account hooks', () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
 
-      const { result } = renderHook(() => useCreateEmailVerification(), { wrapper })
+      const { result } = renderHook(() => useCreateEmailVerification(), {
+        wrapper,
+      })
 
       await act(async () => {
         await result.current.mutateAsync({ url: 'http://localhost/verify' })

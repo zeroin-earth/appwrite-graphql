@@ -9,6 +9,10 @@ import { useQuery as useReactQuery } from '@tanstack/react-query'
 import type { AppwriteException } from './types'
 import { useQueryClient } from './useQueryClient'
 
+/**
+ * Like {@link useQuery}, but the query is disabled by default and only runs when `run()` is called.
+ * @returns `{ run, query }` — `run` triggers the fetch, `query` contains the standard query result.
+ */
 export function useLazyQuery<
   TQueryFnData,
   TError extends AppwriteException[],

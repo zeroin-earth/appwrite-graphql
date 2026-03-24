@@ -193,7 +193,9 @@ describe('Account misc hooks', () => {
 
     const secret = params.get('secret') || ''
 
-    const { result: resetResult } = renderHook(() => useResetPassword(), { wrapper })
+    const { result: resetResult } = renderHook(() => useResetPassword(), {
+      wrapper,
+    })
 
     await act(async () => {
       await resetResult.current.mutateAsync({
@@ -211,7 +213,10 @@ describe('Account misc hooks', () => {
 
     // Reset password back to original via server SDK (recovery tokens are single-use)
     const { users } = createServerClient()
-    await users.updatePassword({ userId: user.userId, password: user.password })
+    await users.updatePassword({
+      userId: user.userId,
+      password: user.password,
+    })
   })
 
   test.skip('useCreateOAuth2Token requires OAuth provider configuration', () => {})

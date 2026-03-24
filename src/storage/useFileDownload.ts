@@ -2,6 +2,11 @@ import { useMemo } from 'react'
 
 import { useAppwrite } from '../useAppwrite'
 
+/**
+ * Returns a URL for downloading a file from a storage bucket.
+ * Memoized to avoid unnecessary recomputation.
+ * @param params - The bucket ID, file ID, and optional access token.
+ */
 export function useFileDownload({
   bucketId,
   fileId,

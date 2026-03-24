@@ -1,7 +1,7 @@
 {
   "name": "@zeroin.earth/appwrite-graphql",
   "version": "23.0.1",
-  "description": "Appwrite Graphql library, utilizing @tanstack/react-query",
+  "description": "React hooks library for Appwrite with offline-first support, powered by @tanstack/react-query",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -35,6 +35,10 @@
     "type": "git",
     "url": "git+ssh://git@github.com/zeroin-earth/appwrite-graphql.git"
   },
+  "homepage": "https://github.com/zeroin-earth/appwrite-graphql#readme",
+  "bugs": {
+    "url": "https://github.com/zeroin-earth/appwrite-graphql/issues"
+  },
   "author": "Matt Suhay <matthew.suhay@gmail.com>",
   "license": "MIT",
   "scripts": {
@@ -42,6 +46,8 @@
     "prepublishOnly": "bun run tsc && bun run build",
     "tsc": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint . --fix",
+    "format": "prettier --write .",
     "test": "bun test --timeout 30000",
     "test:setup": "bun run tests/setup/setup.ts",
     "test:teardown": "bun run tests/setup/teardown.ts"
@@ -53,7 +59,6 @@
     "@tanstack/react-query-persist-client": "^5.90.24",
     "gql.tada": "^1.9.0",
     "graphql": "^16.13.1",
-    "graphql-scalars": "^1.24.2",
     "immer": "^11.1.4"
   },
   "peerDependencies": {
@@ -61,7 +66,7 @@
     "@react-native-community/netinfo": "^12.0.1",
     "@tanstack/react-query": "^5.70.0",
     "appwrite": "^23.0.0",
-    "react": "19.1.0",
+    "react": "^19.1.0",
     "react-native-appwrite": "^0.25.0"
   },
   "peerDependenciesMeta": {
@@ -94,6 +99,7 @@
     "mailpit-api": "^1.7.2",
     "node-appwrite": "^22.1.3",
     "otpauth": "^9.5.0",
+    "prettier": "^3.8.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-native-appwrite": "^0.25.0",
@@ -104,5 +110,16 @@
   "publishConfig": {
     "access": "public"
   },
-  "type": "module"
+  "type": "module",
+  "sideEffects": false,
+  "keywords": [
+    "appwrite",
+    "graphql",
+    "react",
+    "react-native",
+    "react-query",
+    "tanstack",
+    "hooks",
+    "offline-first"
+  ]
 }

@@ -11,6 +11,10 @@ type ContainsValue<T, K extends keyof T> = T[K] extends unknown[]
     ? string
     : T[K] | T[K][]
 
+/**
+ * Type-safe query builder for constructing Appwrite queries.
+ * Provides a fluent API with autocompletion for your document fields.
+ */
 export class QueryBuilder<T extends Record<string, unknown>> {
   private queries: string[] = []
 
@@ -316,6 +320,17 @@ export class QueryBuilder<T extends Record<string, unknown>> {
   }
 }
 
+/**
+ * Creates a new type-safe {@link QueryBuilder} instance.
+ *
+ * @example
+ * ```ts
+ * const queries = q<MyDocument>()
+ *   .equal('status', 'active')
+ *   .greaterThan('age', 18)
+ *   .build()
+ * ```
+ */
 export function q<T extends Record<string, unknown>>(): QueryBuilder<T> {
   return new QueryBuilder<T>()
 }

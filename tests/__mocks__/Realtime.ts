@@ -12,10 +12,7 @@ import {
 import type { ActionableChannel, ResolvedChannel } from 'appwrite/types/channel'
 import { mock } from 'bun:test'
 
-const subscriptions = new Map<
-  string[],
-  (event: RealtimeResponseEvent<any>) => void
->()
+const subscriptions = new Map<string[], (event: RealtimeResponseEvent<any>) => void>()
 
 class Realtime {
   subscribe(

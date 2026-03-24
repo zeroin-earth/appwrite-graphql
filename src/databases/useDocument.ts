@@ -14,7 +14,8 @@ import { useSuspenseQuery } from '../useSuspenseQuery'
 
 type Variables = VariablesOf<typeof getDocument>
 
-type DocumentParams<TDocument = Record<string, unknown>> = Variables & {
+/** The parameters accepted by the {@link useDocument} hook. */
+export type DocumentParams<TDocument = Record<string, unknown>> = Variables & {
   fields?: (keyof TDocument & string)[]
 }
 
@@ -64,6 +65,30 @@ function useDocumentRealtime(
   }, [databaseId, collectionId, documentId, realtime, queryClient, queriesKey])
 }
 
+/**
+ * Fetches a single document by ID and subscribes to real-time updates.
+ *
+ * @typeParam TDocument - The shape of the document's custom attributes.
+ *
+ * @example
+ * ```tsx
+ * const { data, isLoading } = useDocument({
+ *   databaseId: 'my-db',
+ *   collectionId: 'my-collection',
+ *   documentId: 'doc-123',
+ * })
+ * ```
+ *
+ * **Parameters** ({@link DocumentParams}):
+ * - `databaseId` — The database ID
+ * - `collectionId` — The collection ID
+ * - `documentId` — The document ID to fetch
+ * - `queries` — Optional query filters
+ * - `transactionId` — Optional transaction ID for atomic reads
+ * - `fields` — Optional array of fields to select
+ *
+ * @returns A `UseQueryResult` with the document data as `Document<TDocument>`.
+ */
 export function useDocument<TDocument>(
   {
     databaseId,
@@ -92,9 +117,33 @@ export function useDocument<TDocument>(
 
   useDocumentRealtime(databaseId, collectionId, documentId, queriesKey)
 
-  return { ...queryResult }
+  return queryResult
 }
 
+/**
+ * Suspense variant of {@link useDocument}. Suspends the component while loading.
+ *
+ * @typeParam TDocument - The shape of the document's custom attributes.
+ *
+ * @example
+ * ```tsx
+ * const { data } = useSuspenseDocument({
+ *   databaseId: 'my-db',
+ *   collectionId: 'my-collection',
+ *   documentId: 'doc-123',
+ * })
+ * ```
+ *
+ * **Parameters** ({@link DocumentParams}):
+ * - `databaseId` — The database ID
+ * - `collectionId` — The collection ID
+ * - `documentId` — The document ID to fetch
+ * - `queries` — Optional query filters
+ * - `transactionId` — Optional transaction ID for atomic reads
+ * - `fields` — Optional array of fields to select
+ *
+ * @returns A `UseSuspenseQueryResult` with the document data as `Document<TDocument>`.
+ */
 export function useSuspenseDocument<TDocument>(
   {
     databaseId,
@@ -124,5 +173,5 @@ export function useSuspenseDocument<TDocument>(
 
   useDocumentRealtime(databaseId, collectionId, documentId, queriesKey)
 
-  return { ...queryResult }
+  return queryResult
 }

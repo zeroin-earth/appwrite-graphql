@@ -10,8 +10,7 @@ configure({ asyncUtilTimeout: 5000 })
 // Suppress Appwrite's localStorage session warning in test output
 const _warn = console.warn
 console.warn = (...args: unknown[]) => {
-  if (typeof args[0] === 'string' && args[0].includes('Appwrite is using localStorage'))
-    return
+  if (typeof args[0] === 'string' && args[0].includes('Appwrite is using localStorage')) return
   _warn(...args)
 }
 

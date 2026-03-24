@@ -2,7 +2,7 @@ import type { ResultOf, VariablesOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException } from '../types'
+import type { AppwriteException, Prettify } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -32,17 +32,62 @@ export const decrementDocumentAttribute = gql(/* GraphQL */ `
   }
 `)
 
-type Variables = VariablesOf<typeof decrementDocumentAttribute>
-type Result = ResultOf<typeof decrementDocumentAttribute>['databasesDecrementDocumentAttribute']
+/** The variables accepted by the {@link useDecrementAttribute} mutation. */
+export type DecrementAttributeVariables = Prettify<VariablesOf<typeof decrementDocumentAttribute>>
 
+/** The result returned by the {@link useDecrementAttribute} mutation. */
+export type DecrementAttributeResult = Prettify<
+  ResultOf<typeof decrementDocumentAttribute>['databasesDecrementDocumentAttribute']
+>
+
+/**
+ * Mutation hook to atomically decrement a numeric document attribute with optimistic updates.
+ *
+ * Accepts an optional `value` (default: 1) and `min` floor. The optimistic update
+ * immediately reflects the new value in the cache and rolls back on error.
+ *
+ * @example
+ * ```tsx
+ * const { mutate } = useDecrementAttribute()
+ *
+ * // Decrement "lives" by 1
+ * mutate({
+ *   databaseId: 'my-db',
+ *   collectionId: 'players',
+ *   documentId: 'player-1',
+ *   attribute: 'lives',
+ * })
+ *
+ * // Decrement "balance" by 50, floored at 0
+ * mutate({
+ *   databaseId: 'my-db',
+ *   collectionId: 'accounts',
+ *   documentId: 'acct-1',
+ *   attribute: 'balance',
+ *   value: 50,
+ *   min: 0,
+ * })
+ * ```
+ *
+ * **Variables** ({@link DecrementAttributeVariables}):
+ * - `databaseId` — The target database ID
+ * - `collectionId` — The target collection ID
+ * - `documentId` — The ID of the document containing the attribute
+ * - `attribute` — The name of the numeric attribute to decrement
+ * - `value` — Optional decrement amount (defaults to `1`)
+ * - `min` — Optional minimum floor; the attribute will not go below this value
+ * - `transactionId` — Optional transaction ID for atomic operations
+ *
+ * @returns A `UseMutationResult` with the document's `_id` and updated `data`.
+ */
 export function useDecrementAttribute() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
   const mutationResult = useMutation<
-    Result,
+    DecrementAttributeResult,
     AppwriteException[],
-    Variables,
+    DecrementAttributeVariables,
     {
       previousEntries: [queryKey: readonly unknown[], data: unknown][]
       documentKeyPrefix: readonly unknown[]
@@ -60,7 +105,15 @@ export function useDecrementAttribute() {
     }) => {
       const { data: mutationData, errors } = await graphql.mutation({
         query: decrementDocumentAttribute,
-        variables: { databaseId, collectionId, documentId, attribute, value, min, transactionId },
+        variables: {
+          databaseId,
+          collectionId,
+          documentId,
+          attribute,
+          value,
+          min,
+          transactionId,
+        },
       })
 
       if (errors) {
@@ -77,9 +130,11 @@ export function useDecrementAttribute() {
 
       await queryClient.cancelQueries({ queryKey: documentKeyPrefix })
 
-      const previousEntries = queryClient.getQueriesData({ queryKey: documentKeyPrefix })
+      const previousEntries = queryClient.getQueriesData({
+        queryKey: documentKeyPrefix,
+      })
 
-      queryClient.setQueryData<Variables>(documentKeyPrefix, (old) => {
+      queryClient.setQueryData<DecrementAttributeVariables>(documentKeyPrefix, (old) => {
         if (!old) return old
         const current = (old[variables.attribute] as number) ?? 0
         const decrement = variables.value ?? 1
@@ -105,5 +160,5 @@ export function useDecrementAttribute() {
     },
   })
 
-  return { ...mutationResult }
+  return mutationResult
 }

@@ -2,20 +2,40 @@ import type { ResultOf, VariablesOf } from 'gql.tada'
 
 import type { getTeam } from './queryOptions'
 import { teamQueryOptions } from './queryOptions'
-import type { AppwriteException, QueryOptions } from '../types'
+import type { AppwriteException, Prettify, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
-type Variables = VariablesOf<typeof getTeam>
-type Result = ResultOf<typeof getTeam>['teamsGet']
+/** The variables accepted by the {@link useTeam} hook. */
+export type TeamVariables = Prettify<VariablesOf<typeof getTeam>>
 
-export function useTeam({ teamId }: Variables, opts: QueryOptions = {}) {
+/** The result returned by the {@link useTeam} hook. */
+export type TeamResult = Prettify<ResultOf<typeof getTeam>['teamsGet']>
+
+/**
+ * Fetches a team by its unique identifier.
+ *
+ * @example
+ * ```tsx
+ * const { data, isLoading } = useTeam({
+ *   teamId: 'engineering',
+ * })
+ *
+ * // data.name, data.total, data._id
+ * ```
+ *
+ * **Parameters** ({@link TeamVariables}):
+ * - `teamId` — The unique team identifier.
+ *
+ * @returns A `UseQueryResult` with the team details ({@link TeamResult}).
+ */
+export function useTeam({ teamId }: TeamVariables, opts: QueryOptions = {}) {
   const client = useAppwrite()
 
-  const queryResult = useQuery<Result, AppwriteException[], Result>({
+  const queryResult = useQuery<TeamResult, AppwriteException[], TeamResult>({
     ...teamQueryOptions(client, { teamId }),
     ...opts,
   })
 
-  return { ...queryResult }
+  return queryResult
 }

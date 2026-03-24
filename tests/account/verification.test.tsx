@@ -37,7 +37,9 @@ describe('useVerification', () => {
     const { result: createResult } = renderHook(() => useCreateEmailVerification(), { wrapper })
 
     await act(async () => {
-      await createResult.current.mutateAsync({ url: 'http://localhost/verify' })
+      await createResult.current.mutateAsync({
+        url: 'http://localhost/verify',
+      })
     })
 
     await waitFor(() => expect(createResult.current.isSuccess).toBe(true))

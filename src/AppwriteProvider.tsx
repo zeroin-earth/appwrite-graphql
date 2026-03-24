@@ -11,6 +11,18 @@ export const AppwriteContext = React.createContext<AppwriteClient | null>(null)
 
 const defaultQueryClient = new QueryClient()
 
+/**
+ * React context provider that supplies the Appwrite client and QueryClient to all child hooks.
+ * Supports optional `persister` for offline cache persistence and `onCacheRestored` callback.
+ * Must wrap any component using Appwrite hooks.
+ *
+ * @example
+ * ```tsx
+ * <AppwriteProvider client={client}>
+ *   <App />
+ * </AppwriteProvider>
+ * ```
+ */
 export function AppwriteProvider({
   client,
   queryClient,

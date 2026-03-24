@@ -200,7 +200,9 @@ describe('Collection query hooks', () => {
       const wrapper = createWrapper()
       await loginUser(userEmail, userPassword, wrapper)
 
-      const { result: queryClient } = renderHook(() => useQueryClient(), { wrapper })
+      const { result: queryClient } = renderHook(() => useQueryClient(), {
+        wrapper,
+      })
 
       const spy = spyOn(queryClient.current, 'setQueryData')
 
@@ -232,7 +234,15 @@ describe('Collection query hooks', () => {
       )
 
       expect(spy).toHaveBeenCalledWith(
-        ['appwrite', 'databases', databaseId, 'collections', collectionId, 'documents', 'some-doc-id'],
+        [
+          'appwrite',
+          'databases',
+          databaseId,
+          'collections',
+          collectionId,
+          'documents',
+          'some-doc-id',
+        ],
         expect.objectContaining({
           name: 'Updated Name',
         }),
@@ -314,7 +324,9 @@ describe('Collection query hooks', () => {
       const wrapper = createWrapper({ suspense: true })
       await loginUser(userEmail, userPassword, wrapper)
 
-      const { result: queryClient } = renderHook(() => useQueryClient(), { wrapper })
+      const { result: queryClient } = renderHook(() => useQueryClient(), {
+        wrapper,
+      })
 
       const spy = spyOn(queryClient.current, 'setQueryData')
 
@@ -341,7 +353,15 @@ describe('Collection query hooks', () => {
       )
 
       expect(spy).toHaveBeenCalledWith(
-        ['appwrite', 'databases', databaseId, 'collections', collectionId, 'documents', 'some-doc-id'],
+        [
+          'appwrite',
+          'databases',
+          databaseId,
+          'collections',
+          collectionId,
+          'documents',
+          'some-doc-id',
+        ],
         expect.objectContaining({
           name: 'Updated Name',
         }),

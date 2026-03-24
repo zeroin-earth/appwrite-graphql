@@ -187,7 +187,9 @@ describe('Document CRUD hooks', () => {
       await loginUser(userEmail, userPassword, wrapper)
 
       const { result } = renderHook(() => useUpdateDocument(), { wrapper })
-      const { result: queryClient } = renderHook(() => useQueryClient(), { wrapper })
+      const { result: queryClient } = renderHook(() => useQueryClient(), {
+        wrapper,
+      })
 
       const spy = spyOn(queryClient.current, 'setQueryData')
 
@@ -303,7 +305,10 @@ describe('Document CRUD hooks', () => {
       await loginUser(userEmail, userPassword, wrapper)
 
       // First create a document via server SDK
-      const doc = await createTestDocument({ name: 'Upsert Existing', age: 40 })
+      const doc = await createTestDocument({
+        name: 'Upsert Existing',
+        age: 40,
+      })
       const existingDocId = doc.$id
       createdDocumentIds.push(existingDocId)
 
@@ -371,7 +376,11 @@ describe('Document CRUD hooks', () => {
     let documentId: string
 
     beforeAll(async () => {
-      const doc = await createTestDocument({ name: 'Suspense Test', age: 99, active: true })
+      const doc = await createTestDocument({
+        name: 'Suspense Test',
+        age: 99,
+        active: true,
+      })
       documentId = doc.$id
       createdDocumentIds.push(documentId)
     })
@@ -423,7 +432,9 @@ describe('Document CRUD hooks', () => {
       const wrapper = createWrapper({ suspense: true })
       await loginUser(userEmail, userPassword, wrapper)
 
-      const { result: queryClient } = renderHook(() => useQueryClient(), { wrapper })
+      const { result: queryClient } = renderHook(() => useQueryClient(), {
+        wrapper,
+      })
 
       const spy = spyOn(queryClient.current, 'setQueryData')
 

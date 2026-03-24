@@ -2,7 +2,7 @@ import type { ResultOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException } from '../types'
+import type { AppwriteException, Prettify } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useMutation } from '../useMutation'
 import { useQueryClient } from '../useQueryClient'
@@ -15,13 +15,33 @@ const deleteSessions = gql(/* GraphQL */ `
   }
 `)
 
-type Result = ResultOf<typeof deleteSessions>['accountDeleteSessions']
+/** The result returned by the {@link useDeleteSessions} mutation. */
+export type DeleteSessionsResult = Prettify<
+  ResultOf<typeof deleteSessions>['accountDeleteSessions']
+>
 
+/**
+ * Mutation hook to delete all sessions for the current user.
+ *
+ * Logs the user out of every device. Invalidates account and session queries
+ * and **clears the entire query cache** on success.
+ *
+ * @example
+ * ```tsx
+ * const { mutate, isPending } = useDeleteSessions()
+ *
+ * mutate()
+ * ```
+ *
+ * This mutation takes no variables.
+ *
+ * @returns A `UseMutationResult` with a `status` string indicating the operation result.
+ */
 export function useDeleteSessions() {
   const { graphql } = useAppwrite()
   const queryClient = useQueryClient()
 
-  const queryResult = useMutation<Result, AppwriteException[], void>({
+  const queryResult = useMutation<DeleteSessionsResult, AppwriteException[], void>({
     mutationKey: Keys.account().session().delete(),
     mutationFn: async () => {
       const { data, errors } = await graphql.mutation({
@@ -36,10 +56,12 @@ export function useDeleteSessions() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: Keys.account().key() })
-      void queryClient.invalidateQueries({ queryKey: Keys.account().sessions() })
+      void queryClient.invalidateQueries({
+        queryKey: Keys.account().sessions(),
+      })
       queryClient.clear()
     },
   })
 
-  return { ...queryResult }
+  return queryResult
 }

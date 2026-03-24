@@ -2,6 +2,10 @@ import { useMemo } from 'react'
 
 import { useAppwrite } from '../useAppwrite'
 
+/**
+ * Returns a URL for a screenshot of a website. Memoized.
+ * @param params - The website URL and optional width and height.
+ */
 export function useAvatarScreenshot({
   url,
   width,

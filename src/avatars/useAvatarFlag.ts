@@ -3,6 +3,10 @@ import type { Flag } from 'appwrite'
 
 import { useAppwrite } from '../useAppwrite'
 
+/**
+ * Returns a URL for a country flag avatar image. Memoized.
+ * @param params - The country code and optional width, height, and quality.
+ */
 export function useAvatarFlag({
   code,
   width,

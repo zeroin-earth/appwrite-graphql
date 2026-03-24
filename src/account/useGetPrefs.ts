@@ -2,7 +2,7 @@ import type { ResultOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException, QueryOptions } from '../types'
+import type { AppwriteException, Prettify, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -14,12 +14,23 @@ const accountGetPrefs = gql(/* GraphQL */ `
   }
 `)
 
-type Result = ResultOf<typeof accountGetPrefs>['accountGetPrefs']
+/** The result returned by the {@link useGetPrefs} query. */
+export type GetPrefsResult = Prettify<ResultOf<typeof accountGetPrefs>['accountGetPrefs']>
 
+/**
+ * Fetches the current user's account preferences.
+ *
+ * @example
+ * ```tsx
+ * const { data, isLoading } = useGetPrefs()
+ * ```
+ *
+ * @returns A `UseQueryResult` with the user's account preferences ({@link GetPrefsResult}).
+ */
 export function useGetPrefs(opts: QueryOptions = {}) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<Result, AppwriteException[], Result>({
+  const queryResult = useQuery<GetPrefsResult, AppwriteException[], GetPrefsResult>({
     queryKey: Keys.account().prefs().key(),
     queryFn: async () => {
       const { data, errors } = await graphql.query({
@@ -35,5 +46,5 @@ export function useGetPrefs(opts: QueryOptions = {}) {
     ...opts,
   })
 
-  return { ...queryResult }
+  return queryResult
 }

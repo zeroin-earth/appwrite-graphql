@@ -49,7 +49,10 @@ export function conflictAwareUpdate(conflictStrategy: ConflictStrategy): Mutatio
       delete remote._id // Remove the _id field to avoid confusion during conflict resolution
 
       // Build the "local" document: the base with the user's changes applied
-      const local = { ...baseSnapshot, ...(variables.data as Record<string, unknown>) }
+      const local = {
+        ...baseSnapshot,
+        ...(variables.data as Record<string, unknown>),
+      }
 
       const result = resolveConflict(
         {

@@ -1,5 +1,7 @@
 export {
   AppwriteException,
+  AuthenticationFactor,
+  AuthenticatorType,
   Client,
   Account,
   Avatars,
@@ -17,6 +19,12 @@ export {
 } from 'appwrite'
 
 export type { Models, Browser, CreditCard, Flag, ImageGravity, ImageFormat } from 'appwrite'
+
+/**
+ * Resolves intersection and mapped types into a flat object for cleaner IntelliSense.
+ * @internal
+ */
+export type Prettify<T> = { [K in keyof T]: T[K] } & {}
 
 export type QueryOptions = {
   enabled?: boolean

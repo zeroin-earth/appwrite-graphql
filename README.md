@@ -1,34 +1,31 @@
 # Appwrite GraphQL
+
 ![Static Badge](https://img.shields.io/badge/coverage-95%25-brightgreen) ![NPM Version](https://img.shields.io/npm/v/%40zeroin.earth%2Fappwrite-graphql) ![Static Badge](https://img.shields.io/badge/appwrite-v1.8.1-%23FD366E)
 
 Appwrite is an open source, BaaS in the same vein as Supabase and Firebase, but geared more toward self-hosting.
 
 This is a fully featured GraphQL library built with [@tanstack/react-query](https://github.com/TanStack/query) on top of the Appwrite web SDK and is fully typed. Think of this library as the abstract wrapper you would have made yourself, but we already did it for you.
 
-## Getting Started
-  - [Installation](#installation)
-  - [Basic Usage](#usage)
-
 ## Features
 
 - Dual build for both React and React Native
 - Full Appwrite SDK v23 parity using React hooks
 - [Optimistic Mutations](#optimistic-mutations)
-	- Documents only
+  - Documents only
 - [Query Caching](#query-caching)
-	- [QueryKey Builder](#querykey-builder)
+  - [QueryKey Builder](#querykey-builder)
 - [Offline-first Support](#offline-first-support)
-	- [Built-in Offline Persisters](#built-in-offline-persisters) (localStorage, AsyncStorage)
-	- [Custom Offline Persister Support](#custom-offline-persister-support)
-	- [Conflict Resolution](#conflict-resolution)
+  - [Built-in Offline Persisters](#built-in-offline-persisters) (localStorage, AsyncStorage)
+  - [Custom Offline Persister Support](#custom-offline-persister-support)
+  - [Conflict Resolution](#conflict-resolution)
 - [SSR Support](#ssr-support)
 - [Field Selection](#field-selection)
 - [Suspense Queries](#suspense-queries)
-	- Documents
-	- Collections
+  - Documents
+  - Collections
 - [Pagination Hooks](#pagination-hooks)
-	- Standard Pagination
-	- Infinite Scroll
+  - Standard Pagination
+  - Infinite Scroll
 - [Appwrite QueryBuilder](#appwrite-querybuilder)
 - [React Query Devtools Support](#react-query-devtools-support)
 
@@ -48,9 +45,9 @@ bun add @zeroin.earth/appwrite-graphql
 
 **React Native:**
 
-- `@react-native-async-storage/async-storage`
-- `@react-native-community/netinfo`
-- `react-native-appwrite`
+- `react-native-appwrite` - `^0.25.0`
+- `@react-native-async-storage/async-storage` - `^3.0.1`
+- `@react-native-community/netinfo` - `^12.0.1`
 
 ## Usage
 
@@ -61,10 +58,7 @@ The library is designed to use a single wrapper, `<AppwriteProvider>`. There are
 1. Basic (no offline-first support) - React
 
 ```tsx
-import { 
-  AppwriteProvider, 
-  createAppwriteClient 
-} from '@zeroin.earth/appwrite-graphql'
+import { AppwriteProvider, createAppwriteClient } from '@zeroin.earth/appwrite-graphql'
 
 const client = createAppwriteClient({
   endpoint: 'https://cloud.appwrite.io/v1',
@@ -72,11 +66,7 @@ const client = createAppwriteClient({
 })
 
 function App() {
-  return (
-    <AppwriteProvider client={client}>
-      {/* your app */}
-    </AppwriteProvider>
-  )
+  return <AppwriteProvider client={client}>{/* your app */}</AppwriteProvider>
 }
 ```
 
@@ -114,14 +104,9 @@ function App() {
 
 ```tsx
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import {
-  AppwriteProvider,
-  createOfflineClient,
-} from '@zeroin.earth/appwrite-graphql'
+import { AppwriteProvider, createOfflineClient } from '@zeroin.earth/appwrite-graphql'
 
-import { 
-  reactNativeNetworkAdapter 
-} from '@zeroin.earth/appwrite-graphql/react-native'
+import { reactNativeNetworkAdapter } from '@zeroin.earth/appwrite-graphql/react-native'
 
 const { appwrite, queryClient, persister } = createOfflineClient({
   endpoint: 'https://cloud.appwrite.io/v1',
@@ -132,11 +117,7 @@ const { appwrite, queryClient, persister } = createOfflineClient({
 
 function App() {
   return (
-    <AppwriteProvider
-      client={appwrite}
-      queryClient={queryClient}
-      persister={persister}
-    >
+    <AppwriteProvider client={appwrite} queryClient={queryClient} persister={persister}>
       {/* your app */}
     </AppwriteProvider>
   )
@@ -154,9 +135,15 @@ import {
 } from '@zeroin.earth/appwrite-graphql'
 
 const myPersister: Persister = {
-  persistClient: async (client) => { /* write to your storage */ },
-  restoreClient: async () => { /* read from your storage */ },
-  removeClient: async () => { /* clear your storage */ },
+  persistClient: async (client) => {
+    /* write to your storage */
+  },
+  restoreClient: async () => {
+    /* read from your storage */
+  },
+  removeClient: async () => {
+    /* clear your storage */
+  },
 }
 
 const { appwrite, queryClient, persister } = createOfflineClient({
@@ -168,11 +155,7 @@ const { appwrite, queryClient, persister } = createOfflineClient({
 
 function App() {
   return (
-    <AppwriteProvider
-      client={appwrite}
-      queryClient={queryClient}
-      persister={persister}
-    >
+    <AppwriteProvider client={appwrite} queryClient={queryClient} persister={persister}>
       {/* your app */}
     </AppwriteProvider>
   )
@@ -182,10 +165,7 @@ function App() {
 5. Offline - Imperative / non-React
 
 ```tsx
-import {
-  createOfflineClient,
-  webNetworkAdapter,
-} from '@zeroin.earth/appwrite-graphql'
+import { createOfflineClient, webNetworkAdapter } from '@zeroin.earth/appwrite-graphql'
 
 const client = createOfflineClient({
   endpoint: 'https://cloud.appwrite.io/v1',
@@ -242,12 +222,9 @@ const person = useDocument<Person>(
 During development, we started getting annoyed with keeping our query keys straight, so we built a factory you can use to perform manual cache eviction. We tried to keep the pattern as close to Appwrite's `Channels` as possible.
 
 ```tsx
-import { Keys } from "@zeroin.earth/appwrite-graphql";
+import { Keys } from '@zeroin.earth/appwrite-graphql'
 
-const queryKey = Keys.database(databaseId)
-  .collection(collectionId)
-  .document(documentId)
-  .key()
+const queryKey = Keys.database(databaseId).collection(collectionId).document(documentId).key()
 ```
 
 ## Offline-first Support
@@ -267,11 +244,11 @@ const { appwrite, queryClient, persister } = createOfflineClient({
 })
 ```
 
-The above example will serialize the mutations to localStorage after a set `throttleTime` elapses (defaults to 1000ms). Once the `networkAdpater` detects the device is online, the serialized mutations will instantly start replaying in order.
+The above example will serialize the mutations to localStorage after a set `throttleTime` elapses (defaults to 1000ms). Once the `networkAdapter` detects the device is online, the serialized mutations will instantly start replaying in order.
 
 ### Custom Offline Persister Support
 
-Sometimes you want to bring your own persister, or just don't want to use localStorage or AsyncStorage. For this, you can build your own.
+Sometimes you want to bring your own persister, or just don't want to use localStorage or AsyncStorage. For this, you can build your own. See [Provider example #4](#provider) above for a full example using a custom `Persister`.
 
 ### Conflict Resolution
 
@@ -283,7 +260,7 @@ createOfflineClient({
   projectId: 'my-project',
   storage: localStorage,
   networkAdapter: webNetworkAdapter(),
-  conflictStrategy: 'last-write-wins'
+  conflictStrategy: 'last-write-wins',
 })
 ```
 
@@ -296,7 +273,8 @@ createOfflineClient({
 **custom**: A custom resolver function can be supplied with the following type:
 
 ```tsx
-conflictStrategy: ((context: ConflictContext) => Record<string, string | number | boolean | null> | 'abort')
+conflictStrategy: (context: ConflictContext) =>
+  Record<string, string | number | boolean | null> | 'abort'
 ```
 
 - `abort` signals to drop the replaying mutation and change nothing.
@@ -310,47 +288,46 @@ We have exposed 3 of the most used queries Appwrite surfaces to be used in SSR p
 - `getCollectionQuery`
 
 ```tsx
-import * as React from "react";
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
+import * as React from 'react'
+import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 
-import { createAppwriteClient, useCollection } from "./";
-import { getCollectionQuery } from "./";
+import {
+  createAppwriteClient,
+  useCollection,
+  getCollectionQuery,
+} from '@zeroin.earth/appwrite-graphql'
 
 type PostType = {
-  title: string;
-  image: string;
-  description: string;
-};
+  title: string
+  image: string
+  description: string
+}
 
 // This could also be getServerSideProps
 export async function getStaticProps() {
   const appwriteClient = createAppwriteClient({
-    endpoint: "https://example.com/v1",
-    projectId: "project-id",
-  });
+    endpoint: 'https://example.com/v1',
+    projectId: 'project-id',
+  })
 
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient()
 
   // Perform the prefetching of the collection query on the server.
   await queryClient.prefetchQuery(
     getCollectionQuery<PostType>(appwriteClient, {
-      databaseId: "db1",
-      collectionId: "col1",
-      fields: ["title", "image", "description"],
+      databaseId: 'db1',
+      collectionId: 'col1',
+      fields: ['title', 'image', 'description'],
     }),
-  );
+  )
 
-  // Dehydrate the query client state and pass it as a 
+  // Dehydrate the query client state and pass it as a
   // prop to the page component.
   return {
     props: {
       dehydratedState: dehydrate(queryClient),
     },
-  };
+  }
 }
 
 function Posts() {
@@ -358,10 +335,10 @@ function Posts() {
   // cached data and not trigger a network request. If the cache is empty,
   // it will fetch the data from the Appwrite server normally.
   const { data } = useCollection<PostType>({
-    databaseId: "db1",
-    collectionId: "col1",
-    fields: ["title", "image", "description"],
-  });
+    databaseId: 'db1',
+    collectionId: 'col1',
+    fields: ['title', 'image', 'description'],
+  })
 
   return (
     <div>
@@ -373,7 +350,7 @@ function Posts() {
         </div>
       ))}
     </div>
-  );
+  )
 }
 
 // The dehydrated state from the server is passed to the HydrationBoundary,
@@ -384,7 +361,7 @@ export default function PostsRoute({ dehydratedState }) {
     <HydrationBoundary state={dehydratedState}>
       <Posts />
     </HydrationBoundary>
-  );
+  )
 }
 ```
 
@@ -399,18 +376,16 @@ The most used query hooks allow you to specify the fields returned by Appwrite t
 
 ```tsx
 type Person = {
-  name: string;
-  age: number;
-};
+  name: string
+  age: number
+}
 
-const person = useDocument<Person>(
-  {
-    databaseId: "db1",
-    collectionId: "col1",
-    documentId: "doc1",
-    fields: ["name", "age"],
-  },
-);
+const person = useDocument<Person>({
+  databaseId: 'db1',
+  collectionId: 'col1',
+  documentId: 'doc1',
+  fields: ['name', 'age'],
+})
 ```
 
 ## Suspense Queries
@@ -430,34 +405,27 @@ We have included two pagination hooks out of the box
 **With Pagination:**
 
 ```tsx
-import * as React from "react";
-import { q, useCollectionWithPagination } from "./";
+import * as React from 'react'
+import { q, useCollectionWithPagination } from '@zeroin.earth/appwrite-graphql'
 
 type Item = {
-  _id: string;
-  name: string;
-};
+  _id: string
+  name: string
+}
 
 export default function Test() {
-  const {
-    documents,
-    page,
-    total,
-    nextPage,
-    previousPage,
-    hasNextPage,
-    hasPreviousPage,
-  } = useCollectionWithPagination<Item>({
-    databaseId: "your-database-id",
-    collectionId: "your-collection-id",
-    queries: q<Item>()
-      .equal("name", ["John", "Jane"])
-      .createdBefore(new Date("2024-01-01").toDateString())
-      .orderAsc("name")
-      .build(),
-    limit: 10,
-    fields: ["name", "_id"],
-  });
+  const { documents, page, total, nextPage, previousPage, hasNextPage, hasPreviousPage } =
+    useCollectionWithPagination<Item>({
+      databaseId: 'your-database-id',
+      collectionId: 'your-collection-id',
+      queries: q<Item>()
+        .equal('name', ['John', 'Jane'])
+        .createdBefore(new Date('2024-01-01').toDateString())
+        .orderAsc('name')
+        .build(),
+      limit: 10,
+      fields: ['name', '_id'],
+    })
 
   return (
     <div>
@@ -478,35 +446,33 @@ export default function Test() {
       <p>Page: {page}</p>
       <p>Total: {total}</p>
     </div>
-  );
+  )
 }
 ```
 
 **Infinite Scroll**:
 
 ```tsx
-import * as React from "react";
-import { q, useInfiniteCollection } from "./";
+import * as React from 'react'
+import { q, useInfiniteCollection } from '@zeroin.earth/appwrite-graphql'
 
 type Item = {
-  _id: string;
-  name: string;
-};
+  _id: string
+  name: string
+}
 
 export default function Test() {
-  const { documents, fetchNextPage, hasNextPage } = useInfiniteCollection<Item>(
-    {
-      databaseId: "your-database-id",
-      collectionId: "your-collection-id",
-      queries: q<Item>()
-        .equal("name", ["John", "Jane"])
-        .createdBefore(new Date("2024-01-01").toDateString())
-        .orderAsc("name")
-        .build(),
-      limit: 25,
-      fields: ["name", "_id"],
-    },
-  );
+  const { documents, fetchNextPage, hasNextPage } = useInfiniteCollection<Item>({
+    databaseId: 'your-database-id',
+    collectionId: 'your-collection-id',
+    queries: q<Item>()
+      .equal('name', ['John', 'Jane'])
+      .createdBefore(new Date('2024-01-01').toDateString())
+      .orderAsc('name')
+      .build(),
+    limit: 25,
+    fields: ['name', '_id'],
+  })
 
   return (
     <div>
@@ -520,7 +486,7 @@ export default function Test() {
         Load More...
       </button>
     </div>
-  );
+  )
 }
 ```
 
@@ -531,32 +497,32 @@ Appwrite SDK includes a built-in Query factory, but we wanted to make something 
 Our QueryBuilder is type safe and exposes all underlying functions from the built-in version 1 for 1.
 
 ```tsx
-import { q } from "@zeroin.earth/appwrite-graphql";
+import { q, useCollection } from '@zeroin.earth/appwrite-graphql'
 
 type YourType = {
-  name: string;
-  favNumber: number;
-  favColor: string;
-  favFood: string;
-};
+  name: string
+  favNumber: number
+  favColor: string
+  favFood: string
+}
 
 export function Profiles() {
   const { documents, error, isLoading } = useCollection<YourType>({
-    databaseId: "your-database-id",
-    collectionId: "your-collection-id",
+    databaseId: 'your-database-id',
+    collectionId: 'your-collection-id',
     queries: q<YourType>()
       .or(
-        (q) => q.equal("favColor", "blue").greaterThan("favNumber", 18),
-        (q) => q.equal("favFood", "pizza").lessThan("favNumber", 10),
+        (q) => q.equal('favColor', 'blue').greaterThan('favNumber', 18),
+        (q) => q.equal('favFood', 'pizza').lessThan('favNumber', 10),
         (q) =>
           q.and(
-            (q) => q.between("favNumber", 5, 15),
-            (q) => q.startsWith("name", "A"),
+            (q) => q.between('favNumber', 5, 15),
+            (q) => q.startsWith('name', 'A'),
           ),
       )
 
       .build(),
-  });
+  })
 
   return (
     <div>
@@ -566,14 +532,14 @@ export function Profiles() {
         <ul>
           {documents.map((doc) => (
             <li key={doc.$id}>
-              Name: {doc.name}, Fav Number: {doc.favNumber}, Fav Color:{" "}
-              {doc.favColor}, Fav Food: {doc.favFood}
+              Name: {doc.name}, Fav Number: {doc.favNumber}, Fav Color: {doc.favColor}, Fav Food:{' '}
+              {doc.favFood}
             </li>
           ))}
         </ul>
       )}
     </div>
-  );
+  )
 }
 ```
 
@@ -583,44 +549,48 @@ React Query Devtools are bundled and ready to go. For any additional questions a
 
 ## Examples
 
+### Login with email or OAuth
+
 ```ts
-import { useLogin } from "@zeroin.earth/appwrite-graphql";
+import { useLogin } from '@zeroin.earth/appwrite-graphql'
 
 export function LogIn() {
-  const router = useRouter();
+  const router = useRouter()
 
-  const { login, oAuthLogin } = useLogin();
+  const { login, oAuthLogin } = useLogin()
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     await login.mutateAsync(data, {
       onSuccess: () => {
-        router.push("/profile");
+        router.push('/profile')
       },
-    });
-  };
+    })
+  }
 
   const loginWithGoogle = () => {
     oAuthLogin.mutate({
-      provider: "google",
-      success: "successUrl",
-      failure: "failureUrl",
-    });
-  };
+      provider: 'google',
+      success: 'successUrl',
+      failure: 'failureUrl',
+    })
+  }
 }
 ```
 
 ---
 
+### Execute a server function
+
 ```ts
-import { useFunction } from "@zeroin.earth/appwrite-graphql";
+import { useFunction } from '@zeroin.earth/appwrite-graphql'
 
 export function Form() {
-  const { executeFunction } = useFunction();
+  const { executeFunction } = useFunction()
 
   const onSubmit: SubmitHandler<Input> = async (data) => {
     executeFunction.mutate(
       {
-        functionId: "6gibhbyy6tggdf",
+        functionId: '6gibhbyy6tggdf',
         body: {
           message: {
             ...data,
@@ -629,10 +599,14 @@ export function Form() {
       },
       {
         onSettled: () => {
-          setJustSignedUp(true);
+          setJustSignedUp(true)
         },
       },
-    );
-  };
+    )
+  }
 }
 ```
+
+## License
+
+MIT

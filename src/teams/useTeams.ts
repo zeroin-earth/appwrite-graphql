@@ -2,7 +2,7 @@ import type { ResultOf } from 'gql.tada'
 import { graphql as gql } from 'gql.tada'
 
 import { Keys } from '../query/Keys'
-import type { AppwriteException, QueryOptions } from '../types'
+import type { AppwriteException, Prettify, QueryOptions } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useQuery } from '../useQuery'
 
@@ -24,8 +24,25 @@ const listTeams = gql(/* GraphQL */ `
   }
 `)
 
-type Result = ResultOf<typeof listTeams>['teamsList']
+/** The result returned by the {@link useTeams} hook. */
+export type TeamsResult = Prettify<ResultOf<typeof listTeams>['teamsList']>
 
+/**
+ * Fetches a list of teams the current user belongs to.
+ *
+ * @example
+ * ```tsx
+ * const { data, isLoading } = useTeams()
+ *
+ * // data.total, data.teams
+ * ```
+ *
+ * **Parameters** *(all optional)*:
+ * - `queries` — Appwrite query strings for filtering and pagination.
+ * - `search` — A search term to filter teams by name.
+ *
+ * @returns A `UseQueryResult` with the paginated team list ({@link TeamsResult}).
+ */
 export function useTeams(
   {
     queries,
@@ -38,7 +55,7 @@ export function useTeams(
 ) {
   const { graphql } = useAppwrite()
 
-  const queryResult = useQuery<Result, AppwriteException[], Result>({
+  const queryResult = useQuery<TeamsResult, AppwriteException[], TeamsResult>({
     queryKey: [...Keys.teams().key(), ...(queries ?? []), ...(search ? [search] : [])],
     queryFn: async () => {
       const { data, errors } = await graphql.query({
@@ -55,5 +72,5 @@ export function useTeams(
     ...opts,
   })
 
-  return { ...queryResult }
+  return queryResult
 }

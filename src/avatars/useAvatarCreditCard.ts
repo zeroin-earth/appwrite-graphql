@@ -3,6 +3,10 @@ import type { CreditCard } from 'appwrite'
 
 import { useAppwrite } from '../useAppwrite'
 
+/**
+ * Returns a URL for a credit card brand logo avatar image. Memoized.
+ * @param params - The credit card code and optional width, height, and quality.
+ */
 export function useAvatarCreditCard({
   code,
   width,

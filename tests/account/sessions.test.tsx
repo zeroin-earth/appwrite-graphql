@@ -272,7 +272,9 @@ describe('useUpdateSession', () => {
     await loginUser(email, password, wrapper)
 
     // First, get the list of sessions to obtain a real session ID
-    const { result: listResult } = renderHook(() => useListSessions(), { wrapper })
+    const { result: listResult } = renderHook(() => useListSessions(), {
+      wrapper,
+    })
 
     await waitFor(() => expect(listResult.current.isSuccess).toBe(true))
 
@@ -320,7 +322,9 @@ describe('useDeleteSession', () => {
     await loginUser(email, password, wrapper)
 
     // Get the list of sessions to find a session ID to delete
-    const { result: listResult } = renderHook(() => useListSessions(), { wrapper })
+    const { result: listResult } = renderHook(() => useListSessions(), {
+      wrapper,
+    })
 
     await waitFor(() => expect(listResult.current.isSuccess).toBe(true))
 

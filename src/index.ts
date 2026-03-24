@@ -24,3 +24,12 @@ export * from './offline'
 export * from './functions/useFunction'
 export * from './functions/useGetExecution'
 export * from './functions/useListExecutions'
+
+export {
+  AppwriteException,
+  AuthenticationFactor,
+  AuthenticatorType,
+  OAuthProvider,
+  ID,
+} from './types'
+export type { Models, Prettify, QueryOptions } from './types'

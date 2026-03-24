@@ -2,6 +2,10 @@ import { useMemo } from 'react'
 
 import { useAppwrite } from '../useAppwrite'
 
+/**
+ * Returns a URL for a QR code image. Memoized.
+ * @param params - The text to encode, and optional size, margin, and download flag.
+ */
 export function useAvatarQR({
   text,
   size,

@@ -41,8 +41,10 @@ function gqlMutation(
       ? { ...variables, data: JSON.stringify(variables.data) }
       : variables
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, errors } = await client.graphql.mutation({ query, variables: vars as any })
+    const { data, errors } = await client.graphql.mutation({
+      query,
+      variables: vars as any,
+    })
     if (errors) throw errors
     return (data as Vars)[resultKey]
   }
@@ -56,7 +58,9 @@ type MutationEntry = {
 export const mutationRegistry: MutationEntry[] = [
   {
     mutationKey: Keys.databases().collections().documents().create(),
-    mutationFn: gqlMutation(createDocument, 'databasesCreateDocument', { serializeData: true }),
+    mutationFn: gqlMutation(createDocument, 'databasesCreateDocument', {
+      serializeData: true,
+    }),
   },
   // The update document entry is registered separately by hydrateMutationDefaults
   // so it can be configured with the user's conflict resolution strategy.
@@ -66,7 +70,9 @@ export const mutationRegistry: MutationEntry[] = [
   },
   {
     mutationKey: Keys.databases().collections().documents().upsert(),
-    mutationFn: gqlMutation(upsertDocument, 'databasesUpsertDocument', { serializeData: true }),
+    mutationFn: gqlMutation(upsertDocument, 'databasesUpsertDocument', {
+      serializeData: true,
+    }),
   },
   {
     mutationKey: [...Keys.databases().transactions().operations().key(), 'incrementAttribute'],
@@ -99,8 +105,14 @@ export const mutationRegistry: MutationEntry[] = [
     mutationFn: gqlMutation(accountUpdatePhone, 'accountUpdatePhone'),
   },
 
-  { mutationKey: Keys.teams().create(), mutationFn: gqlMutation(createTeam, 'teamsCreate') },
-  { mutationKey: Keys.teams().delete(), mutationFn: gqlMutation(deleteTeam, 'teamsDelete') },
+  {
+    mutationKey: Keys.teams().create(),
+    mutationFn: gqlMutation(createTeam, 'teamsCreate'),
+  },
+  {
+    mutationKey: Keys.teams().delete(),
+    mutationFn: gqlMutation(deleteTeam, 'teamsDelete'),
+  },
   {
     mutationKey: Keys.teams().teamName().update(),
     mutationFn: gqlMutation(updateTeamName, 'teamsUpdateName'),
