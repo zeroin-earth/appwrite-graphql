@@ -31,4 +31,4 @@ export {
   OAuthProvider,
   ID,
 } from './types'
-export type { Models, Prettify, QueryOptions } from './types'
+export type { Models, Prettify, QueryOptions, KVStorage } from './types'

@@ -36,3 +36,13 @@ export type QueryOptions = {
   retryDelay?: number | ((attemptIndex: number) => number)
   staleTime?: number
 }
+
+/**
+ * A minimal key-value storage interface compatible with both
+ * `localStorage` (sync) and React Native `AsyncStorage` (async).
+ */
+export type KVStorage = {
+  getItem: (key: string) => string | null | Promise<string | null>
+  setItem: (key: string, value: string) => void | Promise<void>
+  removeItem: (key: string) => void | Promise<void>
+}

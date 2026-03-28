@@ -1,5 +1,8 @@
 import * as React from 'react'
 
 import type { AppwriteClient } from './client'
+import type { KVStorage } from './types'
 
-export const AppwriteContext = React.createContext<AppwriteClient | null>(null)
+export type AppwriteContextValue = AppwriteClient & { kvStorage?: KVStorage }
+
+export const AppwriteContext = React.createContext<AppwriteContextValue | null>(null)

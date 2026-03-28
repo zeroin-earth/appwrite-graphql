@@ -25,9 +25,9 @@ export type PasswordRecoveryResult = Prettify<
  * Sends a password recovery email to the supplied address.
  *
  * Mutation hook to send a password recovery email. On success, stores
- * the email in `localStorage` for convenience during the reset flow
- * (silently skipped in React Native environments). The recovery URL
- * receives `userId` and `secret` query parameters for use with
+ * the email using the `kvStorage` adapter provided to `AppwriteProvider`
+ * (falls back to `localStorage` on web). The recovery URL receives
+ * `userId` and `secret` query parameters for use with
  * {@link useResetPassword}.
  *
  * @example
@@ -47,7 +47,7 @@ export type PasswordRecoveryResult = Prettify<
  * @returns A `UseMutationResult` with the recovery token's `expire` timestamp.
  */
 export function usePasswordRecovery() {
-  const { graphql } = useAppwrite()
+  const { graphql, kvStorage } = useAppwrite()
 
   const queryResult = useMutation<
     PasswordRecoveryResult,
@@ -72,12 +72,13 @@ export function usePasswordRecovery() {
     },
     onSuccess: async (_, variables) => {
       try {
-        localStorage?.setItem('email', variables.email)
-      } catch (e: any) {
-        console.error(
-          'Could not save email to local storage. If you are using react-native, this is expected.',
-          e,
-        )
+        if (kvStorage) {
+          await kvStorage.setItem('email', variables.email)
+        } else if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('email', variables.email)
+        }
+      } catch {
+        // Storage unavailable — non-critical, skip silently.
       }
     },
   })

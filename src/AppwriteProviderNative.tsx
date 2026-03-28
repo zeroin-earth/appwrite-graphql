@@ -6,17 +6,27 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 
 import type { AppwriteClient } from './client'
 import { AppwriteContext } from './context'
+import type { KVStorage } from './types'
 
 const defaultQueryClient = new QueryClient()
 
 /**
  * React context provider that supplies the Appwrite client and QueryClient to all child hooks.
- * Supports optional `persister` for offline cache persistence and `onCacheRestored` callback.
  * Must wrap any component using Appwrite hooks.
+ *
+ * @param client - The Appwrite client created by {@link createAppwriteClient}.
+ * @param queryClient - Optional custom `QueryClient` instance.
+ * @param kvStorage - Optional key-value storage adapter (e.g. `AsyncStorage` on React Native).
+ *   Used by hooks like {@link usePasswordRecovery} to persist data across screens.
+ *   On web, `localStorage` is used automatically when this is omitted.
+ * @param persister - Optional TanStack `Persister` for offline cache persistence.
+ * @param onCacheRestored - Callback invoked after the persisted cache is restored.
  *
  * @example
  * ```tsx
- * <AppwriteProvider client={client}>
+ * import AsyncStorage from '@react-native-async-storage/async-storage'
+ *
+ * <AppwriteProvider client={client} kvStorage={AsyncStorage}>
  *   <App />
  * </AppwriteProvider>
  * ```
@@ -24,17 +34,20 @@ const defaultQueryClient = new QueryClient()
 export function AppwriteProvider({
   client,
   queryClient,
+  kvStorage,
   persister,
   onCacheRestored,
   children,
 }: {
   client: AppwriteClient
   queryClient?: QueryClient
+  kvStorage?: KVStorage
   persister?: Persister
   onCacheRestored?: () => void
   children: ReactNode
 }) {
   const qc = queryClient ?? defaultQueryClient
+  const contextValue = React.useMemo(() => ({ ...client, kvStorage }), [client, kvStorage])
 
   if (persister) {
     return (
@@ -52,14 +65,14 @@ export function AppwriteProvider({
           onCacheRestored?.()
         }}
       >
-        <AppwriteContext.Provider value={client}>{children}</AppwriteContext.Provider>
+        <AppwriteContext.Provider value={contextValue}>{children}</AppwriteContext.Provider>
       </PersistQueryClientProvider>
     )
   }
 
   return (
     <QueryClientProvider client={qc}>
-      <AppwriteContext.Provider value={client}>{children}</AppwriteContext.Provider>
+      <AppwriteContext.Provider value={contextValue}>{children}</AppwriteContext.Provider>
     </QueryClientProvider>
   )
 }
