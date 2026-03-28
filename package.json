@@ -1,6 +1,6 @@
 {
   "name": "@zeroin.earth/appwrite-graphql",
-  "version": "23.0.4",
+  "version": "23.0.5",
   "description": "React hooks library for Appwrite with offline-first support, powered by @tanstack/react-query",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
