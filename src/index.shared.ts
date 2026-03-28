@@ -1,3 +1,4 @@
+export { useAppwrite } from './useAppwrite'
 export { useMutation } from './useMutation'
 export { useQuery } from './useQuery'
 export { useLazyQuery } from './useLazyQuery'

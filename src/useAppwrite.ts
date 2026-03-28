@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 
-import { AppwriteContext } from './AppwriteProvider'
+import { AppwriteContext } from './context'
 
 /**
  * Returns the Appwrite client instance from context.

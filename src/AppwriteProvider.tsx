@@ -6,8 +6,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 
 import type { AppwriteClient } from './client'
-
-export const AppwriteContext = React.createContext<AppwriteClient | null>(null)
+import { AppwriteContext } from './context'
 
 const defaultQueryClient = new QueryClient()
 
