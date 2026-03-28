@@ -6,7 +6,7 @@ import { castDraft, produce } from 'immer'
 import type { getAccount } from './queryOptions'
 import { getAccountQuery } from './queryOptions'
 import { Keys } from '../query/Keys'
-import type { AppwriteException, Models, Prettify, QueryOptions, Realtime } from '../types'
+import type { AppwriteException, Models, Prettify, QueryOptions, RealtimeLike } from '../types'
 import { useAppwrite } from '../useAppwrite'
 import { useLazyQuery } from '../useLazyQuery'
 import { useQuery } from '../useQuery'
@@ -93,7 +93,7 @@ function getAccountQueryOptions(client: ReturnType<typeof useAppwrite>) {
 }
 
 function subscribe<Preferences extends Models.Preferences>(
-  realtime: Realtime,
+  realtime: RealtimeLike,
   queryClient: ReturnType<typeof useQueryClient>,
 ) {
   return realtime.subscribe<Models.User<Preferences>>(Channel.account(), (response) => {

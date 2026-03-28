@@ -34,9 +34,9 @@ export type SignUpVariables = Prettify<
 export type SignUpResult = Prettify<ResultOf<typeof createAccount>['accountCreate']>
 
 /** The variables accepted by the verify email mutation in {@link useSignUp}. */
-export type VerifyEmailVariables = {
+export type VerifyEmailVariables = Prettify<{
   verifyUrl: string
-}
+}>
 /** The result returned by the verify email mutation in {@link useSignUp}. */
 export type VerifyEmailResult = Prettify<ResultOf<typeof verify>['accountCreateVerification']>
 

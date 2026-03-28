@@ -20,6 +20,10 @@ export {
 
 export type { Models, Browser, CreditCard, Flag, ImageGravity, ImageFormat } from 'appwrite'
 
+import type { Realtime as _Realtime } from 'appwrite'
+/** Minimal realtime interface — works with both the standalone Realtime class (web) and Client-integrated realtime (React Native). */
+export type RealtimeLike = Pick<_Realtime, 'subscribe'>
+
 /**
  * Resolves intersection and mapped types into a flat object for cleaner IntelliSense.
  * @internal
