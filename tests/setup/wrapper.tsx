@@ -51,8 +51,8 @@ export function createWrapper(opts?: {
 
     if (opts?.suspense) {
       return (
-        <ErrorBoundary fallback={<div>Error occurred</div>} onError={opts?.onError}>
-          <Suspense fallback={<div>Loading...</div>}>{inner}</Suspense>
+        <ErrorBoundary fallback={<>Error occurred</>} onError={opts?.onError}>
+          <Suspense fallback={<>Loading...</>}>{inner}</Suspense>
         </ErrorBoundary>
       )
     }
