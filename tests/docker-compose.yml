@@ -1,3 +1,5 @@
+name: appwrite-graphql-test
+
 x-logging: &x-logging
   logging:
     driver: 'json-file'
@@ -6,7 +8,7 @@ x-logging: &x-logging
       max-size: '10m'
 
 x-appwrite-service: &appwrite-service
-  image: appwrite/appwrite:1.8.1
+  image: appwrite/appwrite:1.9.0
   restart: unless-stopped
   networks:
     - appwrite
@@ -65,7 +67,8 @@ services:
       - appwrite-sites:/storage/sites:rw
       - appwrite-builds:/storage/builds:rw
     depends_on:
-      - mariadb
+      - mongodb
+      - postgresql
       - redis
     extra_hosts:
       - 'host.docker.internal:host-gateway'
@@ -87,7 +90,8 @@ services:
       - traefik.http.routers.appwrite_realtime_wss.service=appwrite_realtime
       - traefik.http.routers.appwrite_realtime_wss.tls=true
     depends_on:
-      - mariadb
+      - mongodb
+      - postgresql
       - redis
     extra_hosts:
       - 'host.docker.internal:host-gateway'
@@ -98,7 +102,7 @@ services:
     container_name: appwrite-worker-audits
     depends_on:
       - redis
-      - mariadb
+      - mongodb
 
   appwrite-worker-databases:
     <<: *appwrite-service
@@ -106,7 +110,7 @@ services:
     container_name: appwrite-worker-databases
     depends_on:
       - redis
-      - mariadb
+      - mongodb
 
   appwrite-worker-deletes:
     <<: *appwrite-service
@@ -114,7 +118,7 @@ services:
     container_name: appwrite-worker-deletes
     depends_on:
       - redis
-      - mariadb
+      - mongodb
     volumes:
       - appwrite-uploads:/storage/uploads:rw
       - appwrite-cache:/storage/cache:rw
@@ -138,7 +142,7 @@ services:
     container_name: appwrite-worker-messaging
     depends_on:
       - redis
-      - mariadb
+      - mongodb
     extra_hosts:
       - 'host.docker.internal:host-gateway'
 
@@ -215,8 +219,8 @@ services:
     depends_on:
       redis:
         condition: service_started
-      mariadb:
-        condition: service_started
+      mongodb:
+        condition: service_healthy
       openruntimes-executor:
         condition: service_healthy
     extra_hosts:
@@ -229,30 +233,69 @@ services:
     depends_on:
       redis:
         condition: service_started
-      mariadb:
-        condition: service_started
+      mongodb:
+        condition: service_healthy
       openruntimes-executor:
         condition: service_healthy
 
-  mariadb:
-    image: mariadb:10.11
-    container_name: appwrite-mariadb
+  mongodb:
+    image: mongo:8.2.5
+    container_name: appwrite-mongodb
     <<: *x-logging
     restart: unless-stopped
     networks:
       - appwrite
     volumes:
-      - appwrite-mariadb:/var/lib/mysql:rw
+      - appwrite-mongodb:/data/db
+      - appwrite-mongodb-keyfile:/data/keyfile
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ./mongo-entrypoint.sh:/mongo-entrypoint.sh:ro
     environment:
-      - MYSQL_ROOT_PASSWORD=${_APP_DB_ROOT_PASS}
-      - MYSQL_DATABASE=${_APP_DB_SCHEMA}
-      - MYSQL_USER=${_APP_DB_USER}
-      - MYSQL_PASSWORD=${_APP_DB_PASS}
-      - MARIADB_AUTO_UPGRADE=1
-    command: 'mysqld --innodb-flush-method=fsync'
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=${_APP_DB_ROOT_PASS}
+      - MONGO_INITDB_DATABASE=${_APP_DB_SCHEMA}
+      - MONGO_INITDB_USERNAME=${_APP_DB_USER}
+      - MONGO_INITDB_PASSWORD=${_APP_DB_PASS}
+    entrypoint: ['/bin/bash', '/mongo-entrypoint.sh']
+    healthcheck:
+      test: |
+        bash -c "
+          if mongosh -u root -p ${_APP_DB_ROOT_PASS} --authenticationDatabase admin --quiet --eval 'rs.status().ok' 2>/dev/null | grep -q 1; then
+            exit 0
+          else
+            mongosh -u root -p ${_APP_DB_ROOT_PASS} --authenticationDatabase admin --quiet --eval \"
+              rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'appwrite-mongodb:27017'}]})
+            \" 2>/dev/null || exit 1
+          fi
+        "
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  postgresql:
+    image: appwrite/postgres:0.1.0
+    container_name: appwrite-postgresql
+    <<: *x-logging
+    restart: unless-stopped
+    networks:
+      - appwrite
+    volumes:
+      - appwrite-postgresql:/var/lib/postgresql/18/data:rw
+    environment:
+      - POSTGRES_DB=${_APP_DB_SCHEMA}
+      - POSTGRES_USER=${_APP_DB_USER}
+      - POSTGRES_PASSWORD=${_APP_DB_PASS}
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${_APP_DB_USER} -d ${_APP_DB_SCHEMA}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    command: 'postgres'
 
   redis:
-    image: redis:7.2.4-alpine
+    image: redis:7.4.7-alpine
     container_name: appwrite-redis
     <<: *x-logging
     restart: unless-stopped
@@ -304,7 +347,9 @@ networks:
     name: runtimes
 
 volumes:
-  appwrite-mariadb:
+  appwrite-mongodb:
+  appwrite-mongodb-keyfile:
+  appwrite-postgresql:
   appwrite-redis:
   appwrite-cache:
   appwrite-uploads:
