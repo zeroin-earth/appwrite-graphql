@@ -13,5 +13,6 @@
         "tadaOutputLocation": "./src/graphql-env.d.ts"
       }
     ]
-  }
+  },
+  "exclude": ["scripts"]
 }

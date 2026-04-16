@@ -1,6 +1,6 @@
 # Appwrite GraphQL
 
-![Static Badge](https://img.shields.io/badge/coverage-95%25-brightgreen) ![NPM Version](https://img.shields.io/npm/v/%40zeroin.earth%2Fappwrite-graphql) ![Static Badge](https://img.shields.io/badge/appwrite-v1.8.1-%23FD366E)
+![Static Badge](https://img.shields.io/badge/coverage-96%25-brightgreen) ![NPM Version](https://img.shields.io/npm/v/%40zeroin.earth%2Fappwrite-graphql) ![Static Badge](https://img.shields.io/badge/appwrite-v1.9.0-%23FD366E)
 
 Appwrite is an open source, BaaS in the same vein as Supabase and Firebase, but geared more toward self-hosting.
 
@@ -39,13 +39,13 @@ bun add @zeroin.earth/appwrite-graphql
 
 ### Peer Dependencies
 
-- `react` - `^19.1.0`
-- `appwrite` - `^23.0.0`
-- `@tanstack/react-query` - `^5.70.0`
+- `react` - `^19.2.5`
+- `appwrite` - `24.1.1`
+- `@tanstack/react-query` - `^5.99.0`
 
 **React Native:**
 
-- `react-native-appwrite` - `^0.25.0`
+- `react-native-appwrite` - `^0.27.1`
 - `@react-native-async-storage/async-storage` - `^3.0.1`
 - `@react-native-community/netinfo` - `^12.0.1`
 

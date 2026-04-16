@@ -13,9 +13,11 @@ export default defineConfig(
       'eslint.config.mjs',
       'react-native/**',
       'dist/**',
+      'scripts/**',
       'src/__generated__/**',
       'node_modules/**',
       'post-build.js',
+      'tests/mongo-init.js',
     ],
   },
   {

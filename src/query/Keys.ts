@@ -90,6 +90,10 @@ export class Keys<T> {
     return Keys.create<Database>('databases', id)
   }
 
+  static tablesDBs() {
+    return Keys.create<TablesDB>('tablesDB')
+  }
+
   static tablesDB(id: string) {
     return Keys.create<TablesDB>('tablesDB', id)
   }
@@ -302,6 +306,16 @@ export class Keys<T> {
   operations(this: Keys<Transaction>) {
     this.keys.push('operations')
     return this as unknown as Keys<Actionable>
+  }
+
+  tableTransactions(this: Keys<TablesDB>) {
+    this.keys.push('transactions')
+    return this as unknown as Keys<Transaction>
+  }
+
+  tableTransaction(this: Keys<TablesDB>, id: string) {
+    this.keys.push('transactions', id)
+    return this as unknown as Keys<Transaction>
   }
 
   table(this: Keys<TablesDB>, id: string) {
