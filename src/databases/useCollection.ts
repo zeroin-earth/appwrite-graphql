@@ -79,7 +79,7 @@ function useCollectionRealtime<TDocument>(
     )
 
     return () => {
-      void subscriptionPromise.then((sub) => sub.close())
+      void subscriptionPromise?.then((sub) => sub.close())
     }
   }, [databaseId, collectionId, realtime, queryClient, queriesKey, subscribe])
 }

@@ -60,7 +60,7 @@ function useDocumentRealtime(
     )
 
     return () => {
-      void subscriptionPromise.then((sub) => sub.close())
+      void subscriptionPromise?.then((sub) => sub.close())
     }
   }, [databaseId, collectionId, documentId, realtime, queryClient, queriesKey])
 }
