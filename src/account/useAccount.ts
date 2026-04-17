@@ -44,7 +44,7 @@ export function useLazyAccount() {
 
     const subscriptionPromise = subscribe(client.realtime, queryClient)
     return () => {
-      void subscriptionPromise.then((sub) => sub.close())
+      void subscriptionPromise?.then((sub) => sub.close())
     }
   }, [isActive, client.realtime, queryClient])
 
@@ -81,7 +81,7 @@ export function useAccount(opts: QueryOptions = {}) {
   useEffect(() => {
     const subscriptionPromise = subscribe(client.realtime, queryClient)
     return () => {
-      void subscriptionPromise.then((sub) => sub.close())
+      void subscriptionPromise?.then((sub) => sub.close())
     }
   }, [client.realtime, queryClient])
 

@@ -79,7 +79,7 @@ function useTableRowsRealtime<TRow>(
     )
 
     return () => {
-      void subscriptionPromise.then((sub) => sub.close())
+      void subscriptionPromise?.then((sub) => sub.close())
     }
   }, [databaseId, tableId, realtime, queryClient, queriesKey, subscribe])
 }
