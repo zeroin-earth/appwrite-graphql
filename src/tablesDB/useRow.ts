@@ -55,7 +55,7 @@ function useRowRealtime(databaseId: string, tableId: string, rowId: string, quer
     )
 
     return () => {
-      void subscriptionPromise?.then((sub) => sub.close())
+      void subscriptionPromise?.then?.((sub) => sub.close())
     }
   }, [databaseId, tableId, rowId, realtime, queryClient, queriesKey])
 }
