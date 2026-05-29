@@ -40,7 +40,10 @@ const graphqlObject = (graphqlAppwrite: Graphql) => ({
     query: TypedDocumentNode<T, V>
     variables?: V
   }) => {
-    const { data, errors } = (await graphqlAppwrite.mutation({
+    // Use the query endpoint for mutations to avoid CORS issues with the
+    // separate /v1/graphql/mutation path. The GraphQL operation type is
+    // determined by the document content, not the HTTP path.
+    const { data, errors } = (await graphqlAppwrite.query({
       query: { query: print(query), variables },
     })) as { data: ResultOf<typeof query>; errors: unknown[] }
     return { data, errors }

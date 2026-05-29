@@ -9,8 +9,13 @@ configure({ asyncUtilTimeout: 5000 })
 // browser cookies are unavailable, which we control via createWrapper().
 // Suppress Appwrite's localStorage session warning in test output
 const _warn = console.warn
-console.warn = (...args: unknown[]) => {
-  if (typeof args[0] === 'string' && args[0].includes('Appwrite is using localStorage')) return
+const SUPPRESSED_WARNINGS = [
+  'Appwrite is using localStorage',
+  'The current SDK is built for Appwrite',
+]
+
+console.warn = (...args: string[]) => {
+  if (typeof args[0] === 'string' && SUPPRESSED_WARNINGS.some((w) => args[0].includes(w))) return
   _warn(...args)
 }
 
