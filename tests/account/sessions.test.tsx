@@ -139,13 +139,13 @@ describe('useListSessions', () => {
     expect(result.current.data).toBeDefined()
     expect(result.current.data?.sessions).toBeDefined()
     expect(Array.isArray(result.current.data?.sessions)).toBe(true)
-    expect(result.current.data!.sessions.length).toBeGreaterThanOrEqual(1)
+    expect(result.current.data!.sessions?.length).toBeGreaterThanOrEqual(1)
 
-    const session = result.current.data!.sessions[0]
-    expect(session._id).toBeDefined()
-    expect(session._createdAt).toBeDefined()
-    expect(session.osName).toBeDefined()
-    expect(session.clientName).toBeDefined()
+    const session = result.current.data!.sessions?.[0]
+    expect(session?._id).toBeDefined()
+    expect(session?._createdAt).toBeDefined()
+    expect(session?.osName).toBeDefined()
+    expect(session?.clientName).toBeDefined()
   })
 })
 
@@ -227,7 +227,7 @@ describe('useCreateJWT', () => {
     expect(result.current.data).toBeDefined()
     expect(result.current.data?.jwt).toBeDefined()
     expect(typeof result.current.data?.jwt).toBe('string')
-    expect(result.current.data!.jwt.length).toBeGreaterThan(0)
+    expect(result.current.data!.jwt?.length).toBeGreaterThan(0)
   })
 
   test('creates a JWT token with useSuspenseQuery', async () => {
@@ -241,7 +241,7 @@ describe('useCreateJWT', () => {
     expect(result.current.data).toBeDefined()
     expect(result.current.data?.jwt).toBeDefined()
     expect(typeof result.current.data?.jwt).toBe('string')
-    expect(result.current.data!.jwt.length).toBeGreaterThan(0)
+    expect(result.current.data!.jwt?.length).toBeGreaterThan(0)
   })
 })
 
@@ -282,7 +282,7 @@ describe('useUpdateSession', () => {
 
     await waitFor(() => expect(listResult.current.isSuccess).toBe(true))
 
-    const sessionId = listResult.current.data!.sessions[0]._id
+    const sessionId = listResult.current.data!.sessions?.[0]?._id ?? ''
 
     // Now update (extend) that session
     const { result } = renderHook(() => useUpdateSession(), { wrapper })
@@ -332,7 +332,7 @@ describe('useDeleteSession', () => {
 
     await waitFor(() => expect(listResult.current.isSuccess).toBe(true))
 
-    const sessionId = listResult.current.data!.sessions[0]._id
+    const sessionId = listResult.current.data!.sessions?.[0]?._id ?? ''
 
     // Delete that session
     const { result } = renderHook(() => useDeleteSession(), { wrapper })

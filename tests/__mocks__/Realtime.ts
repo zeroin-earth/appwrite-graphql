@@ -9,14 +9,13 @@ import {
   type RealtimeResponseEvent,
   type RealtimeSubscription,
 } from 'appwrite'
-import type { ActionableChannel, ResolvedChannel } from 'appwrite/types/channel'
 import { mock } from 'bun:test'
 
 const subscriptions = new Map<string[], (event: RealtimeResponseEvent<any>) => void>()
 
 class Realtime {
   subscribe(
-    channel: string | Channel<any> | ActionableChannel | ResolvedChannel,
+    channel: string | Channel<any>,
     callback: (event: RealtimeResponseEvent<any>) => void,
     queries?: (string | Query)[],
   ): Promise<RealtimeSubscription> {
@@ -43,7 +42,7 @@ mock.module('appwrite', () => {
 })
 
 export const triggerRealtimeEvent = (
-  channel: string | Channel<any> | ActionableChannel | ResolvedChannel,
+  channel: string | Channel<any>,
   payload: any,
   events?: string[],
 ) => {

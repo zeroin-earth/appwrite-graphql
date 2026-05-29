@@ -29,7 +29,7 @@ describe('MFA (Multi-Factor Authentication) Challenge', () => {
   let totpSecret: string
 
   /** Recovery codes created during the MFA setup flow. */
-  let recoveryCodes: string[]
+  let recoveryCodes: (string | null)[]
 
   beforeAll(async () => {
     const user = await createTestUser({ name: 'MFA Challenge Test User' })
@@ -109,7 +109,7 @@ describe('MFA (Multi-Factor Authentication) Challenge', () => {
     await waitFor(() => expect(codes.current.isSuccess).toBe(true))
 
     // Store the codes from CREATE – these are the actual usable codes
-    recoveryCodes = codes.current.data!.recoveryCodes
+    recoveryCodes = codes.current.data!.recoveryCodes ?? []
 
     const { result } = renderHook(() => useGetMfaRecoveryCodes(), { wrapper })
 
@@ -119,7 +119,9 @@ describe('MFA (Multi-Factor Authentication) Challenge', () => {
     expect(result.current.data?.recoveryCodes).toBeDefined()
 
     expect(Array.isArray(result.current.data?.recoveryCodes)).toBe(true)
-    expect(result.current.data!.recoveryCodes.length).toBe(codes.current.data!.recoveryCodes.length)
+    expect(result.current.data!.recoveryCodes?.length).toBe(
+      codes.current.data!.recoveryCodes?.length,
+    )
   })
 
   test.skip('useCreateMfaChallenge, useUpdateMfaChallenge with valid Recovery Code — Appwrite 1.8.1 returns user_invalid_token on both REST and GraphQL endpoints (server bug, not GraphQL-specific)', async () => {
@@ -131,7 +133,7 @@ describe('MFA (Multi-Factor Authentication) Challenge', () => {
     expect(result.current.data?.recoveryCodes).toBeDefined()
 
     // Store the codes from CREATE – these are the actual usable codes
-    const rCodes = result.current.data!.recoveryCodes
+    const rCodes = result.current.data!.recoveryCodes ?? []
 
     const { result: createResult, unmount: unmountCreate } = renderHook(
       () => useCreateMfaChallenge(),
@@ -154,7 +156,7 @@ describe('MFA (Multi-Factor Authentication) Challenge', () => {
     await act(async () =>
       updateResult.current.mutateAsync({
         challengeId,
-        otp: rCodes[0],
+        otp: rCodes[0] ?? '',
       }),
     )
 
@@ -176,10 +178,10 @@ describe('MFA (Multi-Factor Authentication) Challenge', () => {
     expect(result.current.data).toBeDefined()
     expect(result.current.data?.recoveryCodes).toBeDefined()
     expect(Array.isArray(result.current.data?.recoveryCodes)).toBe(true)
-    expect(result.current.data!.recoveryCodes.length).toBeGreaterThan(0)
+    expect(result.current.data!.recoveryCodes?.length).toBeGreaterThan(0)
 
     // New codes should differ from the original set
-    const newCodes = result.current.data!.recoveryCodes
+    const newCodes = result.current.data!.recoveryCodes ?? []
     const codesChanged = newCodes.some((code) => !recoveryCodes.includes(code))
     expect(codesChanged).toBe(true)
   })

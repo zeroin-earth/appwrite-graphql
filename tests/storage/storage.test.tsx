@@ -62,8 +62,8 @@ describe('Storage content URL hooks', () => {
       await waitFor(() => {
         expect(createResult.current.isSuccess).toBe(true)
         expect(createResult.current.data).toBeDefined()
-        expect(createResult.current.data.bucketId).toBe('test-bucket')
-        expect(createResult.current.data.name).toBe('test-file.txt')
+        expect(createResult.current.data!.bucketId).toBe('test-bucket')
+        expect(createResult.current.data!.name).toBe('test-file.txt')
       })
     })
 
@@ -78,8 +78,8 @@ describe('Storage content URL hooks', () => {
       await waitFor(() => {
         expect(fileResult.current.isSuccess).toBe(true)
         expect(fileResult.current.data).toBeDefined()
-        expect(fileResult.current.data.bucketId).toBe('test-bucket')
-        expect(fileResult.current.data.name).toBe('test-file.txt')
+        expect(fileResult.current.data!.bucketId).toBe('test-bucket')
+        expect(fileResult.current.data!.name).toBe('test-file.txt')
       })
     })
 
@@ -109,8 +109,8 @@ describe('Storage content URL hooks', () => {
       await waitFor(() => {
         expect(updateResult.current.isSuccess).toBe(true)
         expect(updateResult.current.data).toBeDefined()
-        expect(updateResult.current.data.bucketId).toBe('test-bucket')
-        expect(updateResult.current.data.name).toBe('updated-file.txt')
+        expect(updateResult.current.data!.bucketId).toBe('test-bucket')
+        expect(updateResult.current.data!.name).toBe('updated-file.txt')
       })
     })
 
@@ -125,8 +125,8 @@ describe('Storage content URL hooks', () => {
       await waitFor(() => {
         expect(filesResult.current.isSuccess).toBe(true)
         expect(filesResult.current.data).toBeDefined()
-        expect(filesResult.current.data.total).toBe(1)
-        expect(filesResult.current.data.files[0].name).toBe('updated-file.txt')
+        expect(filesResult.current.data!.total).toBe(1)
+        expect(filesResult.current.data!.files?.[0]?.name).toBe('updated-file.txt')
       })
     })
 

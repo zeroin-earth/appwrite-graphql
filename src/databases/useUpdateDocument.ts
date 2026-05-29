@@ -103,16 +103,16 @@ export function useUpdateDocument() {
       { databaseId, collectionId, documentId, data, permissions, transactionId },
       ctx,
     ) => {
-      const wasOffline = ctx.meta.willPerformOfflineMutation ?? false
+      const wasOffline = (ctx.meta?.willPerformOfflineMutation as boolean | undefined) ?? false
 
-      if (ctx.meta.willPerformOfflineMutation != null) {
+      if (ctx.meta?.willPerformOfflineMutation != null) {
         delete ctx.meta.willPerformOfflineMutation
       }
 
       if (wasOffline) {
         try {
           const updateData = (await conflictAwareUpdate(
-            ctx.meta.conflictStrategy as ConflictStrategy,
+            ctx.meta?.conflictStrategy as ConflictStrategy,
           )(
             appwrite,
             {

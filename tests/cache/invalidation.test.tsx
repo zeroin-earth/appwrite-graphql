@@ -56,7 +56,7 @@ describe('Cache invalidation', () => {
     })
 
     await waitFor(() => {
-      expect(accountResult.current.data.name).not.toBe(originalName)
+      expect(accountResult.current.data!.name).not.toBe(originalName)
     })
   })
 
@@ -83,8 +83,8 @@ describe('Cache invalidation', () => {
 
     await waitFor(() => {
       expect(accountResult.current.data).toBeDefined()
-      const account = accountResult.current.data
-      expect(JSON.parse(account.prefs.data as string)).toMatchObject(newPrefs)
+      const account = accountResult.current.data!
+      expect(JSON.parse(account.prefs?.data as string)).toMatchObject(newPrefs)
     })
   })
 

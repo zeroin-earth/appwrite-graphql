@@ -16,7 +16,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   state: ErrorBoundaryState = { hasError: false, error: null }
 
   // This lifecycle method is called if an error is thrown during rendering
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: unknown) {
     // Update state so the next render shows the fallback UI.
     return { hasError: true, error: error }
   }

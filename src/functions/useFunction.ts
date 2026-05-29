@@ -188,7 +188,7 @@ export function useFunction() {
       const { _id, status, errors, responseBody } = data.functionsCreateExecution ?? {}
 
       if (status === 'failed') {
-        throw new Error(errors)
+        throw new Error(errors ?? undefined)
       }
 
       setCurrentExecution(_id ?? null)
@@ -274,7 +274,7 @@ export function useSuspenseFunction({
       })
 
       if (data?.functionsCreateExecution?.status === 'failed') {
-        throw new Error(data.functionsCreateExecution.errors)
+        throw new Error(data.functionsCreateExecution.errors ?? undefined)
       }
 
       const { responseBody } = data.functionsCreateExecution ?? {}

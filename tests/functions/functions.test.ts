@@ -224,7 +224,7 @@ describe('Function hooks', () => {
         () =>
           useGetExecution({
             functionId: 'test-function',
-            executionId: data?.executions[0]._id ?? '',
+            executionId: data?.executions?.[0]?._id ?? '',
           }),
         {
           wrapper,

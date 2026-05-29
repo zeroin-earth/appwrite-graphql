@@ -63,11 +63,11 @@ describe('Offline Client', () => {
     expect(onlineManager.isOnline()).toBe(true)
 
     // Simulate going offline
-    onlineCallback?.(false)
+    onlineCallback!(false)
     expect(onlineManager.isOnline()).toBe(false)
 
     // Simulate going back online
-    onlineCallback?.(true)
+    onlineCallback!(true)
     expect(onlineManager.isOnline()).toBe(true)
   })
 })

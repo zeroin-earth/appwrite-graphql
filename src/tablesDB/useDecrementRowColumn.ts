@@ -128,7 +128,8 @@ export function useDecrementRowColumn() {
 
       queryClient.setQueryData<DecrementRowColumnVariables>(rowKeyPrefix, (old) => {
         if (!old) return old
-        const current = (old[variables.column] as number) ?? 0
+        const current =
+          ((old as unknown as Record<string, unknown>)[variables.column] as number) ?? 0
         const decrement = variables.value ?? 1
         const newValue =
           variables.min != null ? Math.max(current - decrement, variables.min) : current - decrement

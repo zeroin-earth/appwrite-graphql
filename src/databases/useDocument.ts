@@ -33,8 +33,8 @@ function useDocumentQueryConfig<TDocument>({
     databaseId,
     collectionId,
     documentId,
-    queries,
-    transactionId,
+    queries: queries ?? undefined,
+    transactionId: transactionId ?? undefined,
     fields,
   })
 }

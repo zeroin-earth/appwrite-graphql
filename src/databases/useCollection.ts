@@ -195,7 +195,7 @@ export function useSuspenseCollection<TDocument>(
     ...opts,
   })
 
-  useCollectionRealtime<TDocument>(databaseId, collectionId, queries, subscribe)
+  useCollectionRealtime<TDocument>(databaseId, collectionId, queries ?? [], subscribe)
 
   return {
     ...collection,

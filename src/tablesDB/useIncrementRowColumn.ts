@@ -128,7 +128,8 @@ export function useIncrementRowColumn() {
 
       queryClient.setQueryData<IncrementRowColumnVariables>(rowKeyPrefix, (old) => {
         if (!old) return old
-        const current = (old[variables.column] as number) ?? 0
+        const current =
+          ((old as unknown as Record<string, unknown>)[variables.column] as number) ?? 0
         const increment = variables.value ?? 1
         const newValue =
           variables.max != null ? Math.min(current + increment, variables.max) : current + increment

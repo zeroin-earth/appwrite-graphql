@@ -405,7 +405,7 @@ describe('Teams hooks', () => {
       const params = new URLSearchParams(url.search)
 
       expect(params.get('teamId')).toBe(teamId)
-      expect(params.get('membershipId')).toBe(result.current.data?._id)
+      expect(params.get('membershipId')).toBe(result.current.data?._id ?? null)
       expect(params.get('userId')).toBe(invited.userId)
       expect(params.get('secret')).toBeDefined()
 

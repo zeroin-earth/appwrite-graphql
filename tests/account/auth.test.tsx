@@ -281,10 +281,10 @@ describe('useAccount', () => {
     const accountData = accountResult.current.data
     expect(accountData).toBeDefined()
 
-    expect(accountData._id).toBeDefined()
-    expect(typeof accountData._id).toBe('string')
-    expect(accountData.name).toBe(testUser.name)
-    expect(accountData.email).toBe(testUser.email)
+    expect(accountData!._id).toBeDefined()
+    expect(typeof accountData!._id).toBe('string')
+    expect(accountData!.name).toBe(testUser.name)
+    expect(accountData!.email).toBe(testUser.email)
   })
 
   test('should report error when no session is active', async () => {
@@ -360,9 +360,9 @@ describe('useLazyAccount', () => {
 
     const accountData = result.current.query.data
     expect(accountData).toBeDefined()
-    expect(accountData._id).toBeDefined()
-    expect(accountData.name).toBe(testUser.name)
-    expect(accountData.email).toBe(testUser.email)
+    expect(accountData!._id).toBeDefined()
+    expect(accountData!.name).toBe(testUser.name)
+    expect(accountData!.email).toBe(testUser.email)
   })
 })
 
@@ -440,8 +440,8 @@ describe('auth lifecycle', () => {
     })
 
     const accountData = accountResult.current.data
-    expect(accountData._id).toBeDefined()
-    expect(accountData.email).toBe(testUser.email)
+    expect(accountData!._id).toBeDefined()
+    expect(accountData!.email).toBe(testUser.email)
 
     // 2.1 Update preferences and check if subscription works
     triggerRealtimeEvent(

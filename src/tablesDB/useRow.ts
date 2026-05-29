@@ -33,8 +33,8 @@ function useRowQueryConfig<TRow>({
     databaseId,
     tableId,
     rowId,
-    queries,
-    transactionId,
+    queries: queries?.filter((q): q is string => q !== null) ?? undefined,
+    transactionId: transactionId ?? undefined,
     fields,
   })
 }

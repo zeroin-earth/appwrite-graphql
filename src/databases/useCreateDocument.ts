@@ -109,7 +109,7 @@ export function useCreateDocument() {
     onSuccess: (result, variables) => {
       const documentKeyPrefix = Keys.database(variables.databaseId)
         .collection(variables.collectionId)
-        .document(result._id)
+        .document(result!._id ?? '')
         .key()
 
       void queryClient.invalidateQueries({

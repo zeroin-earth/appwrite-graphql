@@ -97,7 +97,7 @@ export function useCreateRow() {
     onSuccess: (result, variables) => {
       const rowKeyPrefix = Keys.tablesDB(variables.databaseId)
         .table(variables.tableId)
-        .row(result._id)
+        .row(result!._id ?? '')
         .key()
 
       void queryClient.invalidateQueries({

@@ -136,7 +136,8 @@ export function useDecrementAttribute() {
 
       queryClient.setQueryData<DecrementAttributeVariables>(documentKeyPrefix, (old) => {
         if (!old) return old
-        const current = (old[variables.attribute] as number) ?? 0
+        const current =
+          ((old as unknown as Record<string, unknown>)[variables.attribute] as number) ?? 0
         const decrement = variables.value ?? 1
         const newValue =
           variables.min != null ? Math.max(current - decrement, variables.min) : current - decrement

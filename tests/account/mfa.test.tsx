@@ -85,7 +85,7 @@ describe('MFA (Multi-Factor Authentication)', () => {
     expect(typeof result.current.data?.uri).toBe('string')
 
     // Persist the secret for subsequent tests
-    totpSecret = result.current.data!.secret
+    totpSecret = result.current.data!.secret ?? ''
   })
 
   test('useUpdateMfaAuthenticator – verifies the TOTP authenticator', async () => {
@@ -128,7 +128,7 @@ describe('MFA (Multi-Factor Authentication)', () => {
     expect(result.current.data).toBeDefined()
     expect(result.current.data?.recoveryCodes).toBeDefined()
     expect(Array.isArray(result.current.data?.recoveryCodes)).toBe(true)
-    expect(result.current.data!.recoveryCodes.length).toBeGreaterThan(0)
+    expect(result.current.data!.recoveryCodes?.length).toBeGreaterThan(0)
   })
 
   test('useUpdateMfa – disables MFA on the account', async () => {
